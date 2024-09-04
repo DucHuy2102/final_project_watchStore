@@ -12,7 +12,7 @@ export default function ShopNow() {
     // };
 
     return (
-        <div className='font-semibold'>
+        <div className='mt-7 font-semibold'>
             <div className='flex flex-col md:flex-row justify-center items-center gap-5'>
                 <div className='relative w-full md:w-1/2 cursor-pointer'>
                     <div className='overflow-hidden'>

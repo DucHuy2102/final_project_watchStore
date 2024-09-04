@@ -13,10 +13,11 @@ export default function Header_Component() {
     const navigate = useNavigate();
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
-    const currentUser = {
-        email: 'duchuytv2102',
-        avatar: 'https://pbs.twimg.com/media/EnbDAFKXcAAVBsO?format=jpg&name=large',
-    };
+    // const currentUser = {
+    //     email: 'duchuytv2102',
+    //     avatar: 'https://pbs.twimg.com/media/EnbDAFKXcAAVBsO?format=jpg&name=large',
+    // };
+    const currentUser = null;
     const [uploadFailed, setUploadError] = useState(null);
 
     // handle search function
@@ -50,7 +51,7 @@ export default function Header_Component() {
                     type='text'
                     placeholder='Tìm kiếm...'
                     rightIcon={AiOutlineSearch}
-                    className='w-60 inline-block sm:w-80'
+                    className='w-60 hidden sm:inline sm:w-80'
                     // value={searchTerm ?? ''}
                     // onChange={(e) => setSearchTerm(e.target.value)}
                 />

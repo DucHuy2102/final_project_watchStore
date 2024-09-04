@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
-import { Home_Page } from './pages/exportPage';
+import { Home_Page, Login_Page } from './pages/exportPage';
 
 export default function App() {
     return (
@@ -10,7 +10,7 @@ export default function App() {
             <Routes>
                 {/* route not auth */}
                 <Route path='/' element={<Home_Page />} />
-                <Route path='/sign-in' element={'<SignIn_Page />'} />
+                <Route path='/sign-in' element={<Login_Page />} />
                 <Route path='/sign-up' element={'<SignUp_Page />'} />
                 <Route path='/about' element={'<About_Page />'} />
                 <Route path='/search' element={'<Search_Page />'} />
