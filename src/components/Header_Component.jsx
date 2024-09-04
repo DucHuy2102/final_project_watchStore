@@ -31,12 +31,15 @@ export default function Header_Component() {
     };
 
     return (
-        <Navbar className='border-b-2'>
+        <Navbar className='shadow-lg border-b-2'>
             {/* name app */}
-            <Link to='/' className='self-center whitespace-nowrap text-lg sm:text-xl font-semibold'>
-                <span className='px-3 py-2 rounded-lg bg-gradient-to-r from-white via-gray-200 to-white '>
-                    <span className='bg-clip-text text-transparent bg-gradient-to-r from-black via-gray-900 to-black hover:text-black'>
-                        Watc<span className='text-black text-xl sm:text-2xl'>H</span>es
+            <Link
+                to='/'
+                className='self-center whitespace-nowrap text-xl sm:text-2xl font-semibold'
+            >
+                <span className='px-3 py-2 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
+                    <span className='tracking-widest font-semibold bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-gray-900 to-black dark:from-white dark:to-orange-500'>
+                        Watc<span className='font-bold text-teal-500 dark:text-white'>H</span>es
                     </span>
                 </span>
             </Link>
