@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Avatar, Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
@@ -31,13 +31,13 @@ export default function Header_Component() {
     };
 
     return (
-        <Navbar className='shadow-lg border-b-2'>
+        <Navbar className='shadow-lg border-b-2 flex flex-wrap md:flex-nowrap items-center justify-between'>
             {/* name app */}
             <Link
                 to='/'
                 className='self-center whitespace-nowrap text-xl sm:text-2xl font-semibold'
             >
-                <span className='px-3 py-2 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
+                <span className='px-3 py-1 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
                     <span className='tracking-widest font-semibold bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-gray-900 to-black dark:from-white dark:to-orange-500'>
                         Watc<span className='font-bold text-teal-500 dark:text-white'>H</span>es
                     </span>
@@ -50,7 +50,7 @@ export default function Header_Component() {
                     type='text'
                     placeholder='Tìm kiếm...'
                     rightIcon={AiOutlineSearch}
-                    className='w-60 hidden sm:inline sm:w-80'
+                    className='w-60 hidden sm:inline-block md:inline'
                     // value={searchTerm ?? ''}
                     // onChange={(e) => setSearchTerm(e.target.value)}
                 />

@@ -1,6 +1,9 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
+
+const styleImage = 'w-full h-full object-cover';
+
 const Carousel = () => {
     return (
         <Swiper
@@ -8,7 +11,7 @@ const Carousel = () => {
             spaceBetween={0}
             modules={[Navigation, Autoplay]}
             autoplay={{ delay: 4000 }}
-            className='h-[90vh] w-full shadow-lg rounded-md'
+            className='sm:h-[90vh] sm:w-full shadow-lg rounded-md'
         >
             <SwiperSlide>
                 <img src={'../assets/slide_01.jpg'} alt='Image' className={styleImage} />
@@ -29,4 +32,3 @@ const Carousel = () => {
 };
 
 export default Carousel;
-const styleImage = 'w-full h-full object-cover';

@@ -1,5 +1,5 @@
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { Link, useNavigate } from 'react-router-dom';
@@ -35,7 +35,7 @@ export default function Login() {
         try {
             setLoadingState(true);
             const credentials = btoa(`${formData.username}:${formData.password}`);
-            const res = await axios.post('http://localhost:8080/sign-in', null, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/sign-in`, null, {
                 headers: {
                     Authorization: `Basic ${credentials}`,
                     'Content-Type': 'application/json',
@@ -52,6 +52,7 @@ export default function Login() {
         } catch (error) {
             setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
             setTimeout(() => {
+                setFormData({ username: '', password: '' });
                 setErrorMessage('');
             }, 3000);
             console.log(error);
@@ -59,6 +60,7 @@ export default function Login() {
             setLoadingState(false);
         }
     };
+
     return (
         <div
             className='w-full p-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-center
@@ -80,6 +82,7 @@ export default function Login() {
                             type='text'
                             placeholder='Tên người dùng'
                             id='username'
+                            value={formData.username}
                             onChange={handleChange}
                             className='mt-1'
                         />
@@ -91,6 +94,7 @@ export default function Login() {
                             type='password'
                             placeholder='Mật khẩu'
                             id='password'
+                            value={formData.password}
                             onChange={handleChange}
                             className='mt-1'
                         />

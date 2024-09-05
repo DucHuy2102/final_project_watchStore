@@ -1,17 +1,26 @@
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { CiMail, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { IoIosSend } from 'react-icons/io';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PasswordStrengthMeter } from '../../components/exportComponent';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
 
 export default function Login() {
     // state
-    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        phone: '0948547577',
+    });
     const [loadingState, setLoadingState] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     // handle change input
     const handleChange = (e) => {
@@ -28,18 +37,29 @@ export default function Login() {
             }, 3000);
             return;
         }
+
         try {
             setLoadingState(true);
-            console.log(formData);
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, formData);
+            if (res?.status === 200) {
+                const data = res?.data;
+                toast.success('Đăng ký tài khoản thành công!');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 3000);
+            }
         } catch (error) {
             setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
+            setTimeout(() => {
+                setFormData({ username: '', email: '', password: '' });
+                setErrorMessage('');
+            }, 3000);
             console.log(error);
         } finally {
             setLoadingState(false);
-            setFormData({ username: '', email: '', password: '' });
         }
     };
+
     return (
         <div
             className='w-full p-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-center
