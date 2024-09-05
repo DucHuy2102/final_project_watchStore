@@ -1,14 +1,20 @@
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useEffect, useRef, useState } from 'react';
-import { CiLogin, CiMail, CiUser } from 'react-icons/ci';
+import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import { user_SignIn } from '../../redux/slices/userSlice';
 
 export default function Login() {
     // state
-    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [formData, setFormData] = useState({ username: '', password: '' });
     const [loadingState, setLoadingState] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     // handle change input
     const handleChange = (e) => {
@@ -18,18 +24,36 @@ export default function Login() {
     // handle submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.email || !formData.password) {
+        if (!formData.username || !formData.password) {
             setErrorMessage('Vui lòng nhập đầy đủ thông tin!');
             setTimeout(() => {
                 setErrorMessage('');
             }, 3000);
             return;
         }
+
         try {
             setLoadingState(true);
-            console.log(formData);
+            const credentials = btoa(`${formData.username}:${formData.password}`);
+            const res = await axios.post('http://localhost:8080/sign-in', null, {
+                headers: {
+                    Authorization: `Basic ${credentials}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (res?.status === 200) {
+                const data = res?.data;
+                dispatch(user_SignIn(data));
+                toast.success('Đăng nhập thành công!');
+                setTimeout(() => {
+                    navigate('/');
+                }, 3000);
+            }
         } catch (error) {
             setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
+            setTimeout(() => {
+                setErrorMessage('');
+            }, 3000);
             console.log(error);
         } finally {
             setLoadingState(false);
@@ -47,12 +71,15 @@ export default function Login() {
                 </span>
                 <form className='flex flex-col gap-6 mt-6' onSubmit={handleSubmit}>
                     <div>
-                        <Label value='Email' className='text-gray-700 dark:text-gray-300' />
+                        <Label
+                            value='Tên người dùng'
+                            className='text-gray-700 dark:text-gray-300'
+                        />
                         <TextInput
-                            icon={CiMail}
+                            icon={CiUser}
                             type='text'
-                            placeholder='Đại chỉ email'
-                            id='email'
+                            placeholder='Tên người dùng'
+                            id='username'
                             onChange={handleChange}
                             className='mt-1'
                         />
@@ -76,6 +103,14 @@ export default function Login() {
                             {errorMessage}
                         </Alert>
                     )}
+                    <div>
+                        <Link
+                            className='text-sm sm:text-black text-gray-500 font-semibold hover:underline hover:text-blue-500'
+                            to='/forgot-password'
+                        >
+                            Quên mật khẩu?
+                        </Link>
+                    </div>
                     <Button
                         disabled={loadingState}
                         type='submit'

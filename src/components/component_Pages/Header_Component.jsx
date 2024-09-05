@@ -4,7 +4,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { toggleTheme } from '../redux/slices/theme.slice';
+import { toggleTheme } from '../../redux/slices/theme.slice';
+import { user_SignOut } from '../../redux/slices/userSlice';
 
 export default function Header_Component() {
     // states
@@ -13,11 +14,8 @@ export default function Header_Component() {
     const navigate = useNavigate();
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
-    // const currentUser = {
-    //     email: 'duchuytv2102',
-    //     avatar: 'https://pbs.twimg.com/media/EnbDAFKXcAAVBsO?format=jpg&name=large',
-    // };
-    const currentUser = null;
+    const currentUser = useSelector((state) => state.user.currentUser);
+    console.log(currentUser);
     const [uploadFailed, setUploadError] = useState(null);
 
     // handle search function
@@ -28,6 +26,7 @@ export default function Header_Component() {
 
     // handle sign out account
     const handleSignOutAccount = () => {
+        dispatch(user_SignOut());
         console.log('sign out');
     };
 
@@ -75,8 +74,8 @@ export default function Header_Component() {
                         label={<Avatar alt='Avatar_User' img={currentUser.avatar} rounded />}
                     >
                         <Dropdown.Header>
-                            <span className='block text-sm font-medium truncate'>
-                                {currentUser.email}
+                            <span className='block text-center text-sm font-medium truncate'>
+                                {currentUser.user_name}
                             </span>
                         </Dropdown.Header>
                         <Link to={'/dashboard?tab=profile'}>

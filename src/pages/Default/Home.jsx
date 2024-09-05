@@ -4,7 +4,7 @@ import {
     Review_Component,
     SayThanks_Component,
     ShopNow_Component,
-} from '../components/exportComponent';
+} from '../../components/exportComponent';
 
 export default function Home() {
     return (

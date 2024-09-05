@@ -1,10 +1,13 @@
-export { default as ThemeProvider } from './ThemeProvider';
-export { default as ScrollToTop } from './ScrollToTop';
-export { default as Header_Component } from './Header_Component';
-export { default as Footer_Component } from './Footer_Component';
-export { default as Carousel_Component } from './Carousel';
-export { default as Policy_Component } from './Policy';
-export { default as ShopNow_Component } from './ShopNow';
-export { default as SayThanks_Component } from './SayThanks';
-export { default as Review_Component } from './Review_Component';
-export { default as PasswordStrengthMeter } from './PasswordStrengthMeter';
+// pages
+export { default as Policy_Component } from './component_Pages/Policy';
+export { default as ShopNow_Component } from './component_Pages/ShopNow';
+export { default as SayThanks_Component } from './component_Pages/SayThanks';
+export { default as Review_Component } from './component_Pages/Review_Component';
+export { default as Header_Component } from './component_Pages/Header_Component';
+export { default as Footer_Component } from './component_Pages/Footer_Component';
+
+// components
+export { default as ScrollToTop } from './component_Utils/ScrollToTop';
+export { default as ThemeProvider } from './component_Utils/ThemeProvider';
+export { default as Carousel_Component } from './component_Utils/Carousel';
+export { default as PasswordStrengthMeter } from './component_Utils/PasswordStrengthMeter';

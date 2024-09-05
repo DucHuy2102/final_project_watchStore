@@ -4,7 +4,7 @@ import { CiMail, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { IoIosSend } from 'react-icons/io';
 import { Link } from 'react-router-dom';
-import { PasswordStrengthMeter } from '../components/exportComponent';
+import { PasswordStrengthMeter } from '../../components/exportComponent';
 import axios from 'axios';
 
 export default function Login() {
