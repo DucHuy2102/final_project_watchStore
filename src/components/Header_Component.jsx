@@ -86,8 +86,12 @@ export default function Header_Component() {
                         <Dropdown.Item onClick={handleSignOutAccount}>Đăng xuất</Dropdown.Item>
                     </Dropdown>
                 ) : (
-                    <Link to='/sign-in' className='ml-2'>
-                        <Button gradientDuoTone='purpleToBlue' pill outline>
+                    <Link to='/login' className='ml-2'>
+                        <Button
+                            className='bg-gradient-to-r from-slate-700 via-slate-700 to-zinc-700 text-white px-1'
+                            outline
+                            pill
+                        >
                             Đăng nhập
                         </Button>
                     </Link>

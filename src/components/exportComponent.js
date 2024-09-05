@@ -7,3 +7,4 @@ export { default as Policy_Component } from './Policy';
 export { default as ShopNow_Component } from './ShopNow';
 export { default as SayThanks_Component } from './SayThanks';
 export { default as Review_Component } from './Review_Component';
+export { default as PasswordStrengthMeter } from './PasswordStrengthMeter';
