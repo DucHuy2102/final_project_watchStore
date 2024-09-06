@@ -15,7 +15,6 @@ export default function Header_Component() {
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
     const currentUser = useSelector((state) => state.user.currentUser);
-    console.log(currentUser);
     const [uploadFailed, setUploadError] = useState(null);
 
     // handle search function
@@ -35,9 +34,9 @@ export default function Header_Component() {
             {/* name app */}
             <Link
                 to='/'
-                className='self-center whitespace-nowrap text-xl sm:text-2xl font-semibold'
+                className='self-center whitespace-nowrap text-xl sm:text-2xl md:text-xl lg:font-bold font-semibold'
             >
-                <span className='px-3 py-1 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
+                <span className='px-3 py-1 md:py-[7px] lg:px-5 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
                     <span className='tracking-widest font-semibold bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-gray-900 to-black dark:from-white dark:to-orange-500'>
                         Watc<span className='font-bold text-teal-500 dark:text-white'>H</span>es
                     </span>
@@ -50,7 +49,7 @@ export default function Header_Component() {
                     type='text'
                     placeholder='Tìm kiếm...'
                     rightIcon={AiOutlineSearch}
-                    className='w-60 hidden sm:inline-block md:inline'
+                    className='w-60 hidden sm:inline md:inline-block md:w-36 lg:w-96'
                     // value={searchTerm ?? ''}
                     // onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -60,7 +59,7 @@ export default function Header_Component() {
             <div className='flex gap-2 md:order-2'>
                 <Button
                     onClick={() => dispatch(toggleTheme())}
-                    className='w-12 h-10 hidden sm:inline'
+                    className='w-12 h-10 sm:inline flex justify-center items-center'
                     color='gray'
                     pill
                 >
@@ -99,7 +98,7 @@ export default function Header_Component() {
             </div>
 
             {/* menu */}
-            <Navbar.Collapse>
+            <Navbar.Collapse className=''>
                 <Navbar.Link active={pathURL === '/'} as={'div'}>
                     <Link to='/'>Trang chủ</Link>
                 </Navbar.Link>

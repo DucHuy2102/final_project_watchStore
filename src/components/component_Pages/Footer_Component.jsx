@@ -1,5 +1,6 @@
 import { Footer } from 'flowbite-react';
 import { FaFacebook, FaGithub } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 export const SITEMAP = [
     {
@@ -28,9 +29,17 @@ export const SITEMAP = [
 export default function Footer_Component() {
     // get current year
     const currentYear = new Date().getFullYear();
+    const { pathname } = useLocation();
 
     return (
-        <Footer container className='border border-t-8 border-gray-500'>
+        <Footer
+            container
+            className={`${
+                pathname === '/register' || pathname === '/login'
+                    ? 'hidden sm:hidden md:hidden lg:hidden'
+                    : 'block'
+            } border border-t-8 border-gray-500`}
+        >
             <div className='w-full px-4 md:px-8'>
                 <div className='grid w-full grid-cols-1 gap-8 py-8 px-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
                     {SITEMAP.map(({ title, links }, index) => (

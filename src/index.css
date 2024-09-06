@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* .custom-phone-input .inputClass {
+    background-color: black;
+} */
