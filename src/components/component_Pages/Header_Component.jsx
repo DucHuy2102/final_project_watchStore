@@ -25,8 +25,13 @@ export default function Header_Component() {
 
     // handle sign out account
     const handleSignOutAccount = () => {
-        dispatch(user_SignOut());
-        console.log('sign out');
+        try {
+            dispatch(user_SignOut());
+            console.log('sign out');
+        } catch (error) {
+            setUploadError('Hệ thống đang bận, vui lòng thử lại sau');
+            console.log(error);
+        }
     };
 
     return (

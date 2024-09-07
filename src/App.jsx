@@ -1,6 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
-import { ForgotPassword_Page, Home_Page, Login_Page, Register_Page } from './pages/exportPage';
+import {
+    DashboardUser_Page,
+    ForgotPassword_Page,
+    Home_Page,
+    Login_Page,
+    PrivateRoute_Page,
+    Register_Page,
+} from './pages/exportPage';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -16,6 +23,14 @@ export default function App() {
                     <Route path='/login' element={<Login_Page />} />
                     <Route path='/register' element={<Register_Page />} />
                     <Route path='/forgot-password' element={<ForgotPassword_Page />} />
+
+                    {/* route only for user */}
+                    <Route element={<PrivateRoute_Page />}>
+                        <Route path='/dashboard' element={<DashboardUser_Page />} />
+                    </Route>
+
+                    {/* route only for admin */}
+
                     {/* <Route path='/about' element={'<About_Page />'} />
                     <Route path='/search' element={'<Search_Page />'} />
                     <Route path='/projects' element={'<Projects_Page />'} />

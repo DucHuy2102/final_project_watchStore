@@ -11,3 +11,4 @@ export { default as ScrollToTop } from './component_Utils/ScrollToTop';
 export { default as ThemeProvider } from './component_Utils/ThemeProvider';
 export { default as Carousel_Component } from './component_Utils/Carousel';
 export { default as PasswordStrengthMeter } from './component_Utils/PasswordStrengthMeter';
+export { default as Sidebar_Component } from './component_Pages/Sidebar';
