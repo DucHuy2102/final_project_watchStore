@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { user_SignOut } from '../../redux/slices/userSlice';
-import { Sidebar } from 'flowbite-react';
+import { Button, Modal, Sidebar } from 'flowbite-react';
 import {
     HiAnnotation,
     HiArrowSmDown,
     HiChartPie,
     HiDocumentText,
+    HiOutlineExclamationCircle,
     HiOutlineUserGroup,
     HiShoppingBag,
     HiUser,
@@ -15,19 +16,21 @@ import {
 import { FaShippingFast } from 'react-icons/fa';
 
 export default function Sidebar_Component() {
+    // state
     const dispatch = useDispatch();
     const [error, setError] = useState(null);
+    const [showModal, setShowModal] = useState(false);
     // const isAdmin = useSelector((state) => state.user.currentUser.isAdmin);
     const isAdmin = false;
 
     // get tab from url
     const location = useLocation();
     const [tab, setTab] = useState('');
-    // useEffect(() => {
-    //     const urlParams = new URLSearchParams(location.search);
-    //     const tabURL = urlParams.get('tab');
-    //     setTab(tabURL);
-    // }, [location.search]);
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const tabURL = urlParams.get('tab');
+        setTab(tabURL);
+    }, [location.search]);
 
     // sign out function
     const handleSignOutAccount = async () => {
@@ -45,15 +48,6 @@ export default function Sidebar_Component() {
             <Sidebar.Items>
                 {isAdmin && (
                     <Sidebar.ItemGroup className='flex flex-col gap-1 justify-center'>
-                        <Sidebar.Item
-                            as={Link}
-                            to='/dashboard?tab=dashboard'
-                            active={tab === 'dashboard'}
-                            icon={HiChartPie}
-                            className={`${tab === 'dashboard' ? 'bg-gray-400 text-black' : ''}`}
-                        >
-                            Trang chủ hệ thống
-                        </Sidebar.Item>
                         <Sidebar.Collapse icon={HiDocumentText} label='Quản lý hệ thống'>
                             <Sidebar.Item
                                 as={Link}
@@ -88,6 +82,15 @@ export default function Sidebar_Component() {
                 <Sidebar.ItemGroup className='flex flex-col gap-1 justify-center'>
                     <Sidebar.Item
                         as={Link}
+                        to='/dashboard?tab=dashboard'
+                        active={tab === 'dashboard'}
+                        icon={HiChartPie}
+                        className={`${tab === 'dashboard' ? 'bg-gray-400 text-black' : ''}`}
+                    >
+                        Trang chủ
+                    </Sidebar.Item>
+                    <Sidebar.Item
+                        as={Link}
                         to='/dashboard?tab=profile'
                         active={tab === 'profile'}
                         icon={HiUser}
@@ -98,22 +101,42 @@ export default function Sidebar_Component() {
                     </Sidebar.Item>
                     <Sidebar.Item
                         as={Link}
-                        to='/dashboard?tab=profile'
-                        active={tab === 'profile'}
+                        to='/dashboard?tab=order'
+                        active={tab === 'order'}
                         icon={FaShippingFast}
                         labelColor='dark'
-                        className={`${tab === 'profile' ? 'bg-gray-400 text-black' : ''}`}
+                        className={`${tab === 'order' ? 'bg-gray-400 text-black' : ''}`}
                     >
                         Đơn hàng
                     </Sidebar.Item>
                     <Sidebar.Item
                         icon={HiArrowSmDown}
                         className={'cursor-pointer'}
-                        onClick={handleSignOutAccount}
+                        onClick={() => setShowModal(true)}
                     >
                         Đăng xuất
                     </Sidebar.Item>
                 </Sidebar.ItemGroup>
+
+                <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
+                    <Modal.Header />
+                    <Modal.Body>
+                        <div className='text-center'>
+                            <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
+                            <span className='text-lg font-medium text-black'>
+                                Bạn có chắc chắn muốn đăng xuất?
+                            </span>
+                            <div className='flex justify-between items-center mt-5'>
+                                <Button color='gray' onClick={() => setShowModal(false)}>
+                                    Hủy
+                                </Button>
+                                <Button color='warning' onClick={handleSignOutAccount}>
+                                    Xác nhận
+                                </Button>
+                            </div>
+                        </div>
+                    </Modal.Body>
+                </Modal>
             </Sidebar.Items>
         </Sidebar>
     );

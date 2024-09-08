@@ -12,3 +12,11 @@ export { default as ThemeProvider } from './component_Utils/ThemeProvider';
 export { default as Carousel_Component } from './component_Utils/Carousel';
 export { default as PasswordStrengthMeter } from './component_Utils/PasswordStrengthMeter';
 export { default as Sidebar_Component } from './component_Pages/Sidebar';
+
+// User components
+export { default as Profile_Component } from './components_User/Profile';
+export { default as Dashboard_Component } from './components_User/Dashboard';
+export { default as Order_Component } from './components_User/Order';
+export { default as ChangePassword_Component } from './components_User/ChangePassword';
+
+// Admin components

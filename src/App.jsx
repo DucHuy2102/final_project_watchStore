@@ -48,7 +48,7 @@ export default function App() {
                 <Footer_Component />
             </Router>
             <ToastContainer
-                position='top-right'
+                position='bottom-right'
                 autoClose={2500}
                 hideProgressBar={false}
                 newestOnTop={false}

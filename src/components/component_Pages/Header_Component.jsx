@@ -6,6 +6,7 @@ import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/theme.slice';
 import { user_SignOut } from '../../redux/slices/userSlice';
+import { toast } from 'react-toastify';
 
 export default function Header_Component() {
     // states
@@ -15,7 +16,7 @@ export default function Header_Component() {
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
     const currentUser = useSelector((state) => state.user.currentUser);
-    const [uploadFailed, setUploadError] = useState(null);
+    console.log(currentUser);
 
     // handle search function
     const handleSubmit = (e) => {
@@ -29,7 +30,7 @@ export default function Header_Component() {
             dispatch(user_SignOut());
             console.log('sign out');
         } catch (error) {
-            setUploadError('Hệ thống đang bận, vui lòng thử lại sau');
+            toast.error('Hệ thống đang bận, vui lòng thử lại sau');
             console.log(error);
         }
     };
@@ -75,14 +76,14 @@ export default function Header_Component() {
                         className='mt-1'
                         inline
                         arrowIcon={false}
-                        label={<Avatar alt='Avatar_User' img={currentUser.avatar} rounded />}
+                        label={<Avatar alt='Avatar_User' img={currentUser?.avatarImg} rounded />}
                     >
                         <Dropdown.Header>
                             <span className='block text-center text-sm font-medium truncate'>
-                                {currentUser.user_name}
+                                {currentUser.username}
                             </span>
                         </Dropdown.Header>
-                        <Link to={'/dashboard?tab=profile'}>
+                        <Link to={'/dashboard?tab=dashboard'}>
                             <Dropdown.Item>Trang cá nhân</Dropdown.Item>
                         </Link>
                         <Dropdown.Divider />
@@ -114,16 +115,6 @@ export default function Header_Component() {
                     <Link to='/cart'>Giỏ hàng</Link>
                 </Navbar.Link>
             </Navbar.Collapse>
-
-            {/* show error when sign out failed */}
-            {uploadFailed && (
-                <Alert
-                    color='failure'
-                    className='w-full font-semibold flex justify-center items-center'
-                >
-                    {uploadFailed}
-                </Alert>
-            )}
         </Navbar>
     );
 }
