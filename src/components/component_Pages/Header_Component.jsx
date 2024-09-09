@@ -16,7 +16,6 @@ export default function Header_Component() {
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
     const currentUser = useSelector((state) => state.user.currentUser);
-    console.log(currentUser);
 
     // handle search function
     const handleSubmit = (e) => {
@@ -80,7 +79,7 @@ export default function Header_Component() {
                     >
                         <Dropdown.Header>
                             <span className='block text-center text-sm font-medium truncate'>
-                                {currentUser.username}
+                                {currentUser?.username}
                             </span>
                         </Dropdown.Header>
                         <Link to={'/dashboard?tab=dashboard'}>

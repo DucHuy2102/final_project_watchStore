@@ -44,9 +44,7 @@ export default function Login() {
             });
             if (res?.status === 200) {
                 const data = res?.data;
-                dispatch(
-                    user_SignIn({ currentUser: data.user_name, accessToken: data.access_token })
-                );
+                dispatch(user_SignIn(data));
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
                     navigate('/');
