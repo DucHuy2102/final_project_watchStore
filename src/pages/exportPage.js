@@ -9,3 +9,5 @@ export { default as DashboardUser_Page } from './Default/DashboardUser';
 export { default as Login_Page } from './Auth/Login';
 export { default as Register_Page } from './Auth/Register';
 export { default as ForgotPassword_Page } from './Auth/ForgotPassword';
+export { default as EmailVerification_Page } from './Auth/EmailVerification';
+export { default as ResetPassword_Page } from './Auth/ResetPassword';

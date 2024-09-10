@@ -2,13 +2,15 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
 import {
     DashboardUser_Page,
+    EmailVerification_Page,
     ForgotPassword_Page,
     Home_Page,
     Login_Page,
     PrivateRoute_Page,
     Register_Page,
+    ResetPassword_Page,
 } from './pages/exportPage';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function App() {
@@ -23,6 +25,8 @@ export default function App() {
                     <Route path='/login' element={<Login_Page />} />
                     <Route path='/register' element={<Register_Page />} />
                     <Route path='/forgot-password' element={<ForgotPassword_Page />} />
+                    <Route path='/verify-email' element={<EmailVerification_Page />} />
+                    <Route path='/reset-password/:token' element={<ResetPassword_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>

@@ -111,7 +111,7 @@ export default function Login() {
                     )}
                     <div>
                         <Link
-                            className='text-sm sm:text-black text-gray-500 font-semibold hover:underline hover:text-blue-500'
+                            className='text-sm sm:text-black text-gray-500 dark:text-gray-300 font-semibold hover:underline hover:text-blue-500'
                             to='/forgot-password'
                         >
                             Quên mật khẩu?

@@ -77,7 +77,7 @@ export default function Register() {
             if (res?.status === 200) {
                 toast.success('Đăng ký tài khoản thành công!');
                 setTimeout(() => {
-                    navigate('/login');
+                    navigate('/verify-email');
                 }, 3000);
             }
         } catch (error) {

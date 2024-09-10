@@ -35,7 +35,10 @@ export default function Footer_Component() {
         <Footer
             container
             className={`${
-                pathname === '/register' || pathname === '/login'
+                pathname === '/register' ||
+                pathname === '/login' ||
+                pathname === '/forgot-password' ||
+                pathname === '/verify-email'
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
             } border border-t-8 border-gray-500`}
