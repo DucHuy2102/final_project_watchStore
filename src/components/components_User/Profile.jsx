@@ -1,4 +1,4 @@
-import { Alert, Button, Modal, Select, Spinner, TextInput } from 'flowbite-react';
+import { Alert, Button, Modal, Spinner, TextInput } from 'flowbite-react';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -15,6 +15,7 @@ import { TfiLock } from 'react-icons/tfi';
 import { GoLock } from 'react-icons/go';
 import { PasswordStrengthMeter } from '../exportComponent';
 import { PiHouseLineLight } from 'react-icons/pi';
+import { Select } from 'antd';
 
 export default function Profile_Component() {
     // get token user from redux store
@@ -27,7 +28,14 @@ export default function Profile_Component() {
     const [imgFile, setImgFile] = useState(null);
     const [imgURL, setImgURL] = useState(null);
     const [imgUploadProgress, setImgUploadProgress] = useState(null);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
+        address: '',
+        avatarImg: '',
+    });
+    console.log('formData', formData);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
@@ -44,42 +52,54 @@ export default function Profile_Component() {
 
     // change address states
     const [modalChangeAddress, setModalChangeAddress] = useState(false);
+    const [provinces, setProvinces] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
     const [formAddress, setFormAddress] = useState({
-        province: '',
-        district: '',
-        ward: '',
+        province: {
+            label: '',
+            value: null,
+        },
+        district: {
+            label: '',
+            value: null,
+        },
+        ward: {
+            label: '',
+            value: null,
+        },
         street: '',
     });
 
     // ======================================== Fetch API ========================================
     // get user from api and update to redux store
-    // useEffect(() => {
-    //     const getUser = async () => {
-    //         setLoading(true);
-    //         try {
-    //             const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile`, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${tokenUser}`,
-    //                 },
-    //             });
-    //             if (res?.status === 200) {
-    //                 const updatedUser = res?.data;
-    //                 setFormData({
-    //                     fullName: updatedUser.fullName,
-    //                     email: updatedUser.email,
-    //                     phone: updatedUser.phone,
-    //                     address: updatedUser.address,
-    //                     avatarImg: updatedUser.avatarImg,
-    //                 });
-    //             }
-    //         } catch (error) {
-    //             console.log('Error get user profile: ', error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-    //     getUser();
-    // }, [dispatch, tokenUser]);
+    useEffect(() => {
+        const getUser = async () => {
+            setLoading(true);
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                });
+                if (res?.status === 200) {
+                    const updatedUser = res?.data;
+                    setFormData({
+                        fullName: updatedUser.fullName,
+                        email: updatedUser.email,
+                        phone: updatedUser.phone,
+                        address: updatedUser.address,
+                        avatarImg: updatedUser.avatarImg,
+                    });
+                }
+            } catch (error) {
+                console.log('Error get user profile: ', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        getUser();
+    }, [dispatch, tokenUser]);
 
     // upload image to firebase storage
     useEffect(() => {
@@ -115,12 +135,82 @@ export default function Profile_Component() {
         }
     }, [imgFile]);
 
-    // ======================================== Update user ========================================
-    // handle change input function
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value });
-    };
+    // get province from api
+    useEffect(() => {
+        const getProvince = async () => {
+            try {
+                const res = await axios.get(
+                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/province',
+                    {
+                        headers: {
+                            Token: import.meta.env.VITE_TOKEN_GHN,
+                        },
+                    }
+                );
+                if (res?.status === 200) {
+                    setProvinces(res.data.data);
+                }
+            } catch (error) {
+                console.log('Error get api province', error);
+            }
+        };
 
+        getProvince();
+    }, []);
+
+    // get district from api
+    useEffect(() => {
+        const getDistrict = async () => {
+            if (!formAddress.province.value) return;
+            try {
+                const res = await axios.get(
+                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
+                    {
+                        params: { province_id: formAddress.province.value },
+                        headers: {
+                            Token: import.meta.env.VITE_TOKEN_GHN,
+                        },
+                    }
+                );
+                if (res?.status === 200) {
+                    setDistricts(res.data.data);
+                }
+            } catch (error) {
+                console.log('Error get api district', error);
+                console.log('district', formAddress.province.value);
+            }
+        };
+
+        getDistrict();
+    }, [formAddress.province.value]);
+
+    // get ward from api
+    useEffect(() => {
+        const getWard = async () => {
+            if (!formAddress.district.value) return;
+            try {
+                const res = await axios.get(
+                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
+                    {
+                        params: { district_id: formAddress.district.value },
+                        headers: {
+                            Token: import.meta.env.VITE_TOKEN_GHN,
+                        },
+                    }
+                );
+                if (res?.status === 200) {
+                    setWards(res.data.data);
+                }
+            } catch (error) {
+                console.log('Error get api ward', error);
+                console.log('ward', formAddress.district.value);
+            }
+        };
+
+        getWard();
+    }, [formAddress.district.value]);
+
+    // ======================================== Update user ========================================
     // handle change avatar function
     const handleChangeAvatar = (e) => {
         const file = e.target.files[0];
@@ -150,7 +240,7 @@ export default function Profile_Component() {
             if (res?.status === 200) {
                 const updatedUser = res.data;
                 toast.success('Cập nhật thông tin thành công');
-                dispatch(user_UpdateProfile(updatedUser));
+                // dispatch(user_UpdateProfile(updatedUser));
             }
         } catch (error) {
             toast.error('Hệ thống đang bận, vui lòng thử lại sau');
@@ -170,18 +260,18 @@ export default function Profile_Component() {
     };
 
     // loading
-    // if (loading) {
-    //     return (
-    //         <div className='w-full min-h-screen flex justify-center items-center '>
-    //             <div className='flex flex-col items-center'>
-    //                 <Spinner size='xl' color='info' />
-    //                 <p className='mt-4 text-gray-400 text-lg font-semibold'>
-    //                     Vui lòng chờ trong giây lát...
-    //                 </p>
-    //             </div>
-    //         </div>
-    //     );
-    // }
+    if (loading) {
+        return (
+            <div className='w-full min-h-screen flex justify-center items-center '>
+                <div className='flex flex-col items-center'>
+                    <Spinner size='xl' color='info' />
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>
+                        Vui lòng chờ trong giây lát...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     // ======================================== Reset password user ========================================
     // get strength of password
@@ -248,11 +338,27 @@ export default function Profile_Component() {
     // ======================================== Update address user ========================================
     // update address function
     const handleUpdateAddress = async () => {
-        console.log(formAddress);
-        if (!formAddress) {
-            toast.error('ass');
-            return;
-        }
+        const newAddress = `${formAddress.street}, ${formAddress.ward.label}, ${formAddress.district.label}, ${formAddress.province.label}`;
+        setFormData({
+            ...formData,
+            address: newAddress,
+        });
+        setModalChangeAddress(false);
+        setFormAddress({
+            province: {
+                label: '',
+                value: null,
+            },
+            district: {
+                label: '',
+                value: null,
+            },
+            ward: {
+                label: '',
+                value: null,
+            },
+            street: '',
+        });
     };
 
     return (
@@ -310,39 +416,39 @@ export default function Profile_Component() {
                     <div className='grid grid-cols-1 gap-5'>
                         <TextInput
                             type='text'
-                            id='fullname'
+                            // id='fullname'
                             icon={CiUser}
                             className='w-full'
                             placeholder='Họ và tên'
-                            defaultValue={formData.fullName || ''}
-                            onChange={handleChange}
+                            value={formData.fullName}
+                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         />
                         <TextInput
                             type='text'
-                            id='email'
+                            // id='email'
                             icon={CiMail}
                             className='w-full'
                             placeholder='Email'
-                            defaultValue={formData.email || ''}
-                            onChange={handleChange}
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                         <TextInput
                             type='text'
                             id='phone'
                             icon={CiPhone}
                             className='w-full'
-                            defaultValue={formData.phone || ''}
+                            value={formData.phone}
                             placeholder='Số điện thoại'
-                            onChange={handleChange}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
                         <TextInput
+                            disabled
                             type='text'
                             id='address'
                             icon={CiHome}
                             className='w-full'
-                            defaultValue={formData.address || ''}
+                            value={formData.address}
                             placeholder='Địa chỉ'
-                            onChange={handleChange}
                         />
                     </div>
 
@@ -398,7 +504,7 @@ export default function Profile_Component() {
                     </Button>
                     <button
                         onClick={() => setShowModal(true)}
-                        className='bg-red-500 hover:bg-red-600 hover:text-white border dark:border-none px-10 py-2 rounded-lg transition duration-200 cursor-pointer'
+                        className='bg-red-500 hover:bg-red-600 text-white border dark:border-none px-10 py-2 rounded-lg transition duration-200 cursor-pointer'
                         disabled={imgUploadProgress && imgUploadProgress < 100}
                     >
                         Đăng xuất
@@ -548,41 +654,86 @@ export default function Profile_Component() {
                                 Cập nhật địa chỉ của bạn
                             </span>
                             <Select
-                                onChange={(e) =>
-                                    setFormAddress({ ...formAddress, province: e.target.value })
+                                showSearch
+                                placeholder='Chọn Thành Phố'
+                                className='w-full h-10'
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '')
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
                                 }
-                                className='w-full'
-                            >
-                                <option value='' disabled selected>
-                                    Chọn Thành Phố
-                                </option>
-                                <option value='hcm'>Hồ Chí Minh</option>
-                                <option value='kg'>Kiên Giang</option>
-                            </Select>
+                                options={
+                                    provinces?.map((province) => ({
+                                        label: province.ProvinceName,
+                                        value: province.ProvinceID,
+                                    })) ?? []
+                                }
+                                onChange={(value) => {
+                                    setFormAddress({
+                                        ...formAddress,
+                                        province: {
+                                            label: provinces.find(
+                                                (province) => province.ProvinceID === value
+                                            ).NameExtension[1],
+                                            value: value,
+                                        },
+                                    });
+                                }}
+                            />
                             <Select
-                                onChange={(e) =>
-                                    setFormAddress({ ...formAddress, district: e.target.value })
+                                showSearch
+                                placeholder='Chọn Quận/Huyện'
+                                className='w-full h-10'
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '')
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
                                 }
-                                className='w-full'
-                            >
-                                <option value='' disabled selected>
-                                    Chọn Quận/Huyện
-                                </option>
-                                <option value='hcm'>Hồ Chí Minh</option>
-                                <option value='kg'>Kiên Giang</option>
-                            </Select>
+                                options={
+                                    districts?.map((district) => ({
+                                        label: district.DistrictName,
+                                        value: district.DistrictID,
+                                    })) ?? []
+                                }
+                                onChange={(value) => {
+                                    setFormAddress({
+                                        ...formAddress,
+                                        district: {
+                                            label: districts.find(
+                                                (district) => district.DistrictID === value
+                                            ).NameExtension[0],
+                                            value: value,
+                                        },
+                                    });
+                                }}
+                            />
                             <Select
-                                onChange={(e) =>
-                                    setFormAddress({ ...formAddress, ward: e.target.value })
+                                showSearch
+                                placeholder='Chọn Phường/Xã'
+                                className='w-full h-10'
+                                filterOption={(input, option) =>
+                                    (option?.label ?? '')
+                                        .toLowerCase()
+                                        .includes(input.toLowerCase())
                                 }
-                                className='w-full'
-                            >
-                                <option value='' disabled selected hidden>
-                                    Chọn Phường/Xã
-                                </option>
-                                <option value='hcm'>Hồ Chí Minh</option>
-                                <option value='kg'>Kiên Giang</option>
-                            </Select>
+                                options={
+                                    wards?.map((ward) => ({
+                                        label: ward.WardName,
+                                        value: ward.WardCode,
+                                    })) ?? []
+                                }
+                                onChange={(value) => {
+                                    setFormAddress({
+                                        ...formAddress,
+                                        ward: {
+                                            label: wards.find((ward) => ward.WardCode === value)
+                                                .NameExtension[0],
+                                            value: value,
+                                        },
+                                    });
+                                }}
+                            />
+
                             <TextInput
                                 type='text'
                                 className='w-full'
@@ -606,8 +757,9 @@ export default function Profile_Component() {
                                             Địa chỉ của bạn:
                                         </h4>
                                         <p className='text-gray-600 break-words text-ellipsis overflow-hidden'>
-                                            {formAddress.street}, Phường {formAddress.ward}, Quận{' '}
-                                            {formAddress.district}, {formAddress.province}
+                                            {`${formAddress.street}, ${formAddress.ward.label},
+                                            ${formAddress.district.label},
+                                            ${formAddress.province.label}`}
                                         </p>
                                     </div>
                                 )}
