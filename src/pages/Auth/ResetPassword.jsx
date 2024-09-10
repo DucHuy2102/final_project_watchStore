@@ -1,12 +1,12 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { CiMail } from 'react-icons/ci';
 import { TfiHandPointRight } from 'react-icons/tfi';
 import { IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import { GoLock } from 'react-icons/go';
 import { PasswordStrengthMeter } from '../../components/exportComponent';
+import axios from 'axios';
 
 export default function ResetPassword() {
     // state
@@ -14,6 +14,8 @@ export default function ResetPassword() {
     const [verifyPassword, setVerifyPassword] = useState('');
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [loadingState, setLoadingState] = useState(false);
+    const { token } = useParams();
+    const navigate = useNavigate();
 
     // get strength of password
     const getStrength = (pass) => {
@@ -40,6 +42,16 @@ export default function ResetPassword() {
         }
         try {
             setLoadingState(true);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/reset-password`, {
+                code: token,
+                newPassword: password,
+            });
+            if (res?.status === 200) {
+                toast.success('Đặt lại mật khẩu thành công!');
+                setTimeout(() => {
+                    navigate('/login');
+                }, 3000);
+            }
         } catch (error) {
             console.log(error);
         } finally {

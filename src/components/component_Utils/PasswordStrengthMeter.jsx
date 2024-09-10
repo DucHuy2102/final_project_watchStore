@@ -29,7 +29,6 @@ const PasswordCriteria = ({ password }) => {
 };
 
 const PasswordStrengthMeter = ({ password, strength }) => {
-    console.log(strength);
     // get color based on strength
     const getColor = (strength) => {
         switch (strength) {

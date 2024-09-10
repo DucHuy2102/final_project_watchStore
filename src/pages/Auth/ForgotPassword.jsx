@@ -5,6 +5,7 @@ import { CiMail } from 'react-icons/ci';
 import { TfiHandPointRight } from 'react-icons/tfi';
 import { IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 export default function ForgotPassword() {
     // state
@@ -21,10 +22,17 @@ export default function ForgotPassword() {
         }
         try {
             setLoadingState(true);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/forgotPassword`, {
+                email,
+            });
+            if (res?.status === 200) {
+                setIsSubmitted(true);
+            }
         } catch (error) {
             console.log(error);
+            toast.error('Đã xảy ra lỗi, vui lòng thử lại sau!');
         } finally {
-            setIsSubmitted(true);
+            setLoadingState(false);
         }
     };
 
@@ -84,7 +92,10 @@ export default function ForgotPassword() {
                     </>
                 ) : (
                     <div className='flex flex-col justify-center items-center'>
-                        <div className='w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4'>
+                        <span className='text-xl font-bold sm:text-2xl sm:font-semibold text-gray-800 dark:text-white text-center block'>
+                            Quên mật khẩu
+                        </span>
+                        <div className='w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto my-4'>
                             <a
                                 href='https://mail.google.com'
                                 target='_blank'

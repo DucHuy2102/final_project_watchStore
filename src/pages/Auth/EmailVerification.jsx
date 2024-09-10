@@ -51,7 +51,7 @@ export default function EmailVerification() {
         const verificationCode = code.join('');
         try {
             setIsLoading(true);
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/verify-email`, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/verify-user`, {
                 code: verificationCode,
             });
             if (res?.status === 200) {
@@ -64,9 +64,9 @@ export default function EmailVerification() {
             console.log(error);
         } finally {
             setIsLoading(false);
-            setCode(['', '', '', '', '', '']);
         }
     };
+
     return (
         <div className='w-full h-[92vh] bg-gray-100 flex justify-center items-center px-4 md:px-0'>
             <div className='max-w-md w-full bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden border dark:border-gray-600 p-6 md:p-8'>
