@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-    ChangePassword_Component,
-    Dashboard_Component,
-    Order_Component,
-    Profile_Component,
-    Sidebar_Component,
-} from '../../components/exportComponent';
+import { Dashboard_Page, Order_Page, Profile_Page } from '../exportPage';
+import { Sidebar_Component } from '../../components/exportComponent';
 
 export default function DashboardUser() {
     const location = useLocation();
@@ -24,10 +19,9 @@ export default function DashboardUser() {
                 <Sidebar_Component />
             </div>
 
-            {tab === 'dashboard' && <Dashboard_Component />}
-            {tab === 'profile' && <Profile_Component />}
-            {tab === 'order' && <Order_Component />}
-            {tab === 'change-password' && <ChangePassword_Component />}
+            {tab === 'dashboard' && <Dashboard_Page />}
+            {tab === 'profile' && <Order_Page />}
+            {tab === 'order' && <Profile_Page />}
         </div>
     );
 }

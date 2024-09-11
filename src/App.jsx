@@ -1,11 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
 import {
+    DashboardProduct_Page,
     DashboardUser_Page,
     EmailVerification_Page,
     ForgotPassword_Page,
     Home_Page,
     Login_Page,
+    PageNotFound_Page,
     PrivateRoute_Page,
     Register_Page,
     ResetPassword_Page,
@@ -27,6 +29,7 @@ export default function App() {
                     <Route path='/forgot-password' element={<ForgotPassword_Page />} />
                     <Route path='/verify-email' element={<EmailVerification_Page />} />
                     <Route path='/reset-password/:token' element={<ResetPassword_Page />} />
+                    <Route path='/products' element={<DashboardProduct_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
@@ -40,14 +43,12 @@ export default function App() {
                     <Route path='/projects' element={'<Projects_Page />'} />
                     <Route path='/post/:postSlu g' element={'<PostDetail_Page />'} />
 
-                    <Route element={'<PrivateRoute />'}>
-                        <Route path='/dashboard' element={'<Dashboard_Page />'} />
-                    </Route>
-
                     <Route element={'<AdminRoute />'}>
                         <Route path='/create-post' element={'<CreatePost_Page />'} />
                         <Route path='/update-post/:postID' element={'<UpdatePost_Page />'} />
                     </Route> */}
+                    {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
+                    <Route path='*' element={<PageNotFound_Page />} />
                 </Routes>
                 <Footer_Component />
             </Router>
