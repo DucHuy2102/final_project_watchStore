@@ -8,7 +8,7 @@ import 'react-circular-progressbar/dist/styles.css';
 import axios from 'axios';
 import { user_SignOut, user_UpdateProfile } from '../../redux/slices/userSlice';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { toast } from 'react-toastify';
 import { TfiLock } from 'react-icons/tfi';
@@ -16,11 +16,13 @@ import { GoLock } from 'react-icons/go';
 import { PasswordStrengthMeter } from '../../components/exportComponent';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { Select } from 'antd';
+import { FaBan } from 'react-icons/fa';
 
 export default function Profile_Component() {
     // get token user from redux store
     const currentUser = useSelector((state) => state.user.currentUser);
     const tokenUser = currentUser?.access_token;
+    const navigate = useNavigate();
 
     // states
     const dispatch = useDispatch();
@@ -35,7 +37,6 @@ export default function Profile_Component() {
         address: '',
         avatarImg: '',
     });
-    console.log('formData', formData);
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
@@ -48,6 +49,8 @@ export default function Profile_Component() {
         verifyPassword: '',
     });
     const [loadingPassword, setLoadingPassword] = useState(false);
+    const [checkPasswordFail, setCheckPasswordFail] = useState(false);
+    const [codeVerifyPassword, setCodeVerifyPassword] = useState(null);
     const [passwordStrength, setPasswordStrength] = useState(0);
 
     // change address states
@@ -133,6 +136,7 @@ export default function Profile_Component() {
 
             uploadImage();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imgFile]);
 
     // get province from api
@@ -285,54 +289,66 @@ export default function Profile_Component() {
     };
 
     // verify password function
-    const handleVerifyResetPassword = () => {
+    const handleVerifyResetPassword = async () => {
         if (!formPassword.oldPassword) {
-            toast.error('Vui lòng nhập mật khẩu !!!');
+            toast.error('Vui lòng nhập mật khẩu!');
             return;
         }
         try {
-            // nếu lỗi tạo thêm modal hiện thông báo lỗi
             setLoadingPassword(true);
-            setTimeout(() => {
+            setModalVerifyResetPassword(false);
+            setCheckPasswordFail(false);
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/profile/check-password`,
+                { password: formPassword.oldPassword },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                }
+            );
+            if (res?.status === 200) {
+                setCodeVerifyPassword(res.data.code);
                 setModalChangePassword(true);
                 setLoadingPassword(false);
-            }, 5000);
+            }
         } catch (error) {
             console.log(error);
+            setCheckPasswordFail(true);
         } finally {
             setFormPassword({ oldPassword: '', newPassword: '', verifyPassword: '' });
-            setModalVerifyResetPassword(false);
+            setLoadingPassword(false);
         }
     };
 
     // reset password function
     const handleResetPassword = async () => {
         if (!formPassword.newPassword || !formPassword.verifyPassword) {
-            toast.error('Vui lòng nhập mật khẩu mới !!!');
+            toast.error('Vui lòng nhập đầy đủ thông tin!');
             return;
         }
         try {
-            console.log('reset password');
-            // const res = await axios.post(
-            //     `${import.meta.env.VITE_API_URL}/api/profile/reset-password`,
-            //     { password: formPassword.newPassword },
-            //     {
-            //         headers: {
-            //             Authorization: `Bearer ${tokenUser}`,
-            //         },
-            //     }
-            // );
-            // if (res?.status === 200) {
-            //     toast.success('Đổi mật khẩu thành công');
-            //     setModalChangePassword(false);
-            // }
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/reset-password`, {
+                code: codeVerifyPassword,
+                newPassword: formPassword.newPassword,
+            });
+            if (res?.status === 200) {
+                toast.success('Đặt lại mật khẩu thành công!');
+                setTimeout(() => {
+                    dispatch(user_SignOut());
+                    navigate('/login');
+                }, 3000);
+            }
         } catch (error) {
-            toast.error('Hệ thống đang bận, vui lòng thử lại sau');
+            toast.error('Hệ thống đang bận, vui lòng thử lại!');
             console.log(error);
-        } finally {
-            setModalChangePassword(false);
-            setFormPassword({ newPassword: '', verifyPassword: '' });
         }
+    };
+
+    // navigate to login page
+    const handleNavigateUser = () => {
+        dispatch(user_SignOut());
+        navigate('/login');
     };
 
     // ======================================== Update address user ========================================
@@ -420,7 +436,7 @@ export default function Profile_Component() {
                             icon={CiUser}
                             className='w-full'
                             placeholder='Họ và tên'
-                            value={formData.fullName}
+                            value={formData.fullName === 'unknow' ? '' : formData.fullName}
                             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         />
                         <TextInput
@@ -429,7 +445,7 @@ export default function Profile_Component() {
                             icon={CiMail}
                             className='w-full'
                             placeholder='Email'
-                            value={formData.email}
+                            value={formData.email === 'unknow' ? '' : formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                         <TextInput
@@ -437,7 +453,7 @@ export default function Profile_Component() {
                             id='phone'
                             icon={CiPhone}
                             className='w-full'
-                            value={formData.phone}
+                            value={formData.phone === 'unknow' ? '' : formData.phone}
                             placeholder='Số điện thoại'
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
@@ -447,7 +463,7 @@ export default function Profile_Component() {
                             id='address'
                             icon={CiHome}
                             className='w-full'
-                            value={formData.address}
+                            value={formData.address === 'unknow' ? '' : formData.address}
                             placeholder='Địa chỉ'
                         />
                     </div>
@@ -554,18 +570,47 @@ export default function Profile_Component() {
                     </Modal.Body>
                 </Modal>
 
-                {/* loading confirm password */}
-                <Modal show={loadingPassword} size='md' popup>
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                            <Spinner size='xl' color='info' />
-                            <span className='text-lg font-medium text-black'>
-                                Hệ thống đang xác thực. Vui lòng chờ...
-                            </span>
-                        </div>
-                    </Modal.Body>
-                </Modal>
+                {/* modal loading confirm password */}
+                {loadingPassword && (
+                    <Modal
+                        show={loadingPassword}
+                        size='md'
+                        popup
+                        onClose={() => setLoadingPassword(false)}
+                    >
+                        <Modal.Header />
+                        <Modal.Body>
+                            <div className='w-full flex flex-col justify-center items-center gap-y-3'>
+                                <Spinner size='xl' color='info' />
+                                <span className='text-lg font-medium text-black'>
+                                    Hệ thống đang xác thực. Vui lòng chờ...
+                                </span>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
+                )}
+
+                {/* modal check password fail */}
+                {checkPasswordFail && (
+                    <Modal
+                        show={checkPasswordFail}
+                        size='md'
+                        popup
+                        onClose={() => setCheckPasswordFail(false)}
+                    >
+                        <Modal.Body>
+                            <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                                <FaBan size='50px' color='red' />
+                                <span className='text-lg font-medium text-black'>
+                                    Xác thực mật khẩu thất bại !!!
+                                </span>
+                                <Button className='w-full' onClick={handleNavigateUser}>
+                                    Đăng nhập
+                                </Button>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
+                )}
 
                 {/* change password modal */}
                 <Modal

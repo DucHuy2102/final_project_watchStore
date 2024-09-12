@@ -51,7 +51,11 @@ export default function Login() {
                 }, 3000);
             }
         } catch (error) {
-            setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
+            if (error.response.status === 401) {
+                setErrorMessage('Tài khoản hoặc mật khẩu không đúng!');
+            } else {
+                setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
+            }
             setTimeout(() => {
                 setFormData({ username: '', password: '' });
                 setErrorMessage('');
