@@ -27,22 +27,23 @@ export default function ProductCard({ product }) {
         <div
             className='relative bg-white w-full border-b-4 border-gray-600 sm:border-none flex flex-col justify-between items-center 
             sm:w-[45vw] sm:min-h-[50vh] md:w-[30vw] md:min-h-[45vh] 
-            lg:w-[23vw] lg:min-h-[40vh] xl:w-[18vw] xl:min-h-[35vh]
+            lg:w-[30vw] lg:min-h-[45vh] xl:w-[50vw] xl:min-h-[50vh]
             max-w-md min-h-[50vh] mx-auto shadow-md rounded-lg overflow-hidden 
-            transition-transform duration-300 ease-in-out transform hover:scale-105'
+            transition-transform duration-500 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] transform hover:scale-105'
         >
             {/* Image watches */}
             <div
-                className='w-full h-[45vh] sm:h-[30vh] md:h-[25vh] lg:h-[30vh] xl:h-[25vh] 
-            flex items-center justify-center overflow-hidden'
+                className='w-full p-1 h-[50vh] sm:h-[40vh] md:h-[40vh] 
+                lg:h-[45vh] lg:p-2 xl:h-[50vh] xl:px-5
+                flex items-center justify-center overflow-hidden'
             >
-                <Swiper className='h-full w-full' loop={true} spaceBetween={0}>
+                <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>
                     {img.map((item, index) => (
                         <SwiperSlide key={index}>
                             <img
                                 src={item}
                                 alt={productName}
-                                className='h-full w-full object-contain'
+                                className='h-full w-full rounded-lg object-contain transition-transform duration-500 ease-in-out transform hover:scale-105'
                             />
                         </SwiperSlide>
                     ))}
@@ -50,13 +51,20 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Name and price */}
-            <div className='w-full px-4 py-2 sm:px-6'>
+            <div className='w-full px-4 py-2 sm:px-6 lg:px-4 lg:pb-4 xl:px-5'>
                 <Link to={`/product-detail/${id}`}>
-                    <h3 className='text-lg font-semibold text-gray-800'>{productName}</h3>
-                    <p className='text-sm sm:text-base text-gray-500'>
+                    <h3 className='text-lg lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
+                        {productName}
+                    </h3>
+                    <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
                         {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
                     </p>
-                    <p className='text-lg sm:font-medium font-bold text-gray-900'>{priceFormat}</p>
+                    <p
+                        className='text-lg sm:font-medium lg:font-bold lg:text-xl 
+                    xl:text-2xl font-bold text-gray-900 transition-colors duration-300'
+                    >
+                        {priceFormat}
+                    </p>
                 </Link>
             </div>
 
@@ -65,7 +73,7 @@ export default function ProductCard({ product }) {
                 <button
                     onClick={() => setShowModalBuyNow(true)}
                     className='w-full py-2 sm:py-3 rounded-t-none bg-gray-200 text-gray-800
-                    hover:bg-gray-300 hover:text-black font-medium transition-colors duration-200'
+                    hover:bg-gray-300 hover:text-black font-medium transition-colors duration-300'
                 >
                     Mua hàng ngay
                 </button>
@@ -85,7 +93,7 @@ export default function ProductCard({ product }) {
                             <img
                                 src={img[0]}
                                 alt={productName}
-                                className='h-48 w-40 sm:h-64 sm:w-52 object-cover rounded-lg shadow-md'
+                                className='h-48 w-40 sm:h-64 sm:w-52 object-cover rounded-lg shadow-md transition-transform duration-300 hover:scale-105'
                             />
                             <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>
                                 {productName}
@@ -95,20 +103,20 @@ export default function ProductCard({ product }) {
                             </p>
                             <p className='text-lg sm:text-xl text-gray-900'>{priceFormat}</p>
                             <div className='flex items-center mt-4'>
-                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200'>
+                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-300'>
                                     -
                                 </button>
                                 <span className='text-center font-semibold text-lg w-10 sm:w-12'>
                                     1
                                 </span>
-                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200'>
+                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-300'>
                                     +
                                 </button>
                             </div>
                             <button
                                 onClick={handleBuyNow}
                                 className='mt-4 w-full bg-gray-300 text-black font-medium py-2 rounded-lg
-                            hover:bg-gray-400 hover:text-white transition-colors duration-200'
+                                hover:bg-gray-400 hover:text-white transition-colors duration-300'
                             >
                                 Mua hàng ngay
                             </button>

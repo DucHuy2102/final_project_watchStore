@@ -35,16 +35,18 @@ export default function Header_Component() {
     };
 
     return (
-        <Navbar className='shadow-lg border-b-2 flex flex-wrap md:flex-nowrap items-center justify-between'>
+        <Navbar className='shadow-2xl border-b-2 flex flex-wrap md:flex-nowrap items-center justify-between bg-white text-gray-800'>
             {/* name app */}
             <Link
                 to='/'
-                className='self-center whitespace-nowrap text-xl sm:text-2xl md:text-xl lg:font-bold font-semibold'
+                className='self-center tracking-widest outline-none whitespace-nowrap text-xl sm:text-2xl md:text-3xl font-semibold'
             >
-                <span className='px-3 py-1 md:py-[7px] lg:px-5 rounded-lg bg-gradient-to-r from-gray-100 via-gray-200 to-gray-300 dark:from-gray-800 dark:via-gray-700 dark:to-gray-600'>
-                    <span className='tracking-widest font-semibold bg-clip-text text-transparent bg-gradient-to-r from-gray-700 via-gray-900 to-black dark:from-white dark:to-orange-500'>
-                        Watc<span className='font-bold text-teal-500 dark:text-white'>H</span>es
-                    </span>
+                <span
+                    className='bg-clip-text text-transparent bg-gradient-to-r 
+                from-gray-600 via-gray-800 to-gray-500 dark:from-gray-200 dark:to-gray-400'
+                >
+                    Watc<span className='font-extrabold text-yellow-400 dark:text-blue-400'>H</span>
+                    es
                 </span>
             </Link>
 
@@ -68,7 +70,11 @@ export default function Header_Component() {
                     color='gray'
                     pill
                 >
-                    {theme === 'light' ? <FaSun /> : <FaMoon />}
+                    {theme === 'light' ? (
+                        <FaSun className='text-yellow-400' />
+                    ) : (
+                        <FaMoon className='text-blue-400' />
+                    )}
                 </Button>
                 {currentUser ? (
                     <Dropdown
@@ -90,11 +96,12 @@ export default function Header_Component() {
                     </Dropdown>
                 ) : (
                     <Link to='/login' className='ml-2'>
-                        <Button
-                            className='bg-gradient-to-r from-slate-700 via-slate-700 to-zinc-700 text-white px-1'
+                        {/* <Button
                             outline
                             pill
-                        >
+                            className='bg-gradient-to-r from-slate-700 via-slate-700 to-zinc-700 text-white px-1'
+                        > */}
+                        <Button pill outline>
                             Đăng nhập
                         </Button>
                     </Link>

@@ -16,5 +16,8 @@ export { default as PasswordStrengthMeter } from './component_Utils/PasswordStre
 // Products components
 export { default as ProductCard_Component } from './components_Product/ProductCard';
 export { default as Pagination_Component } from './components_Product/Pagination';
-
+export { default as Navbar_CardProduct_Component } from './components_Product/Nav_CardProduct';
+export { default as Breadcrumb_Component } from './components_Product/Breadcrumb';
+export { default as FilterSortPanel_Component } from './components_Product/FilterSortPanel';
+export { default as Chip_Filter_Component } from './components_Product/Chip_Filter';
 // Admin components
