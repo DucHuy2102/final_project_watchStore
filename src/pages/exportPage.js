@@ -20,3 +20,4 @@ export { default as Order_Page } from './User/Order';
 
 // products
 export { default as DashboardProduct_Page } from './Products/DashboardProduct';
+export { default as ProductDetail_Page } from './Products/ProductDetail';

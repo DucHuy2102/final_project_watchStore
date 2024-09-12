@@ -1,103 +1,121 @@
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import Swiper from 'swiper';
-import { SwiperSlide } from 'swiper/react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Modal } from 'flowbite-react';
+import { Link } from 'react-router-dom';
 
-export default function ProductCard() {
+export default function ProductCard({ product }) {
+    const { id, productName, price, img, size, genderUser } = product;
+
+    // state
     const currentUser = useSelector((state) => state.user.currentUser);
     const tokenUser = currentUser?.access_token;
+    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
+
+    // format price to VND
+    const priceFormat = new Intl.NumberFormat('vi-VN', {
+        style: 'currency',
+        currency: 'VND',
+    }).format(price);
+
+    // function buy now
+    const handleBuyNow = () => {
+        console.log('Buy now');
+    };
 
     return (
-        <div className='relative h-[625px] w-[466px] font-Lato hover:scale-105 transition-transform duration-300 hover:cursor-pointer bg-white shadow-xl rounded-xl overflow-hidden'>
+        <div
+            className='relative bg-white w-full border-b-4 border-gray-600 sm:border-none flex flex-col justify-between items-center 
+            sm:w-[45vw] sm:min-h-[50vh] md:w-[30vw] md:min-h-[45vh] 
+            lg:w-[23vw] lg:min-h-[40vh] xl:w-[18vw] xl:min-h-[35vh]
+            max-w-md min-h-[50vh] mx-auto shadow-md rounded-lg overflow-hidden 
+            transition-transform duration-300 ease-in-out transform hover:scale-105'
+        >
             {/* Image watches */}
-            <div className='w-full h-[466px] flex items-center justify-center bg-gray-200 rounded-t-xl'>
-                {/* <Swiper className='h-[430px] w-[430px]' loop={true} spaceBetween={0}>
+            <div
+                className='w-full h-[45vh] sm:h-[30vh] md:h-[25vh] lg:h-[30vh] xl:h-[25vh] 
+            flex items-center justify-center overflow-hidden'
+            >
+                <Swiper className='h-full w-full' loop={true} spaceBetween={0}>
                     {img.map((item, index) => (
                         <SwiperSlide key={index}>
                             <img
                                 src={item}
-                                className='h-full w-full object-cover rounded-lg shadow-md'
+                                alt={productName}
+                                className='h-full w-full object-contain'
                             />
                         </SwiperSlide>
                     ))}
-                </Swiper> */}
-                <img
-                    src={
-                        'https://fossil.scene7.com/is/image/FossilPartners/FS5304_main?$sfcc_fos_medium$'
-                    }
-                    className='h-full w-full object-cover rounded-lg shadow-md'
-                />
+                </Swiper>
             </div>
 
             {/* Name and price */}
-            <div className='mt-3 mb-3 px-4 cursor-pointer'>
-                <div className='text-lg font-semibold text-gray-800'>{'productName'}</div>
-                <div className='text-gray-500'>
-                    {'size'} | {'genderUser'} giới
-                </div>
-                <div className='font-bold text-xl text-gray-900'>{'priceFormat'}</div>
+            <div className='w-full px-4 py-2 sm:px-6'>
+                <Link to={`/product-detail/${id}`}>
+                    <h3 className='text-lg font-semibold text-gray-800'>{productName}</h3>
+                    <p className='text-sm sm:text-base text-gray-500'>
+                        {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
+                    </p>
+                    <p className='text-lg sm:font-medium font-bold text-gray-900'>{priceFormat}</p>
+                </Link>
             </div>
 
             {/* Button buy */}
-            <div
-                className={`border text-lg text-center py-2 transition duration-300 hover:font-bold cursor-pointer ${
-                    tokenUser
-                        ? 'bg-gray-900 text-white '
-                        : 'border-gray-300 text-gray-800 hover:bg-gray-300 hover:text-gray-900'
-                } rounded-lg mx-4`}
-            >
-                Mua hàng ngay
+            <div className='w-full'>
+                <button
+                    onClick={() => setShowModalBuyNow(true)}
+                    className='w-full py-2 sm:py-3 rounded-t-none bg-gray-200 text-gray-800
+                    hover:bg-gray-300 hover:text-black font-medium transition-colors duration-200'
+                >
+                    Mua hàng ngay
+                </button>
             </div>
 
-            {/* Product detail overlay */}
-            {/* {showProductDetail && (
-                <div
-                    className='absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50'
-                    onClick={() => setShowProductDetail(false)}
+            {/* Modal Buy Now */}
+            {showModalBuyNow && (
+                <Modal
+                    size='md'
+                    popup
+                    show={showModalBuyNow}
+                    onClose={() => setShowModalBuyNow(false)}
                 >
-                    <div
-                        className='relative w-[350px] bg-white shadow-2xl p-6 rounded-lg'
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className='flex justify-between items-center mb-4'>
-                            <h2 className='text-lg font-bold text-gray-800'>Thông tin sản phẩm</h2>
-                            <button onClick={() => setShowProductDetail(false)}>
-                                <CloseOutlined className='text-gray-500 hover:text-black transition duration-200' />
-                            </button>
-                        </div>
-                        <div className='text-center'>
+                    <Modal.Header />
+                    <Modal.Body>
+                        <div className='flex flex-col justify-center items-center'>
                             <img
                                 src={img[0]}
-                                className='h-[200px] w-[200px] object-cover mx-auto rounded-lg shadow-md'
+                                alt={productName}
+                                className='h-48 w-40 sm:h-64 sm:w-52 object-cover rounded-lg shadow-md'
                             />
-                            <h3 className='mt-2 text-xl font-semibold text-gray-800'>
+                            <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>
                                 {productName}
-                            </h3>
-                            <p className='text-lg text-gray-900'>{priceFormat}</p>
-                            <div className='flex items-center justify-center mt-4'>
-                                <button
-                                    onClick={() => handleChangeQuantity('decrease')}
-                                    className='bg-gray-200 hover:bg-gray-300 transition duration-200 rounded-full py-2 px-4 mr-2'
-                                >
+                            </h4>
+                            <p className='text-sm sm:text-base text-gray-500'>
+                                {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
+                            </p>
+                            <p className='text-lg sm:text-xl text-gray-900'>{priceFormat}</p>
+                            <div className='flex items-center mt-4'>
+                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200'>
                                     -
                                 </button>
-                                <span className='text-center w-8'>{quantityProduct}</span>
-                                <button
-                                    onClick={() => handleChangeQuantity('increase')}
-                                    className='bg-gray-200 hover:bg-gray-300 transition duration-200 rounded-full py-2 px-4 ml-2'
-                                >
+                                <span className='text-center font-semibold text-lg w-10 sm:w-12'>
+                                    1
+                                </span>
+                                <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-200'>
                                     +
                                 </button>
                             </div>
                             <button
                                 onClick={handleBuyNow}
-                                className='mt-4 w-full bg-gray-900 hover:bg-black text-white py-2 rounded-lg'
+                                className='mt-4 w-full bg-gray-300 text-black font-medium py-2 rounded-lg
+                            hover:bg-gray-400 hover:text-white transition-colors duration-200'
                             >
-                                Mua
+                                Mua hàng ngay
                             </button>
                         </div>
-                    </div>
-                </div>
-            )} */}
+                    </Modal.Body>
+                </Modal>
+            )}
         </div>
     );
 }

@@ -17,13 +17,9 @@ export const userSlice = createSlice({
         user_UpdateProfile: (state, action) => {
             state.currentUser = action.payload;
         },
-        user_DeleteAccount: (state) => {
-            state.currentUser = null;
-        },
     },
 });
 
-export const { user_SignIn, user_SignOut, user_UpdateProfile, user_DeleteAccount } =
-    userSlice.actions;
+export const { user_SignIn, user_SignOut, user_UpdateProfile } = userSlice.actions;
 
 export default userSlice.reducer;

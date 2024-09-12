@@ -9,6 +9,7 @@ import {
     Login_Page,
     PageNotFound_Page,
     PrivateRoute_Page,
+    ProductDetail_Page,
     Register_Page,
     ResetPassword_Page,
 } from './pages/exportPage';
@@ -30,6 +31,7 @@ export default function App() {
                     <Route path='/verify-email' element={<EmailVerification_Page />} />
                     <Route path='/reset-password/:token' element={<ResetPassword_Page />} />
                     <Route path='/products' element={<DashboardProduct_Page />} />
+                    <Route path='/product-detail/:id' element={<ProductDetail_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
