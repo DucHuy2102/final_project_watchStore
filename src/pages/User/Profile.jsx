@@ -20,8 +20,8 @@ import { FaBan } from 'react-icons/fa';
 
 export default function Profile_Component() {
     // get token user from redux store
-    const currentUser = useSelector((state) => state.user.currentUser);
-    const tokenUser = currentUser?.access_token;
+    const currentUser = useSelector((state) => state.user.user);
+    const tokenUser = useSelector((state) => state.user.access_token);
     const navigate = useNavigate();
 
     // states
@@ -31,11 +31,11 @@ export default function Profile_Component() {
     const [imgURL, setImgURL] = useState(null);
     const [imgUploadProgress, setImgUploadProgress] = useState(null);
     const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        avatarImg: '',
+        fullName: currentUser.fullName ?? '',
+        email: currentUser.email ?? '',
+        phone: currentUser.phone ?? '',
+        address: currentUser.address ?? '',
+        avatarImg: currentUser.avatarImg ?? '',
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -74,36 +74,15 @@ export default function Profile_Component() {
         street: '',
     });
 
-    // ======================================== Fetch API ========================================
-    // get user from api and update to redux store
+    // loading screen effect
     useEffect(() => {
-        const getUser = async () => {
-            setLoading(true);
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/profile`, {
-                    headers: {
-                        Authorization: `Bearer ${tokenUser}`,
-                    },
-                });
-                if (res?.status === 200) {
-                    const updatedUser = res?.data;
-                    setFormData({
-                        fullName: updatedUser.fullName,
-                        email: updatedUser.email,
-                        phone: updatedUser.phone,
-                        address: updatedUser.address,
-                        avatarImg: updatedUser.avatarImg,
-                    });
-                }
-            } catch (error) {
-                console.log('Error get user profile: ', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        getUser();
-    }, [dispatch, tokenUser]);
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 1000);
+    }, []);
 
+    // ======================================== Fetch API ========================================
     // upload image to firebase storage
     useEffect(() => {
         if (imgFile) {
@@ -231,6 +210,11 @@ export default function Profile_Component() {
             toast.error('Xin chờ hệ thống đang tải ảnh !!!');
             return;
         }
+        const isFormChanged = Object.values(formData).some((value) => value !== '');
+        if (isFormChanged) {
+            toast.info('Không có gì thay đổi để cập nhật!');
+            return;
+        }
         try {
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/profile/update`,
@@ -242,9 +226,9 @@ export default function Profile_Component() {
                 }
             );
             if (res?.status === 200) {
-                const updatedUser = res.data;
-                toast.success('Cập nhật thông tin thành công');
-                // dispatch(user_UpdateProfile(updatedUser));
+                const { data } = res;
+                toast.success('Cập nhật thông tin thành công!');
+                dispatch(user_UpdateProfile({ user: data }));
             }
         } catch (error) {
             toast.error('Hệ thống đang bận, vui lòng thử lại sau');
@@ -436,7 +420,7 @@ export default function Profile_Component() {
                             icon={CiUser}
                             className='w-full'
                             placeholder='Họ và tên'
-                            value={formData.fullName === 'unknow' ? '' : formData.fullName}
+                            value={formData.fullName}
                             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         />
                         <TextInput
@@ -445,7 +429,7 @@ export default function Profile_Component() {
                             icon={CiMail}
                             className='w-full'
                             placeholder='Email'
-                            value={formData.email === 'unknow' ? '' : formData.email}
+                            value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         />
                         <TextInput
@@ -453,7 +437,7 @@ export default function Profile_Component() {
                             id='phone'
                             icon={CiPhone}
                             className='w-full'
-                            value={formData.phone === 'unknow' ? '' : formData.phone}
+                            value={formData.phone}
                             placeholder='Số điện thoại'
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         />
@@ -463,7 +447,7 @@ export default function Profile_Component() {
                             id='address'
                             icon={CiHome}
                             className='w-full'
-                            value={formData.address === 'unknow' ? '' : formData.address}
+                            value={formData.address}
                             placeholder='Địa chỉ'
                         />
                     </div>

@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Modal } from 'flowbite-react';
-import { Link } from 'react-router-dom';
+import { Button, Modal } from 'flowbite-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { CiWarning } from 'react-icons/ci';
 
 export default function ProductCard({ product }) {
     const { id, productName, price, img, size, genderUser } = product;
 
     // state
-    const currentUser = useSelector((state) => state.user.currentUser);
-    const tokenUser = currentUser?.access_token;
+    const tokenUser = useSelector((state) => state.user.access_token);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
 
     // format price to VND
     const priceFormat = new Intl.NumberFormat('vi-VN', {
@@ -21,6 +23,12 @@ export default function ProductCard({ product }) {
     // function buy now
     const handleBuyNow = () => {
         console.log('Buy now');
+    };
+
+    // function navigate to login page
+    const handleNavigateToLoginPage = () => {
+        navigate('/login', { state: { from: pathname } });
+        setShowModalBuyNow(false);
     };
 
     return (
@@ -72,15 +80,18 @@ export default function ProductCard({ product }) {
             <div className='w-full'>
                 <button
                     onClick={() => setShowModalBuyNow(true)}
-                    className='w-full py-2 sm:py-3 rounded-t-none bg-gray-200 text-gray-800
-                    hover:bg-gray-300 hover:text-black font-medium transition-colors duration-300'
+                    className={`w-full py-2 sm:py-3 rounded-t-none ${
+                        tokenUser
+                            ? 'bg-gray-800 text-gray-200'
+                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300 hover:text-black'
+                    } font-medium transition-colors duration-300`}
                 >
                     Mua hàng ngay
                 </button>
             </div>
 
             {/* Modal Buy Now */}
-            {showModalBuyNow && (
+            {tokenUser ? (
                 <Modal
                     size='md'
                     popup
@@ -116,10 +127,31 @@ export default function ProductCard({ product }) {
                             <button
                                 onClick={handleBuyNow}
                                 className='mt-4 w-full bg-gray-300 text-black font-medium py-2 rounded-lg
-                                hover:bg-gray-400 hover:text-white transition-colors duration-300'
+                                hover:bg-blue-500 hover:text-white transition-colors duration-300'
                             >
                                 Mua hàng ngay
                             </button>
+                        </div>
+                    </Modal.Body>
+                </Modal>
+            ) : (
+                <Modal show={showModalBuyNow} size='md' popup>
+                    <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                        <CiWarning size='70px' color={'#0e7490'} />
+                        <span className='text-lg font-medium text-black'>
+                            Bạn cần đăng nhập để mua hàng
+                        </span>
+                        <div className='w-full flex justify-between items-center gap-x-5'>
+                            <Button
+                                outline
+                                className='w-full'
+                                onClick={() => setShowModalBuyNow(false)}
+                            >
+                                Hủy
+                            </Button>
+                            <Button className='w-full' onClick={handleNavigateToLoginPage}>
+                                Đăng nhập
+                            </Button>
                         </div>
                     </Modal.Body>
                 </Modal>

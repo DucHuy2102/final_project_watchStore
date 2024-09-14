@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
 import {
+    DashboardCart_Page,
     DashboardProduct_Page,
     DashboardUser_Page,
     EmailVerification_Page,
@@ -36,6 +37,7 @@ export default function App() {
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
                         <Route path='/dashboard' element={<DashboardUser_Page />} />
+                        <Route path='/cart' element={<DashboardCart_Page />} />
                     </Route>
 
                     {/* route only for admin */}
@@ -55,6 +57,7 @@ export default function App() {
                 <Footer_Component />
             </Router>
             <ToastContainer
+                className={'w-fit'}
                 position='bottom-right'
                 autoClose={2500}
                 hideProgressBar={false}

@@ -2,7 +2,7 @@ import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -16,6 +16,8 @@ export default function Login() {
     const [errorMessage, setErrorMessage] = useState('');
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { state } = useLocation();
+    console.log(state);
 
     // handle change input
     const handleChange = (e) => {
@@ -43,11 +45,15 @@ export default function Login() {
                 },
             });
             if (res?.status === 200) {
-                const data = res?.data;
-                dispatch(user_SignIn(data));
+                const { data } = res;
+                dispatch(user_SignIn({ access_token: data.access_token, user: data }));
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
-                    navigate('/');
+                    if (state?.from) {
+                        navigate(state.from);
+                    } else {
+                        navigate('/');
+                    }
                 }, 3000);
             }
         } catch (error) {

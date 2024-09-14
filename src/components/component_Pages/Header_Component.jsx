@@ -15,7 +15,8 @@ export default function Header_Component() {
     const navigate = useNavigate();
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
-    const currentUser = useSelector((state) => state.user.currentUser);
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const currentUser = useSelector((state) => state.user.user);
 
     // handle search function
     const handleSubmit = (e) => {
@@ -76,12 +77,18 @@ export default function Header_Component() {
                         <FaMoon className='text-blue-400' />
                     )}
                 </Button>
-                {currentUser ? (
+                {tokenUser ? (
                     <Dropdown
                         className='mt-1'
                         inline
                         arrowIcon={false}
-                        label={<Avatar alt='Avatar_User' img={currentUser?.avatarImg} rounded />}
+                        label={
+                            <Avatar
+                                alt='Avatar_User'
+                                img={currentUser.avatarImg || '../assets/default_Avatar.jpg'}
+                                rounded
+                            />
+                        }
                     >
                         <Dropdown.Header>
                             <span className='block text-center text-sm font-medium truncate'>

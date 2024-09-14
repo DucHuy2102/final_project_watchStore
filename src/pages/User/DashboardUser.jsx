@@ -20,8 +20,8 @@ export default function DashboardUser() {
             </div>
 
             {tab === 'dashboard' && <Dashboard_Page />}
-            {tab === 'profile' && <Order_Page />}
-            {tab === 'order' && <Profile_Page />}
+            {tab === 'profile' && <Profile_Page />}
+            {tab === 'order' && <Order_Page />}
         </div>
     );
 }

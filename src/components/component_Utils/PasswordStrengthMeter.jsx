@@ -3,11 +3,11 @@ import { IoCloseOutline } from 'react-icons/io5';
 
 const PasswordCriteria = ({ password }) => {
     const criteria = [
-        { label: 'At least 6 characters', isMet: password.length >= 6 },
-        { label: 'Contains uppercase letter', isMet: /[A-Z]/.test(password) },
-        { label: 'Contains lowercase letter', isMet: /[a-z]/.test(password) },
-        { label: 'Contains a number', isMet: /\d/.test(password) },
-        { label: 'Contains special character', isMet: /[^A-Za-z0-9]/.test(password) },
+        { label: 'Có ít nhất 6 ký tự', isMet: password.length >= 6 },
+        { label: 'Có chứa ký tự in hoa', isMet: /[A-Z]/.test(password) },
+        { label: 'Có chứa ký tự thường', isMet: /[a-z]/.test(password) },
+        { label: 'Có chứa số', isMet: /\d/.test(password) },
+        { label: 'Có chứa ký tự đặc biệt', isMet: /[^A-Za-z0-9]/.test(password) },
     ];
 
     return (
@@ -64,7 +64,7 @@ const PasswordStrengthMeter = ({ password, strength }) => {
     return (
         <div>
             <div className='flex justify-between items-center mb-2'>
-                <span className='text-xs text-gray-400'>Password strength</span>
+                <span className='text-xs text-gray-400'>Độ mạnh mật khẩu</span>
                 <span className='text-xs text-gray-400'>{getStrengthText(strength)}</span>
             </div>
 
