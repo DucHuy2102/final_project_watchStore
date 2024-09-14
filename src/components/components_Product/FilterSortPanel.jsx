@@ -81,7 +81,7 @@ export default function FilterSortPanel() {
 
     return (
         <>
-            <div className='flex justify-center items-center gap-x-5'>
+            <div className='flex justify-center items-center gap-x-2 sm:gap-x-5'>
                 <Button outline onClick={() => setShowModalFilter(true)} className=''>
                     Bộ lọc
                 </Button>

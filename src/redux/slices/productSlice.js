@@ -1,25 +1,33 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    product: null,
+    allProducts: null,
+    productDetail: null,
 };
 
 export const productSlice = createSlice({
     name: 'product',
     initialState,
     reducers: {
+        // ======================== All Product ========================
         get_All_Product: (state, action) => {
-            state.product = action.payload;
+            state.allProducts = action.payload;
         },
-        set_Product_Null: (state) => {
-            state.product = null;
+        reset_AllProduct: (state) => {
+            state.allProducts = null;
         },
-        // user_UpdateProfile: (state, action) => {
-        //     state.product = action.payload;
-        // },
+
+        // ======================== Product Detail ========================
+        set_Product_Detail: (state, action) => {
+            state.productDetail = action.payload;
+        },
+        reset_Product_Detail: (state) => {
+            state.productDetail = null;
+        },
     },
 });
 
-export const { get_All_Product, set_Product_Null } = productSlice.actions;
+export const { get_All_Product, set_Product_Detail, reset_Product_Detail, reset_AllProduct } =
+    productSlice.actions;
 
 export default productSlice.reducer;

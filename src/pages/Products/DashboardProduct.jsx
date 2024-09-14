@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 // format data products
 const formatData = (data) => {
     let allProducts = [];
-    data.forEach((item) => {
+    data?.forEach((item) => {
         allProducts = allProducts.concat(item.products);
     });
     return allProducts;
@@ -17,8 +17,8 @@ const formatData = (data) => {
 
 export default function DashboardProduct() {
     // get data products from redux
-    const products_Redux = useSelector((state) => state.product.product);
-    const products = formatData(products_Redux);
+    const products_From_Redux = useSelector((state) => state.product.allProducts);
+    const products = formatData(products_From_Redux);
 
     // Pagination state and function to handle pagination logic
     const [currentPage, setCurrentPage] = useState(1);

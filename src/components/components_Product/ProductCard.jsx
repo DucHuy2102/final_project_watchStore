@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
+import { set_Product_Detail } from '../../redux/slices/productSlice';
 
 export default function ProductCard({ product }) {
     const { id, productName, price, img, size, genderUser } = product;
@@ -12,6 +13,7 @@ export default function ProductCard({ product }) {
     const tokenUser = useSelector((state) => state.user.access_token);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { pathname } = useLocation();
 
     // format price to VND
@@ -29,6 +31,12 @@ export default function ProductCard({ product }) {
     const handleNavigateToLoginPage = () => {
         navigate('/login', { state: { from: pathname } });
         setShowModalBuyNow(false);
+    };
+
+    // function navigate to product detail
+    const handleNavigateToProductDetail = () => {
+        dispatch(set_Product_Detail(product));
+        navigate(`/product-detail/${id}`);
     };
 
     return (
@@ -59,21 +67,22 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Name and price */}
-            <div className='w-full px-4 py-2 sm:px-6 lg:px-4 lg:pb-4 xl:px-5'>
-                <Link to={`/product-detail/${id}`}>
-                    <h3 className='text-lg lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
-                        {productName}
-                    </h3>
-                    <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
-                        {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
-                    </p>
-                    <p
-                        className='text-lg sm:font-medium lg:font-bold lg:text-xl 
+            <div
+                onClick={handleNavigateToProductDetail}
+                className='w-full px-4 py-2 sm:px-6 lg:px-4 lg:pb-4 xl:px-5 cursor-pointer'
+            >
+                <h3 className='text-lg lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
+                    {productName}
+                </h3>
+                <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
+                    {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
+                </p>
+                <p
+                    className='text-lg sm:font-medium lg:font-bold lg:text-xl 
                     xl:text-2xl font-bold text-gray-900 transition-colors duration-300'
-                    >
-                        {priceFormat}
-                    </p>
-                </Link>
+                >
+                    {priceFormat}
+                </p>
             </div>
 
             {/* Button buy */}
