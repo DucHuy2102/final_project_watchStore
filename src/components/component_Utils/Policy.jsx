@@ -1,4 +1,4 @@
-export const policyData = [
+const policyData = [
     {
         img: 'https://casio-hcm.vn/wp-content/uploads/2024/03/relationship.png',
         title: '100%',
@@ -33,7 +33,7 @@ export default function Policy() {
                 <span className='relative z-10 bg-white dark:bg-[rgb(16,32,42)] px-2 inline-block'>
                     vì sao nên lựa chọn chúng tôi
                 </span>
-                <div className='absolute inset-x-0 top-1/2 transform -translate-y-1/2 bg-gray-400 h-[1px] sm:h-[2px]'></div>
+                <div className='absolute inset-x-0 top-1/2 transform -translate-y-1/2 bg-black h-[1px] sm:h-[2px]'></div>
             </div>
             <div className='w-full sm:px-6 lg:px-10'>
                 <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'>

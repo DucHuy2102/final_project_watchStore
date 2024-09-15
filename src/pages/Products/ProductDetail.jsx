@@ -1,15 +1,65 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { reset_Product_Detail } from '../../redux/slices/productSlice';
+import { reset_Product_Detail, set_Product_Detail } from '../../redux/slices/productSlice';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
-import { Button } from 'flowbite-react';
+import { Button, Modal } from 'flowbite-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CiWarning } from 'react-icons/ci';
 
+// format price to VND
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
+// PR product
+const prProduct = [
+    {
+        id: 1,
+        url: '//timex.com/cdn/shop/files/Steel.svg?v=1688056464&width=40',
+        title: 'Chất liệu vỏ đồng hồ',
+        description:
+            'Vỏ đồng hồ được làm từ các chất liệu cao cấp, mang đến độ bền và sang trọng cho sản phẩm.',
+    },
+    {
+        id: 2,
+        url: '//timex.com/cdn/shop/files/Adjustable_Watch.svg?v=1688056476&width=40',
+        title: 'Chất lượng dây đồng hồ',
+        description:
+            'Dây đồng hồ được làm từ các chất liệu chọn lọc, có khả năng chịu nước ở độ sâu nhất định, giúp thoải mái sử dụng trong mọi hoàn cảnh.',
+    },
+    {
+        id: 3,
+        url: '//timex.com/cdn/shop/files/Stopwatch_bc7a4d6c-d8af-4131-a0f5-a68fa54e5f5c.svg?v=1688056464&width=40',
+        title: 'Đồng hồ bấm giờ',
+        description:
+            'Đồng hồ có tính năng bấm giờ chính xác, kích thước mặt đồng hồ phù hợp với cỡ cổ tay của bạn, giúp tự tin và thoải mái hơn khi đeo.',
+    },
+    {
+        id: 4,
+        url: '//timex.com/cdn/shop/files/Water_Resistant.svg?v=1687971970&width=40',
+        title: 'Khả năng chống nước',
+        description:
+            'Đồng hồ có khả năng chống nước đáp ứng các tiêu chuẩn an toàn, dây đồng hồ được làm từ chất liệu cao cấp, giúp bạn thoải mái sử dụng trong thời gian dài.',
+    },
+    {
+        id: 5,
+        url: 'https://timex.com/cdn/shop/files/Calendar.svg?v=1687971335&width=40',
+        title: 'Tính năng xem ngày',
+        description:
+            'Đồng hồ có tính năng xem ngày hiện đại và tiện dụng, độ dày phù hợp với cỡ cổ tay của bạn, giúp tự tin và thoải mái hơn khi sử dụng.',
+    },
+    {
+        id: 6,
+        url: 'https://timex.com/cdn/shop/files/Fits_Wrist.svg?v=1688403513&width=40',
+        title: 'Tương thích với cỡ cổ tay',
+        description:
+            'Đồng hồ nhẹ và tương thích với mọi cỡ cổ tay, trọng lượng nhẹ giúp bạn thoải mái sử dụng trong thời gian dài mà không gây khó chịu.',
+    },
+];
+
 export default function ProductDetail() {
+    const tokenUser = useSelector((state) => state.user.access_token);
     const product = useSelector((state) => state.product.productDetail);
     // destructuring product detail
     const {
@@ -105,8 +155,11 @@ export default function ProductDetail() {
 
     // state
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(0);
+    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
 
     // toggle description
     const toggleDescription = () => {
@@ -120,28 +173,61 @@ export default function ProductDetail() {
     //     };
     // }, [dispatch]);
 
-    // format price to VND
+    // format price & discountPrice to VND
     const priceFormat = formatPrice(price);
     const discountPrice = discount !== 0 && !isNaN(discount) ? price * ((100 - discount) / 100) : 0;
-    console.log(discountPrice);
     const discountPriceFormat = formatPrice(discountPrice);
+
+    // more product of the same brand
+    const allProducts = useSelector((state) => state.product.allProducts);
+    const moreProduct = allProducts
+        ?.filter((item) => item.categoryName === brand)
+        .flatMap((item) => item.products)
+        .filter((item) => item.id !== id);
+
+    // navgigate to another product detail page
+    const handleNavigateToProductDetail = (productId) => {
+        const navigateProduct = moreProduct.find((item) => item.id === productId);
+        dispatch(set_Product_Detail(navigateProduct));
+        navigate(`/product-detail/${productId}`);
+    };
+
+    // function buy now
+    const handleVerifyUser = () => {
+        if (!tokenUser) {
+            setShowModalBuyNow(true);
+        } else {
+            handleBuyNow();
+        }
+    };
+
+    // function navigate to login page
+    const handleNavigateToLoginPage = () => {
+        navigate('/login', { state: { from: pathname } });
+        setShowModalBuyNow(false);
+    };
+
+    // function buy now product
+    const handleBuyNow = () => {
+        console.log('Buy now');
+    };
 
     return (
         <div className='p-6 lg:max-w-7xl max-w-4xl mx-auto'>
             {/* top: images & info product */}
             <div
-                className='grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5 
-            gap-12 shadow-lg p-6'
+                className='grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5
+    gap-x-5 gap-y-5 rounded-lg shadow-md sm:shadow-lg sm:shadow-gray-200 dark:shadow-gray-800 sm:px-5 sm:py-3'
             >
                 {/* image product */}
-                <div className='lg:col-span-3 w-full lg:sticky top-0 text-center'>
+                <div className='w-full md:col-span-1 lg:col-span-3 lg:sticky top-0 text-center'>
                     <Swiper
                         loop={true}
                         spaceBetween={0}
                         modules={[Navigation, Autoplay]}
                         autoplay={{ delay: 4000 }}
                         navigation
-                        className='w-full h-auto lg:w-[500px] lg:h-[500px] rounded-xl relative'
+                        className='w-full h-auto md:w-[300px] lg:w-[600px] rounded-xl'
                     >
                         {img.map((item, index) => (
                             <SwiperSlide key={index}>
@@ -156,15 +242,17 @@ export default function ProductDetail() {
                 </div>
 
                 {/* info product & button: buy now and add to cart */}
-                <div className='lg:col-span-2'>
+                <div className='md:col-span-1 lg:col-span-2'>
                     {/* name product */}
-                    <h2 className='text-xl md:text-2xl font-extrabold text-black dark:text-white'>
+                    <h2 className='text-xl sm:text-2xl font-extrabold text-black dark:text-white'>
                         {productName}
                     </h2>
 
                     {/* price product */}
                     <div className='flex flex-wrap justify-start items-center gap-x-5 mt-5'>
-                        <p className='text-blue-500 text-4xl font-bold'>{discountPriceFormat}</p>
+                        <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>
+                            {discountPriceFormat}
+                        </p>
                         <p className='text-gray-400 text-xl flex justify-start items-center'>
                             <strike>{priceFormat}</strike>
                             <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3'>
@@ -207,112 +295,130 @@ export default function ProductDetail() {
 
                     {/* quantity */}
                     <div className='flex justify-start items-center mt-5 gap-x-5'>
-                        <p className='text-lg font-semibold text-gray-800'>Số lượng đặt mua:</p>
+                        <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
+                            Số lượng đặt mua:
+                        </p>
                         <div className='flex items-center justify-center'>
                             <Button
                                 outline
-                                // onClick={decreaseQuantity}
+                                onClick={() => setQuantityProduct(quantityProduct - 1)}
                                 disabled={quantityProduct === 0}
                             >
                                 -
                             </Button>
-                            <span className='text-lg text-center w-8 md:w-12 border-l border-r border-gray-300'>
+                            <span className='text-lg text-center w-8 md:w-12'>
                                 {quantityProduct}
                             </span>
-                            <Button
-                                outline
-                                // onClick={increaseQuantity}
-                            >
+                            <Button outline onClick={() => setQuantityProduct(quantityProduct + 1)}>
                                 +
                             </Button>
                         </div>
                     </div>
 
                     {/* buttons */}
-                    <div className='flex justify-between items-center mt-5'>
-                        <Button outline>Thêm vào giỏ hàng</Button>
-                        <Button className='w-40'>Mua ngay</Button>
+                    <div className='w-full flex flex-col md:flex-row justify-between items-center mt-5 gap-4'>
+                        <Button outline className='w-full md:w-48 lg:w-52'>
+                            Thêm vào giỏ hàng
+                        </Button>
+                        <Button onClick={handleVerifyUser} className='w-full md:w-48 lg:w-52'>
+                            Mua ngay
+                        </Button>
                     </div>
                 </div>
             </div>
+
+            {/* related products */}
+            <div className='mt-5 bg-gray-100 flex flex-col justify-center items-center rounded-lg'>
+                <div className='relative mt-5 w-full text-center'>
+                    <span className='text-2xl uppercase font-semibold sm:font-bold relative z-10 inline-block bg-gray-100 px-4'>
+                        các sản phẩm cùng thương hiệu
+                    </span>
+                    <div className='max-w-5xl mx-auto bg-black h-[1px] absolute inset-x-0 top-1/2 transform -translate-y-1/2' />
+                </div>
+
+                <Swiper
+                    className='mt-2 w-full flex items-center px-4 py-4 sm:py-2 bg-gray-100 dark:bg-gray-900'
+                    spaceBetween={20}
+                    slidesPerView={1}
+                    navigation
+                    autoplay={{ delay: 4000 }}
+                    breakpoints={{
+                        640: { slidesPerView: 1 },
+                        768: { slidesPerView: 2 },
+                        1024: { slidesPerView: 3 },
+                        1280: { slidesPerView: 4 },
+                    }}
+                >
+                    {moreProduct.map((product) => (
+                        <SwiperSlide key={product.id}>
+                            <div
+                                className='bg-white p-4 min-h-[60vh] rounded-lg 
+                                shadow-md hover:shadow-lg transition-shadow cursor-pointer'
+                                onClick={() => handleNavigateToProductDetail(product.id)}
+                            >
+                                <img
+                                    src={product.img[0]}
+                                    alt={product.productName}
+                                    className='w-full h-[40vh] object-cover rounded-lg'
+                                />
+                                <h4 className='mt-5 w-full text-gray-800 text-lg font-semibold'>
+                                    {product.productName}
+                                </h4>
+                                <p className='text-gray-500 text-sm'>{product.brand}</p>
+                                <p className='text-blue-500 text-xl font-bold'>
+                                    {new Intl.NumberFormat('vi-VN', {
+                                        style: 'currency',
+                                        currency: 'VND',
+                                    }).format(product.price)}
+                                </p>
+                            </div>
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
+
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4'>
+                    {prProduct.map((item) => (
+                        <div
+                            key={item.id}
+                            className='flex flex-col justify-start items-center bg-white rounded-lg p-6'
+                        >
+                            <img
+                                src={item.url}
+                                alt={item.title}
+                                className='object-fit h-[10vh] w-[8vw] mb-4 p-4'
+                            />
+                            <h4 className='text-lg font-semibold mb-2'>{item.title}</h4>
+                            <p className='text-gray-600 text-center'>{item.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* if user not login */}
+            <Modal show={showModalBuyNow} size='md' popup>
+                <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                    <CiWarning size='70px' color={'#0e7490'} />
+                    <span className='text-lg font-medium text-black'>
+                        Bạn cần đăng nhập để mua hàng
+                    </span>
+                    <div className='w-full flex justify-between items-center gap-x-5'>
+                        <Button
+                            outline
+                            className='w-full'
+                            onClick={() => setShowModalBuyNow(false)}
+                        >
+                            Hủy
+                        </Button>
+                        <Button className='w-full' onClick={handleNavigateToLoginPage}>
+                            Đăng nhập
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </div>
     );
 }
 
-{
-    /* related products */
-}
-{
-    /* <div className='mt-12'>
-        <h3 className='text-xl font-bold text-gray-900 mb-4'>
-            Sản phẩm cùng thương hiệu
-        </h3>
-        <Swiper
-            className='flex items-center px-4 py-2 bg-gray-100'
-            spaceBetween={20}
-            slidesPerView={1}
-            navigation
-            autoplay={{ delay: 4000 }}
-            breakpoints={{
-                640: { slidesPerView: 1 },
-                768: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-                1280: { slidesPerView: 4 },
-            }}
-        >
-            {moreProduct.map((product) => (
-                <SwiperSlide key={product.id}>
-                    <div
-                        className='bg-white p-4 h-[60vh] rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer'
-                        onClick={() => go_ProductDetail_Page(product.id, product)}
-                    >
-                        <img
-                            src={product.img[0]}
-                            alt={product.productName}
-                            className='w-full h-[40vh] object-cover rounded-lg'
-                        />
-                        <h4 className='mt-4 w-full text-gray-800 text-lg font-semibold'>
-                            {product.productName}
-                        </h4>
-                        <p className='text-gray-500 text-sm'>{product.brand}</p>
-                        <p className='mt-2 text-blue-500 text-xl font-bold'>
-                            {new Intl.NumberFormat('vi-VN', {
-                                style: 'currency',
-                                currency: 'VND',
-                            }).format(product.price)}
-                        </p>
-                    </div>
-                </SwiperSlide>
-            ))}
-        </Swiper>
-    </div> */
-}
-
-{
-    /* pr product */
-}
-{
-    /* <div className='mt-10 w-full grid grid-cols-1 lg:grid-cols-3 gap-5 bg-gray-100 rounded-lg shadow-md p-6'>
-        {prProduct.map((item) => (
-            <div
-                key={item.id}
-                className='flex flex-col justify-center items-center bg-white rounded-lg p-6'
-            >
-                <img
-                    src={item.url}
-                    alt={item.title}
-                    className='object-fit h-[10vh] w-[8vw] mb-4 p-2'
-                />
-                <h4 className='text-lg font-semibold mb-2'>{item.title}</h4>
-                <p className='text-gray-600 text-center'>{item.description}</p>
-            </div>
-        ))}
-    </div> */
-}
-
-{
-    /* comments */
-}
 {
     /* <div className='mt-12'>
         <h3 className='text-xl font-bold text-gray-900 mb-4'>Nhận xét sản phẩm</h3>
