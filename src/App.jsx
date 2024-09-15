@@ -33,11 +33,11 @@ export default function App() {
                     <Route path='/reset-password/:token' element={<ResetPassword_Page />} />
                     <Route path='/products' element={<DashboardProduct_Page />} />
                     <Route path='/product-detail/:id' element={<ProductDetail_Page />} />
+                    <Route path='/cart' element={<DashboardCart_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
                         <Route path='/dashboard' element={<DashboardUser_Page />} />
-                        <Route path='/cart' element={<DashboardCart_Page />} />
                     </Route>
 
                     {/* route only for admin */}

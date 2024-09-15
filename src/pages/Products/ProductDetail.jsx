@@ -328,12 +328,15 @@ export default function ProductDetail() {
             </div>
 
             {/* related products */}
-            <div className='mt-5 bg-gray-100 flex flex-col justify-center items-center rounded-lg'>
+            <div className='mt-5 bg-gray-100 dark:bg-gray-900 flex flex-col justify-center items-center rounded-lg'>
                 <div className='relative mt-5 w-full text-center'>
-                    <span className='text-2xl uppercase font-semibold sm:font-bold relative z-10 inline-block bg-gray-100 px-4'>
+                    <span
+                        className='text-2xl uppercase font-semibold sm:font-bold relative z-10 inline-block 
+                    bg-gray-100 dark:bg-gray-900 px-4'
+                    >
                         các sản phẩm cùng thương hiệu
                     </span>
-                    <div className='max-w-5xl mx-auto bg-black h-[1px] absolute inset-x-0 top-1/2 transform -translate-y-1/2' />
+                    <div className='max-w-5xl dark:max-w-7xl mx-auto bg-black dark:bg-gray-200 h-[1px] absolute inset-x-0 top-1/2 transform -translate-y-1/2' />
                 </div>
 
                 <Swiper
@@ -376,7 +379,7 @@ export default function ProductDetail() {
                     ))}
                 </Swiper>
 
-                <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4'>
+                <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4 dark:bg-gray-900'>
                     {prProduct.map((item) => (
                         <div
                             key={item.id}
@@ -387,7 +390,9 @@ export default function ProductDetail() {
                                 alt={item.title}
                                 className='object-fit h-[10vh] w-[8vw] mb-4 p-4'
                             />
-                            <h4 className='text-lg font-semibold mb-2'>{item.title}</h4>
+                            <h4 className='text-lg font-semibold mb-2 dark:text-gray-800'>
+                                {item.title}
+                            </h4>
                             <p className='text-gray-600 text-center'>{item.description}</p>
                         </div>
                     ))}
