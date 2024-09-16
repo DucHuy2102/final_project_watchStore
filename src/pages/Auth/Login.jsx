@@ -17,7 +17,6 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { state } = useLocation();
-    console.log(state);
 
     // handle change input
     const handleChange = (e) => {

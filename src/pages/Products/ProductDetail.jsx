@@ -7,6 +7,7 @@ import 'swiper/css';
 import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
+import { addProductToCart, resetCart } from '../../redux/slices/cartSlice';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -192,7 +193,9 @@ export default function ProductDetail() {
         navigate(`/product-detail/${productId}`);
     };
 
-    // function buy now
+    // handle verify user to buy now product:
+    // if user not login, show modal to login page
+    // else, handle buy now product
     const handleVerifyUser = () => {
         if (!tokenUser) {
             setShowModalBuyNow(true);
@@ -207,6 +210,11 @@ export default function ProductDetail() {
         setShowModalBuyNow(false);
     };
 
+    // function add product to cart
+    const handleAddProductToCart = () => {
+        dispatch(addProductToCart({ ...product, quantity: quantityProduct }));
+    };
+
     // function buy now product
     const handleBuyNow = () => {
         console.log('Buy now');
@@ -214,7 +222,7 @@ export default function ProductDetail() {
 
     return (
         <div className='p-6 lg:max-w-7xl max-w-4xl mx-auto'>
-            {/* top: images & info product */}
+            {/* top: images, info product & 2 buttons */}
             <div
                 className='grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5
     gap-x-5 gap-y-5 rounded-lg shadow-md sm:shadow-lg sm:shadow-gray-200 dark:shadow-gray-800 sm:px-5 sm:py-3'
@@ -317,9 +325,15 @@ export default function ProductDetail() {
 
                     {/* buttons */}
                     <div className='w-full flex flex-col md:flex-row justify-between items-center mt-5 gap-4'>
-                        <Button outline className='w-full md:w-48 lg:w-52'>
-                            Thêm vào giỏ hàng
-                        </Button>
+                        {tokenUser && (
+                            <Button
+                                onClick={handleAddProductToCart}
+                                outline
+                                className='w-full md:w-48 lg:w-52'
+                            >
+                                Thêm vào giỏ hàng
+                            </Button>
+                        )}
                         <Button onClick={handleVerifyUser} className='w-full md:w-48 lg:w-52'>
                             Mua ngay
                         </Button>

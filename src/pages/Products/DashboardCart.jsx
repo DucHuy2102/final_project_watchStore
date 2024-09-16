@@ -1,17 +1,42 @@
 import { Button, Modal } from 'flowbite-react';
+import { useState } from 'react';
+import { CiWarning } from 'react-icons/ci';
+import { FaMinus, FaPlus } from 'react-icons/fa';
 import { GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
+
+// format price to VND
+const formatPrice = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 export default function DashboardCart() {
     const tokenUser = useSelector((state) => state.user.access_token);
-    const amountProduct = 1;
+    const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
+    const productItems = useSelector((state) => state.cart.cartItem);
+
+    // state
+    const dispatch = useDispatch();
+    const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
+
+    // handle change quantity
+    const handleChangeQuantity = (type, productId) => {
+        dispatch(changeProductQuantity({ type, productId }));
+    };
+
+    // handle delete product from cart
+    const handleDeleteProductFromCart = () => {
+        dispatch(deleteProductFromCart(productToDelete));
+        setShowModalDeleteProduct(false);
+    };
 
     return (
         <div className='min-h-screen py-8'>
             <div className='mx-auto px-4'>
-                {amountProduct === 0 ? (
+                {totalQuantity === 0 ? (
                     // no product in cart
                     <div className='w-full mt-[15vh] flex flex-col items-center justify-center gap-y-3'>
                         <GiShoppingCart size={200} className='text-[#0E7490]' />
@@ -34,7 +59,7 @@ export default function DashboardCart() {
                                     <thead>
                                         <tr>
                                             <th className='text-left font-semibold'>
-                                                Tất cả ( {amountProduct} sản phẩm )
+                                                Tất cả {totalQuantity} sản phẩm
                                             </th>
                                             <th className='font-semibold text-center'>
                                                 Đơn giá (VNĐ)
@@ -50,26 +75,26 @@ export default function DashboardCart() {
                                     </thead>
 
                                     {/* body product */}
-                                    {/* <tbody>
-                                        {orders.data.map((order, index) => {
+                                    <tbody>
+                                        {productItems?.map((item) => {
                                             return (
-                                                <tr key={index}>
+                                                <tr key={item.id}>
                                                     <td className='py-4'>
                                                         <div className='flex items-center'>
                                                             <img
                                                                 className='h-16 w-16 mr-4'
-                                                                src={order.product.img[0]}
+                                                                src={item.img[0]}
                                                                 alt='Product image'
                                                             />
 
                                                             <span className='w-80 font-semibold'>
-                                                                {order.product.productName}
+                                                                {item.productName}
                                                             </span>
                                                         </div>
                                                     </td>
 
                                                     <td className='py-4 text-center'>
-                                                        {priceFormat(order.product.price)}
+                                                        {formatPrice(item.price)}
                                                     </td>
 
                                                     <td className='py-4'>
@@ -78,66 +103,77 @@ export default function DashboardCart() {
                                                                 onClick={() =>
                                                                     handleChangeQuantity(
                                                                         'decrease',
-                                                                        order.product.id
+                                                                        item.id
                                                                     )
                                                                 }
-                                                                className='border rounded-md py-2 px-4 mr-2'
+                                                                className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
+                                                            text-md py-2 px-2 mr-2 font-bold border-gray-400'
                                                             >
-                                                                -
+                                                                <FaMinus />
                                                             </button>
 
                                                             <span className='text-center w-8'>
-                                                                {order.quantity}
+                                                                {item.quantity}
                                                             </span>
 
                                                             <button
                                                                 onClick={() =>
                                                                     handleChangeQuantity(
                                                                         'increase',
-                                                                        order.product.id
+                                                                        item.id
                                                                     )
                                                                 }
-                                                                className='border rounded-md py-2 px-4 ml-2'
+                                                                className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
+                                                            text-md py-2 px-2 ml-2 font-bold border-gray-400'
                                                             >
-                                                                +
+                                                                <FaPlus />
                                                             </button>
                                                         </div>
                                                     </td>
 
                                                     <td className='py-4 text-center'>
-                                                        {priceFormat(
-                                                            order.product.price * order.quantity
-                                                        )}
+                                                        {formatPrice(item.price * item.quantity)}
                                                     </td>
 
                                                     <td className='pt-2 text-center'>
-                                                        <button onClick={() => showModal(order.id)}>
-                                                            <RiDeleteBin6Line size={20} />
+                                                        <button
+                                                            onClick={() => {
+                                                                setProductToDelete(item.id);
+                                                                setShowModalDeleteProduct(true);
+                                                            }}
+                                                        >
+                                                            <MdDeleteOutline size={20} />
                                                         </button>
                                                     </td>
                                                 </tr>
                                             );
                                         })}
-                                    </tbody> */}
+                                    </tbody>
 
                                     {/* modal delete product */}
-                                    {/* <Modal
-                                        title='Xác nhận xóa sản phẩm'
-                                        okText='Xác nhận xóa'
-                                        cancelText='Hủy bỏ'
-                                        style={{ textAlign: 'center' }}
-                                        open={isModalOpen}
-                                        okButtonProps={{
-                                            className:
-                                                'bg-black text-white hover:bg-red-500 hover:text-white',
-                                        }}
-                                        onOk={handleOk}
-                                        onCancel={handleCancel}
-                                    >
-                                        <p className='text-lg'>
-                                            Hành động này sẽ xóa sản phẩm khỏi giỏ hàng của bạn!
-                                        </p>
-                                    </Modal> */}
+                                    <Modal show={showModalDeleteProduct} size='lg' popup>
+                                        <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                                            <CiWarning size='70px' color={'red'} />
+                                            <span className='text-lg font-medium text-black'>
+                                                Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?
+                                            </span>
+                                            <div className='w-full flex justify-between items-center gap-x-5'>
+                                                <Button
+                                                    outline
+                                                    className='w-full'
+                                                    onClick={() => setShowModalDeleteProduct(false)}
+                                                >
+                                                    Hủy
+                                                </Button>
+                                                <Button
+                                                    className='w-full'
+                                                    onClick={handleDeleteProductFromCart}
+                                                >
+                                                    Xóa
+                                                </Button>
+                                            </div>
+                                        </Modal.Body>
+                                    </Modal>
                                 </table>
                             </div>
                         </div>
