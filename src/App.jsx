@@ -1,9 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
 import {
+    AdminRoute_Page,
+    Dashboard_DefaultPage,
     DashboardCart_Page,
     DashboardProduct_Page,
-    DashboardUser_Page,
     EmailVerification_Page,
     ForgotPassword_Page,
     Home_Page,
@@ -37,21 +38,22 @@ export default function App() {
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
-                        <Route path='/dashboard' element={<DashboardUser_Page />} />
+                        <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
                     </Route>
 
                     {/* route only for admin */}
 
-                    {/* <Route path='/about' element={'<About_Page />'} />
+                    {/* 
+                    <Route path='/about' element={'<About_Page />'} />
                     <Route path='/search' element={'<Search_Page />'} />
                     <Route path='/projects' element={'<Projects_Page />'} />
                     <Route path='/post/:postSlu g' element={'<PostDetail_Page />'} />
+                    */}
 
-                    <Route element={'<AdminRoute />'}>
+                    <Route element={<AdminRoute_Page />}>
                         <Route path='/create-post' element={'<CreatePost_Page />'} />
                         <Route path='/update-post/:postID' element={'<UpdatePost_Page />'} />
-                    </Route> */}
-                    {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
+                    </Route>
                     <Route path='*' element={<PageNotFound_Page />} />
                 </Routes>
                 <Footer_Component />

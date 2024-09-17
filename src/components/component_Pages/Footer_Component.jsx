@@ -30,6 +30,7 @@ export default function Footer_Component() {
     // get current year
     const currentYear = new Date().getFullYear();
     const { pathname } = useLocation();
+    console.log(pathname);
 
     return (
         <Footer
@@ -38,7 +39,8 @@ export default function Footer_Component() {
                 pathname === '/register' ||
                 pathname === '/login' ||
                 pathname === '/forgot-password' ||
-                pathname === '/verify-email'
+                pathname === '/verify-email' ||
+                pathname === '/dashboard'
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
             } border border-t-8 border-gray-500`}

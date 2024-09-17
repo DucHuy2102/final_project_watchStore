@@ -439,7 +439,12 @@ export default function Profile_Component() {
                             className='w-full'
                             value={formData.phone}
                             placeholder='Số điện thoại'
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value) && value.length <= 10) {
+                                    setFormData({ ...formData, phone: value });
+                                }
+                            }}
                         />
                         <TextInput
                             disabled

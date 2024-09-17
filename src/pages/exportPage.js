@@ -2,9 +2,8 @@
 export { default as Home_Page } from './Default/Home';
 export { default as PageNotFound_Page } from './Default/PageNotFound';
 export { default as PrivateRoute_Page } from './Default/PrivateRoute';
-
-// dashboard
-export { default as DashboardUser_Page } from './User/DashboardUser';
+export { default as AdminRoute_Page } from './Default/AdminRoute';
+export { default as Dashboard_DefaultPage } from './Default/Dashboard_DefaultPage';
 
 // auth
 export { default as Login_Page } from './Auth/Login';
@@ -17,6 +16,11 @@ export { default as ResetPassword_Page } from './Auth/ResetPassword';
 export { default as Dashboard_Page } from './User/Dashboard';
 export { default as Profile_Page } from './User/Profile';
 export { default as Order_Page } from './User/Order';
+
+// admin
+export { default as ManageProducts_Page } from './Admin/ManageProducts';
+export { default as ManageUsers_Page } from './Admin/ManageUsers';
+export { default as ManageOrders_Page } from './Admin/ManageOrders';
 
 // products
 export { default as DashboardProduct_Page } from './Products/DashboardProduct';

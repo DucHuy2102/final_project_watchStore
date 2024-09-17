@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Dashboard_Page, Order_Page, Profile_Page } from '../exportPage';
+import {
+    Dashboard_Page,
+    ManageOrders_Page,
+    ManageProducts_Page,
+    ManageUsers_Page,
+    Order_Page,
+    Profile_Page,
+} from '../exportPage';
 import { Sidebar_Component } from '../../components/exportComponent';
 
-export default function DashboardUser() {
+export default function Dashboard_DefaultPage() {
     const location = useLocation();
     const [tab, setTab] = useState('');
     useEffect(() => {
@@ -13,8 +20,7 @@ export default function DashboardUser() {
     }, [location.search]);
 
     return (
-        <div className='min-h-screen flex flex-col md:flex-row'>
-            {/* sidebar */}
+        <div className='min-h-full flex flex-col md:flex-row'>
             <div className='md:w-56'>
                 <Sidebar_Component />
             </div>
@@ -22,6 +28,9 @@ export default function DashboardUser() {
             {tab === 'dashboard' && <Dashboard_Page />}
             {tab === 'profile' && <Profile_Page />}
             {tab === 'order' && <Order_Page />}
+            {tab === 'products' && <ManageProducts_Page />}
+            {tab === 'users' && <ManageUsers_Page />}
+            {tab === 'orders' && <ManageOrders_Page />}
         </div>
     );
 }
