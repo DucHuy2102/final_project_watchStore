@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
@@ -41,10 +41,11 @@ export default function ProductCard({ product }) {
 
     return (
         <div
-            className='relative bg-white w-full border-b-4 border-gray-600 sm:border-none flex flex-col justify-between items-center 
+            className='relative bg-white w-full sm:border-none shadow-lg shadow-gray-300 dark:shadow-gray-800
+            flex flex-col justify-between items-center 
             sm:w-[45vw] sm:min-h-[50vh] md:w-[30vw] md:min-h-[45vh] 
             lg:w-[30vw] lg:min-h-[45vh] xl:w-[50vw] xl:min-h-[50vh]
-            max-w-md min-h-[50vh] mx-auto shadow-md rounded-lg overflow-hidden 
+            max-w-md min-h-[50vh] mx-auto rounded-lg overflow-hidden 
             transition-transform duration-500 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] transform hover:scale-105'
         >
             {/* Image watches */}
@@ -87,16 +88,13 @@ export default function ProductCard({ product }) {
 
             {/* Button buy */}
             <div className='w-full'>
-                <button
+                <Button
+                    outline={tokenUser ? false : true}
                     onClick={() => setShowModalBuyNow(true)}
-                    className={`w-full py-2 sm:py-3 rounded-t-none ${
-                        tokenUser
-                            ? 'bg-gray-800 text-gray-200'
-                            : 'bg-gray-200 text-gray-800 hover:bg-gray-300 hover:text-black'
-                    } font-medium transition-colors duration-300`}
+                    className={`w-full ${tokenUser && 'rounded-t-none'}`}
                 >
                     Mua hàng ngay
-                </button>
+                </Button>
             </div>
 
             {/* Modal Buy Now */}

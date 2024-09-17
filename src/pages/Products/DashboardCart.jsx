@@ -1,12 +1,16 @@
 import { Button, Modal } from 'flowbite-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
+import {
+    changeProductQuantity,
+    deleteProductFromCart,
+    updateCartTotalQuantity,
+} from '../../redux/slices/cartSlice';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -21,6 +25,14 @@ export default function DashboardCart() {
     const dispatch = useDispatch();
     const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
     const [productToDelete, setProductToDelete] = useState(null);
+
+    useEffect(() => {
+        dispatch(updateCartTotalQuantity(0));
+        return () => {
+            dispatch(updateCartTotalQuantity(productItems.length));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // handle change quantity
     const handleChangeQuantity = (type, productId) => {

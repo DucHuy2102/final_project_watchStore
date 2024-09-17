@@ -5,15 +5,12 @@ import { user_SignOut } from '../../redux/slices/userSlice';
 import { Button, Modal, Sidebar } from 'flowbite-react';
 import {
     HiChartPie,
-    HiDocumentText,
     HiOutlineExclamationCircle,
     HiOutlineUserGroup,
     HiShoppingBag,
     HiUser,
 } from 'react-icons/hi';
 import { FaShippingFast } from 'react-icons/fa';
-import { RiLogoutBoxLine } from 'react-icons/ri';
-import { SlLogout } from 'react-icons/sl';
 import { TbLogout2 } from 'react-icons/tb';
 
 export default function Sidebar_Component() {

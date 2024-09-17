@@ -30,7 +30,6 @@ export default function Footer_Component() {
     // get current year
     const currentYear = new Date().getFullYear();
     const { pathname } = useLocation();
-    console.log(pathname);
 
     return (
         <Footer

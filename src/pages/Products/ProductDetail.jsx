@@ -8,6 +8,8 @@ import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 import { addProductToCart, resetCart } from '../../redux/slices/cartSlice';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -168,11 +170,11 @@ export default function ProductDetail() {
     };
 
     // reset product detail when unmount
-    // useEffect(() => {
-    //     return () => {
-    //         dispatch(reset_Product_Detail());
-    //     };
-    // }, [dispatch]);
+    useEffect(() => {
+        return () => {
+            dispatch(reset_Product_Detail());
+        };
+    }, [dispatch]);
 
     // format price & discountPrice to VND
     const priceFormat = formatPrice(price);
@@ -211,8 +213,30 @@ export default function ProductDetail() {
     };
 
     // function add product to cart
-    const handleAddProductToCart = () => {
-        dispatch(addProductToCart({ ...product, quantity: quantityProduct }));
+    const handleAddProductToCart = async () => {
+        try {
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/cart/add-product-to-cart`,
+                {
+                    product: product.id,
+                    quantity: quantityProduct,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                }
+            );
+            if (res?.status === 200) {
+                dispatch(addProductToCart({ ...product, quantity: quantityProduct }));
+                toast.success('Đã thêm sản phẩm vào giỏ hàng');
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error('Đã xảy ra lỗi, vui lòng thử lại sau');
+        } finally {
+            setQuantityProduct(0);
+        }
     };
 
     // function buy now product
@@ -317,14 +341,22 @@ export default function ProductDetail() {
                             <span className='text-lg text-center w-8 md:w-12'>
                                 {quantityProduct}
                             </span>
-                            <Button outline onClick={() => setQuantityProduct(quantityProduct + 1)}>
+                            <Button
+                                outline
+                                onClick={() => setQuantityProduct(quantityProduct + 1)}
+                                disabled={!tokenUser}
+                            >
                                 +
                             </Button>
                         </div>
                     </div>
 
                     {/* buttons */}
-                    <div className='w-full flex flex-col md:flex-row justify-between items-center mt-5 gap-4'>
+                    <div
+                        className={`w-full flex flex-col md:flex-row ${
+                            tokenUser ? 'justify-between' : 'justify-center'
+                        } items-center mt-5 gap-4`}
+                    >
                         {tokenUser && (
                             <Button
                                 onClick={handleAddProductToCart}
@@ -334,7 +366,10 @@ export default function ProductDetail() {
                                 Thêm vào giỏ hàng
                             </Button>
                         )}
-                        <Button onClick={handleVerifyUser} className='w-full md:w-48 lg:w-52'>
+                        <Button
+                            onClick={handleVerifyUser}
+                            className={`w-full ${tokenUser && 'md:w-48 lg:w-52'}`}
+                        >
                             Mua ngay
                         </Button>
                     </div>

@@ -1,4 +1,4 @@
-import { Avatar, Button, Dropdown, Modal, Navbar, TextInput } from 'flowbite-react';
+import { Avatar, Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -7,9 +7,8 @@ import { toggleTheme } from '../../redux/slices/themeSlice';
 import { user_SignOut } from '../../redux/slices/userSlice';
 import { toast } from 'react-toastify';
 import { IoIosCart, IoIosHome } from 'react-icons/io';
-import { MdDone, MdWatch } from 'react-icons/md';
-import { useEffect, useState } from 'react';
-import { IoTriangle } from 'react-icons/io5';
+import { MdWatch } from 'react-icons/md';
+import { Badge } from 'antd';
 
 export default function Header_Component() {
     // states
@@ -19,24 +18,7 @@ export default function Header_Component() {
     const theme = useSelector((state) => state.theme.theme);
     const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
-    const cartProduct = useSelector((state) => state.cart.cartItem);
-    const [showCartSuccess, setShowCartSuccess] = useState(false);
-
-    // show cart success when add product to cart
-    useEffect(() => {
-        if (cartProduct.length > 0) {
-            setShowCartSuccess(true);
-            setTimeout(() => {
-                setShowCartSuccess(false);
-            }, 5000);
-        }
-    }, [cartProduct]);
-
-    // handle navigate to cart page
-    const handleNavigateToCart = () => {
-        navigate('/cart');
-        setShowCartSuccess(false);
-    };
+    const cartTotalQuantity = useSelector((state) => state.cart.tempQuantity);
 
     // handle search function
     const handleSubmit = (e) => {
@@ -147,39 +129,12 @@ export default function Header_Component() {
                 </Navbar.Link>
                 <Navbar.Link active={pathURL === '/cart'} as={'div'}>
                     <Link to='/cart' className='flex justify-center items-center gap-x-2'>
-                        <IoIosCart size={'20px'} />
+                        <Badge count={tokenUser ? cartTotalQuantity : 0}>
+                            <IoIosCart size={'20px'} />
+                        </Badge>
                         Giỏ hàng
                     </Link>
                 </Navbar.Link>
-                {/* {showCartSuccess && (
-                    <div className='absolute top-[62px] right-36 z-10'>
-                        <div
-                            className='absolute top-[-12px] left-[10px] w-0 h-0 border-l-[15px] 
-                    border-l-transparent border-r-[15px] border-r-transparent border-b-[15px] border-b-blue-500 dark:border-b-white'
-                        ></div>
-                        <div
-                            className='bg-blue-500 dark:bg-white p-4 rounded-lg shadow-lg 
-                    flex flex-col gap-y-4 relative'
-                        >
-                            <span className='flex justify-center items-center gap-x-2'>
-                                <MdDone
-                                    className='bg-white text-blue-500 dark:bg-green-500 dark:text-white rounded-full p-1'
-                                    size={20}
-                                />
-                                <span className='text-white dark:text-black font-semibold'>
-                                    Thêm vào giỏ hàng thành công!
-                                </span>
-                            </span>
-
-                            <button
-                                onClick={handleNavigateToCart}
-                                className='text-white bg-red-600 hover:bg-red-700 w-full py-2 rounded-lg transition duration-300'
-                            >
-                                Xem và thanh toán
-                            </button>
-                        </div>
-                    </div>
-                )} */}
             </Navbar.Collapse>
         </Navbar>
     );
