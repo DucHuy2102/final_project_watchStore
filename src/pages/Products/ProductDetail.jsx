@@ -228,7 +228,14 @@ export default function ProductDetail() {
                 }
             );
             if (res?.status === 200) {
-                dispatch(addProductToCart({ ...product, quantity: quantityProduct }));
+                const data = res.data;
+                dispatch(
+                    addProductToCart({
+                        idCart: data.id,
+                        product: product,
+                        quantity: quantityProduct,
+                    })
+                );
                 toast.success('Đã thêm sản phẩm vào giỏ hàng');
             }
         } catch (error) {

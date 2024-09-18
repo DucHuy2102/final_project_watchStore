@@ -17,8 +17,22 @@ import {
 } from './pages/exportPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetCart } from './redux/slices/cartSlice';
 
 export default function App() {
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (!tokenUser) {
+            console.log('reset cart');
+            dispatch(resetCart());
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tokenUser]);
+
     return (
         <>
             <Router>

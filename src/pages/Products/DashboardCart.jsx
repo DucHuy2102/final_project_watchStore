@@ -2,7 +2,7 @@ import { Button, Modal } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { GiShoppingCart } from 'react-icons/gi';
+import { GiCardKingClubs, GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -16,10 +16,24 @@ import {
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
+// format data products
+const formatData = (data) => {
+    let allProducts = [];
+    data?.forEach((item) => {
+        allProducts = allProducts.concat(item.products);
+    });
+    return allProducts;
+};
+
 export default function DashboardCart() {
     const tokenUser = useSelector((state) => state.user.access_token);
+    const products_From_Redux = useSelector((state) => state.product.allProducts);
+    const allProducts = formatData(products_From_Redux);
     const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
-    const productItems = useSelector((state) => state.cart.cartItem);
+    const productCartItem = useSelector((state) => state.cart.cartItem);
+    const idProduct = productCartItem.map((item) => item.idProduct);
+    const productItem = allProducts.filter((item) => idProduct.includes(item.id));
+    console.log(productCartItem);
 
     // state
     const dispatch = useDispatch();
@@ -29,7 +43,7 @@ export default function DashboardCart() {
     useEffect(() => {
         dispatch(updateCartTotalQuantity(0));
         return () => {
-            dispatch(updateCartTotalQuantity(productItems.length));
+            dispatch(updateCartTotalQuantity(productItem.length));
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -49,7 +63,6 @@ export default function DashboardCart() {
         <div className='min-h-screen py-8'>
             <div className='mx-auto px-4'>
                 {totalQuantity === 0 ? (
-                    // no product in cart
                     <div className='w-full mt-[15vh] flex flex-col items-center justify-center gap-y-3'>
                         <GiShoppingCart size={200} className='text-[#0E7490]' />
                         <span className='text-2xl font-bold'>Giỏ hàng trống</span>
@@ -61,17 +74,14 @@ export default function DashboardCart() {
                         </Link>
                     </div>
                 ) : (
-                    // have product in cart
                     <div className='flex flex-col md:flex-row gap-4'>
-                        {/* product info */}
                         <div className='md:w-3/4'>
                             <div className='rounded-lg shadow-md dark:shadow-gray-800 p-6 mb-4'>
                                 <table className='w-full'>
-                                    {/* header table */}
                                     <thead>
                                         <tr>
                                             <th className='text-left font-semibold'>
-                                                Tất cả {totalQuantity} sản phẩm
+                                                Tất cả {productItem.length} sản phẩm
                                             </th>
                                             <th className='font-semibold text-center'>
                                                 Đơn giá (VNĐ)
@@ -86,9 +96,8 @@ export default function DashboardCart() {
                                         </tr>
                                     </thead>
 
-                                    {/* body product */}
                                     <tbody>
-                                        {productItems?.map((item) => {
+                                        {productItem?.map((item) => {
                                             return (
                                                 <tr key={item.id}>
                                                     <td className='py-4'>
@@ -125,7 +134,13 @@ export default function DashboardCart() {
                                                             </button>
 
                                                             <span className='text-center w-8'>
-                                                                {item.quantity}
+                                                                {
+                                                                    productCartItem.find(
+                                                                        (product) =>
+                                                                            product.idProduct ===
+                                                                            item.id
+                                                                    ).quantity
+                                                                }
                                                             </span>
 
                                                             <button
@@ -144,7 +159,14 @@ export default function DashboardCart() {
                                                     </td>
 
                                                     <td className='py-4 text-center'>
-                                                        {formatPrice(item.price * item.quantity)}
+                                                        {formatPrice(
+                                                            item.price *
+                                                                productCartItem.find(
+                                                                    (product) =>
+                                                                        product.idProduct ===
+                                                                        item.id
+                                                                ).quantity
+                                                        )}
                                                     </td>
 
                                                     <td className='pt-2 text-center'>
@@ -162,7 +184,6 @@ export default function DashboardCart() {
                                         })}
                                     </tbody>
 
-                                    {/* modal delete product */}
                                     <Modal show={showModalDeleteProduct} size='lg' popup>
                                         <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                                             <CiWarning size='70px' color={'red'} />
@@ -190,18 +211,15 @@ export default function DashboardCart() {
                             </div>
                         </div>
 
-                        {/* Summary */}
                         <div className='md:w-1/4'>
                             <div className='shadow-md dark:bg-gray-800 rounded-lg p-6'>
                                 <h2 className='text-lg font-semibold mb-4'>Thành tiền</h2>
 
-                                {/* total price */}
                                 <div className='flex justify-between mb-2'>
                                     <span>Tạm tính</span>
-                                    {/* <span>{priceFormat(totalPrice)}</span> */}
+                                    <span>{'priceFormat(totalPrice)'}</span>
                                 </div>
 
-                                {/* shippingPrice */}
                                 <div className='flex justify-between mb-2'>
                                     <span>Phí vận chuyển</span>
                                     <span>0 ₫</span>
@@ -210,15 +228,12 @@ export default function DashboardCart() {
                                 <hr className='my-2' />
                                 <div className='flex justify-between mb-2'>
                                     <span className='text-lg font-semibold'>Tổng tiền</span>
-                                    {/* <span className='text-lg font-semibold'>
-                                        {priceFormat(totalPrice)}
-                                    </span> */}
+                                    <span className='text-lg font-semibold'>
+                                        {'priceFormat(totalPrice)'}
+                                    </span>
                                 </div>
 
-                                {/* button checkout */}
-                                {/* <Link to='/checkout' className='mt-6 text-center'> */}
                                 <button
-                                    // onClick={() => handleCheckout()}
                                     type='button'
                                     className='group inline-flex w-full items-center justify-center rounded-md 
                                 bg-gray-700 dark:bg-gray-700 hover:bg-blue-500
@@ -240,18 +255,14 @@ export default function DashboardCart() {
                                         />
                                     </svg>
                                 </button>
-                                {/* </Link> */}
 
-                                {/* Secured Payment info */}
                                 <div className='flex flex-col items-center justify-center mt-3'>
                                     <div className='flex items-center justify-center'>
-                                        {/* <FontAwesomeIcon icon={faLock} /> */}
                                         <p className='ml-2'>
                                             Thanh toán an toàn với các phương thức:
                                         </p>
                                     </div>
 
-                                    {/* Payment methods */}
                                     <div className='flex items-center justify-center gap-3'>
                                         <img
                                             className='rounded-sm w-10 h-10 object-cover cursor-pointer transform hover:scale-110 transition-transform duration-300'

@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { get_All_Product } from '../../redux/slices/productSlice';
+import { getCartUser } from '../../redux/slices/cartSlice';
 
 export default function Home() {
     // state
@@ -43,8 +44,8 @@ export default function Home() {
                         }
                     );
                     if (res?.status === 200) {
-                        console.log(res.data);
-                        // dispatch(addProductToCart(res.data));
+                        const { data } = res;
+                        dispatch(getCartUser(data));
                     }
                 } catch (error) {
                     console.log(error);

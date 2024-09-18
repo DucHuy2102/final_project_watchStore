@@ -11,20 +11,44 @@ export const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
+        getCartUser: (state, action) => {
+            const data = action.payload;
+            state.tempQuantity = data.length;
+            const cartItem = data.map((item) => {
+                return {
+                    idCart: item.id,
+                    idProduct: item.product.id,
+                    price: item.product.price,
+                    quantity: item.quantity,
+                };
+            });
+            state.cartItem = cartItem;
+            state.cartTotalQuantity = data.reduce((total, item) => total + item.quantity, 0);
+            state.cartTotalAmount = data.reduce(
+                (total, item) => total + item.product.price * item.quantity,
+                0
+            );
+        },
         addProductToCart: (state, action) => {
-            const product = action.payload;
-            const itemIndex = state.cartItem.findIndex((item) => item.id === product.id);
-            if (itemIndex >= 0) {
-                state.cartItem[itemIndex].quantity += product.quantity;
+            const { idCart, product, quantity } = action.payload;
+            const itemIndex = state.cartItem.findIndex((item) => item.idProduct === product.id);
+            if (itemIndex === -1) {
+                state.cartItem.push({
+                    idCart: idCart,
+                    idProduct: product.id,
+                    price: product.price,
+                    quantity: quantity,
+                });
+                state.tempQuantity += 1;
             } else {
-                state.cartItem.push(product);
+                state.cartItem[itemIndex].quantity += quantity;
             }
-            state.cartTotalQuantity += product.quantity;
-            state.cartTotalAmount += product.price * product.quantity;
+            state.cartTotalQuantity += quantity;
+            state.cartTotalAmount += product.price * quantity;
         },
         changeProductQuantity: (state, action) => {
             const { type, productId } = action.payload;
-            const itemIndex = state.cartItem.findIndex((item) => item.id === productId);
+            const itemIndex = state.cartItem.findIndex((item) => item.idProduct === productId);
             if (type === 'increase') {
                 state.cartItem[itemIndex].quantity += 1;
                 state.cartTotalQuantity += 1;
@@ -47,6 +71,7 @@ export const cartSlice = createSlice({
             state.cartItem = [];
             state.cartTotalQuantity = 0;
             state.cartTotalAmount = 0;
+            state.tempQuantity = 0;
         },
         updateCartTotalQuantity: (state, action) => {
             state.tempQuantity = action.payload;
@@ -55,6 +80,7 @@ export const cartSlice = createSlice({
 });
 
 export const {
+    getCartUser,
     addProductToCart,
     resetCart,
     changeProductQuantity,
