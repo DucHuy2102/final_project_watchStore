@@ -4,11 +4,11 @@ import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/themeSlice';
-import { user_SignOut } from '../../redux/slices/userSlice';
-import { toast } from 'react-toastify';
 import { IoIosCart, IoIosHome } from 'react-icons/io';
 import { MdWatch } from 'react-icons/md';
 import { Badge } from 'antd';
+import { user_SignOut } from '../../redux/slices/userSlice';
+import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Header_Component() {
     // states
@@ -28,13 +28,8 @@ export default function Header_Component() {
 
     // handle sign out account
     const handleSignOutAccount = () => {
-        try {
-            dispatch(user_SignOut());
-            console.log('sign out');
-        } catch (error) {
-            toast.error('Hệ thống đang bận, vui lòng thử lại sau');
-            console.log(error);
-        }
+        dispatch(user_SignOut());
+        dispatch(resetCart());
     };
 
     return (

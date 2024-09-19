@@ -60,12 +60,16 @@ export const cartSlice = createSlice({
             }
         },
         deleteProductFromCart: (state, action) => {
-            const productId = action.payload;
-            const itemIndex = state.cartItem.findIndex((item) => item.id === productId);
-            state.cartTotalQuantity -= state.cartItem[itemIndex].quantity;
-            state.cartTotalAmount -=
-                state.cartItem[itemIndex].price * state.cartItem[itemIndex].quantity;
-            state.cartItem = state.cartItem.filter((item) => item.id !== productId);
+            const idProduct_Dispatch = action.payload;
+            const itemIndex = state.cartItem.findIndex(
+                (item) => item.idProduct === idProduct_Dispatch
+            );
+            if (itemIndex !== -1) {
+                state.cartTotalQuantity -= state.cartItem[itemIndex].quantity;
+                state.cartTotalAmount -=
+                    state.cartItem[itemIndex].price * state.cartItem[itemIndex].quantity;
+                state.cartItem.splice(itemIndex, 1);
+            }
         },
         resetCart: (state) => {
             state.cartItem = [];

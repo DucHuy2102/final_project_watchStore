@@ -2,15 +2,17 @@ import { Button, Modal } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { GiCardKingClubs, GiShoppingCart } from 'react-icons/gi';
+import { GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     changeProductQuantity,
     deleteProductFromCart,
     updateCartTotalQuantity,
 } from '../../redux/slices/cartSlice';
+import { set_Product_Detail } from '../../redux/slices/productSlice';
+import axios from 'axios';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -33,12 +35,19 @@ export default function DashboardCart() {
     const productCartItem = useSelector((state) => state.cart.cartItem);
     const idProduct = productCartItem.map((item) => item.idProduct);
     const productItem = allProducts.filter((item) => idProduct.includes(item.id));
-    console.log(productCartItem);
+    const updateCartItem = productCartItem.map(({ idCart, quantity }) => {
+        return {
+            itemId: idCart,
+            quantity: quantity,
+        };
+    });
+    console.log(updateCartItem);
 
     // state
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
-    const [productToDelete, setProductToDelete] = useState(null);
+    const [idProductToDelete, setIdProductToDelete] = useState(null);
 
     useEffect(() => {
         dispatch(updateCartTotalQuantity(0));
@@ -48,6 +57,30 @@ export default function DashboardCart() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // // update cart when unmount page
+    useEffect(() => {
+        const updateCart = async () => {
+            try {
+                const res = await axios.put(
+                    `${import.meta.env.VITE_API_URL}/api/cart/update-cart`,
+                    updateCartItem,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                if (res.status === 200) {
+                    console.log('Update cart success');
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        return () => updateCart();
+    }, []);
+
     // handle change quantity
     const handleChangeQuantity = (type, productId) => {
         dispatch(changeProductQuantity({ type, productId }));
@@ -55,8 +88,15 @@ export default function DashboardCart() {
 
     // handle delete product from cart
     const handleDeleteProductFromCart = () => {
-        dispatch(deleteProductFromCart(productToDelete));
+        dispatch(deleteProductFromCart(idProductToDelete));
         setShowModalDeleteProduct(false);
+    };
+
+    // function navigate to product detail
+    const handleNavigateToProductDetail = (id) => {
+        const product = allProducts.find((item) => item.id === id);
+        dispatch(set_Product_Detail(product));
+        navigate(`/product-detail/${id}`);
     };
 
     return (
@@ -84,13 +124,17 @@ export default function DashboardCart() {
                                                 Tất cả {productItem.length} sản phẩm
                                             </th>
                                             <th className='font-semibold text-center'>
+                                                Trạng thái
+                                            </th>
+                                            <th className='font-semibold text-center'>Màu sắc</th>
+                                            <th className='font-semibold text-center'>
                                                 Đơn giá (VNĐ)
                                             </th>
                                             <th className='font-semibold text-center'>Số lượng</th>
-                                            <th className='text-center font-semibold'>
+                                            <th className='font-semibold text-center'>
                                                 Thành tiền (VNĐ)
                                             </th>
-                                            <th className='text-center pl-2'>
+                                            <th className='text-center flex justify-center items-center pt-1'>
                                                 <MdDeleteOutline size={20} />
                                             </th>
                                         </tr>
@@ -101,7 +145,14 @@ export default function DashboardCart() {
                                             return (
                                                 <tr key={item.id}>
                                                     <td className='py-4'>
-                                                        <div className='flex items-center'>
+                                                        <div
+                                                            className='flex items-center cursor-pointer'
+                                                            onClick={() =>
+                                                                handleNavigateToProductDetail(
+                                                                    item.id
+                                                                )
+                                                            }
+                                                        >
                                                             <img
                                                                 className='h-16 w-16 mr-4'
                                                                 src={item.img[0]}
@@ -115,12 +166,27 @@ export default function DashboardCart() {
                                                     </td>
 
                                                     <td className='py-4 text-center'>
+                                                        {item.condition}
+                                                    </td>
+
+                                                    <td className='py-4 text-center'>
+                                                        {item.color}
+                                                    </td>
+
+                                                    <td className='py-4 text-center'>
                                                         {formatPrice(item.price)}
                                                     </td>
 
                                                     <td className='py-4'>
                                                         <div className='flex items-center justify-center'>
                                                             <button
+                                                                disabled={
+                                                                    productCartItem.find(
+                                                                        (product) =>
+                                                                            product.idProduct ===
+                                                                            item.id
+                                                                    ).quantity === 0
+                                                                }
                                                                 onClick={() =>
                                                                     handleChangeQuantity(
                                                                         'decrease',
@@ -172,7 +238,7 @@ export default function DashboardCart() {
                                                     <td className='pt-2 text-center'>
                                                         <button
                                                             onClick={() => {
-                                                                setProductToDelete(item.id);
+                                                                setIdProductToDelete(item.id);
                                                                 setShowModalDeleteProduct(true);
                                                             }}
                                                         >

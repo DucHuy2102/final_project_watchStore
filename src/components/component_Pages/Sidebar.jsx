@@ -12,11 +12,11 @@ import {
 } from 'react-icons/hi';
 import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
+import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Sidebar_Component() {
     // state
     const dispatch = useDispatch();
-    const [error, setError] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const theme = useSelector((state) => state.theme.theme);
     const currentUser = useSelector((state) => state.user.user);
@@ -33,13 +33,8 @@ export default function Sidebar_Component() {
 
     // sign out function
     const handleSignOutAccount = async () => {
-        try {
-            dispatch(user_SignOut());
-            console.log('sign out');
-        } catch (error) {
-            setError('Hệ thống đang bận, vui lòng thử lại sau');
-            console.log(error);
-        }
+        dispatch(user_SignOut());
+        dispatch(resetCart());
     };
 
     return (

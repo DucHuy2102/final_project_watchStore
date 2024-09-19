@@ -61,8 +61,8 @@ export default function Login() {
             } else {
                 setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
+            setFormData({ username: '', password: '' });
             setTimeout(() => {
-                setFormData({ username: '', password: '' });
                 setErrorMessage('');
             }, 3000);
             console.log(error);
