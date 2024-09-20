@@ -8,13 +8,9 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { user_SignIn } from '../../redux/slices/userSlice';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
-import { googleLogout } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { FaFacebookF, FaGoogle } from 'react-icons/fa';
+import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
-import { SiFacebook } from 'react-icons/si';
-import { gapi } from 'gapi-script';
+import { LoginSocialFacebook } from 'reactjs-social-login';
 
 export default function Login() {
     // state
@@ -110,9 +106,26 @@ export default function Login() {
         }
     };
 
-    // Facebook Login
-    const loginFacebook = () => {
-        console.log('Login Facebook');
+    const responseFacebook = async (response) => {
+        const token = response.accessToken;
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/facebook?token=${token}`);
+            console.log(res);
+            if (res.status === 200) {
+                const { data } = res;
+                dispatch(user_SignIn({ access_token: data.access_token, user: data }));
+                toast.success('Đăng nhập thành công!');
+                setTimeout(() => {
+                    if (state?.from) {
+                        navigate(state.from);
+                    } else {
+                        navigate('/');
+                    }
+                }, 3000);
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
@@ -213,13 +226,20 @@ export default function Login() {
                         <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
                             hoặc
                         </span>
-                        <button onClick={() => loginFacebook()}>
+
+                        <LoginSocialFacebook
+                            appId={import.meta.env.VITE_FACEBOOK_APP_ID}
+                            onResolve={responseFacebook}
+                            onReject={(error) => {
+                                console.error(error);
+                            }}
+                        >
                             <img
                                 src={'../assets/fb.png'}
                                 alt='Button_Login_Facebook'
-                                className='w-8 h-8 rounded-full'
+                                className='w-8 h-8 rounded-full cursor-pointer'
                             />
-                        </button>
+                        </LoginSocialFacebook>
                     </div>
                 </div>
             </div>
