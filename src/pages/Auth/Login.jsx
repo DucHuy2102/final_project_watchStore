@@ -1,5 +1,5 @@
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -8,6 +8,13 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { user_SignIn } from '../../redux/slices/userSlice';
 import { TfiHandPointRight } from 'react-icons/tfi';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { googleLogout } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { FaFacebookF, FaGoogle } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
+import { SiFacebook } from 'react-icons/si';
+import { gapi } from 'gapi-script';
 
 export default function Login() {
     // state
@@ -18,12 +25,12 @@ export default function Login() {
     const navigate = useNavigate();
     const { state } = useLocation();
 
-    // handle change input
+    // handle change input value in form
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    // handle submit form
+    // handle submit form login using basic auth: username and password
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.username || !formData.password) {
@@ -69,6 +76,32 @@ export default function Login() {
         } finally {
             setLoadingState(false);
         }
+    };
+
+    // Google Login
+    const loginGoogle = useGoogleLogin({
+        onSuccess: (response) => {
+            const token = response.access_token;
+            sendTokenToServer(token);
+        },
+        onFailure: (response) => {
+            console.log('Login Failed:', response);
+        },
+    });
+
+    // send token to server for verification and login
+    const sendTokenToServer = async (token) => {
+        try {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/google?token=${token}`);
+            console.log(res);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Facebook Login
+    const loginFacebook = () => {
+        console.log('Login Facebook');
     };
 
     return (
@@ -118,14 +151,13 @@ export default function Login() {
                             {errorMessage}
                         </Alert>
                     )}
-                    <div>
-                        <Link
-                            className='text-sm sm:text-black text-gray-500 dark:text-gray-300 font-semibold hover:underline hover:text-blue-500'
-                            to='/forgot-password'
-                        >
-                            Quên mật khẩu?
-                        </Link>
-                    </div>
+                    <Link
+                        className='text-sm sm:text-black text-gray-500 dark:text-gray-300 font-semibold hover:underline hover:text-blue-500'
+                        to='/forgot-password'
+                    >
+                        Quên mật khẩu?
+                    </Link>
+
                     <Button
                         disabled={loadingState}
                         type='submit'
@@ -147,14 +179,36 @@ export default function Login() {
                         )}
                     </Button>
                 </form>
-
-                <div className='flex gap-2 text-sm font-semibold mt-6 text-gray-600 dark:text-gray-400'>
-                    <span>Bạn chưa có tài khoản?</span>
-                    <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
-                        <TfiHandPointRight />
-                        <Link to='/register' className='dark:text-blue-400 hover:underline'>
-                            Đăng ký ngay
-                        </Link>
+                <div className='w-full flex justify-between items-center mt-6'>
+                    <div className='flex gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400'>
+                        <span>Bạn chưa có tài khoản?</span>
+                        <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
+                            <TfiHandPointRight />
+                            <Link to='/register' className='dark:text-blue-400 hover:underline'>
+                                Đăng ký ngay
+                            </Link>
+                        </div>
+                    </div>
+                    <div className='flex justify-center items-center gap-x-2'>
+                        <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
+                            Tiếp tục với
+                        </span>
+                        <button
+                            className='rounded-full dark:bg-white'
+                            onClick={() => loginGoogle()}
+                        >
+                            <FcGoogle size={'30px'} />
+                        </button>
+                        <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
+                            hoặc
+                        </span>
+                        <button onClick={() => loginFacebook()}>
+                            <img
+                                src={'../assets/fb.png'}
+                                alt='Button_Login_Facebook'
+                                className='w-8 h-8 rounded-full'
+                            />
+                        </button>
                     </div>
                 </div>
             </div>
