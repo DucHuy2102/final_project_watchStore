@@ -51,7 +51,7 @@ export default function ProductCard({ product }) {
             {/* Image watches */}
             <div
                 className='w-full p-1 h-[50vh] sm:h-[40vh] md:h-[40vh] 
-                lg:h-[45vh] lg:p-2 xl:h-[50vh] xl:px-5
+                lg:h-[45vh] lg:p-2 xl:h-[54vh] xl:px-5
                 flex items-center justify-center overflow-hidden'
             >
                 <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>

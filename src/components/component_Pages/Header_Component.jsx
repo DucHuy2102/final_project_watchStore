@@ -18,7 +18,8 @@ export default function Header_Component() {
     const theme = useSelector((state) => state.theme.theme);
     const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
-    const cartTotalQuantity = useSelector((state) => state.cart.tempQuantity);
+    const cartInRedux = useSelector((state) => state.cart.cartItem);
+    const cartTotalQuantity = cartInRedux.length;
 
     // handle search function
     const handleSubmit = (e) => {

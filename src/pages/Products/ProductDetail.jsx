@@ -10,6 +10,7 @@ import { CiWarning } from 'react-icons/ci';
 import { addProductToCart, resetCart } from '../../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { Breadcrumb_Component } from '../../components/exportComponent';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -253,9 +254,11 @@ export default function ProductDetail() {
 
     return (
         <div className='p-6 lg:max-w-7xl max-w-4xl mx-auto'>
+            <Breadcrumb_Component />
+
             {/* top: images, info product & 2 buttons */}
             <div
-                className='grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5
+                className='mt-1 grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5
     gap-x-5 gap-y-5 rounded-lg shadow-md sm:shadow-lg sm:shadow-gray-200 dark:shadow-gray-800 sm:px-5 sm:py-3'
             >
                 {/* image product */}
