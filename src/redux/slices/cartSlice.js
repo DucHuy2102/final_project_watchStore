@@ -12,7 +12,6 @@ export const cartSlice = createSlice({
     reducers: {
         getCartUser: (state, action) => {
             const data = action.payload;
-            state.tempQuantity = data.length;
             const cartItem = data.map((item) => {
                 return {
                     idCart: item.id,

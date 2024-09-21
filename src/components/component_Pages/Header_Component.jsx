@@ -16,7 +16,9 @@ export default function Header_Component() {
     const navigate = useNavigate();
     const pathURL = useLocation().pathname;
     const theme = useSelector((state) => state.theme.theme);
-    const tokenUser = useSelector((state) => state.user.access_token);
+    const tokenUser = useSelector(
+        (state) => state.user.access_token || state.user.user?.access_token
+    );
     const currentUser = useSelector((state) => state.user.user);
     const cartInRedux = useSelector((state) => state.cart.cartItem);
     const cartTotalQuantity = cartInRedux.length;
@@ -89,15 +91,29 @@ export default function Header_Component() {
                         }
                     >
                         <Dropdown.Header>
-                            <span className='block text-center text-sm font-medium truncate'>
+                            <span
+                                className={`block text-center text-sm font-medium truncate ${
+                                    currentUser.admin ? 'text-orange-500' : 'text-blue-500'
+                                }`}
+                            >
                                 {currentUser?.username}
                             </span>
                         </Dropdown.Header>
-                        <Link to={'/dashboard?tab=dashboard'}>
-                            <Dropdown.Item>Trang cá nhân</Dropdown.Item>
-                        </Link>
+                        <Dropdown.Item>
+                            <Link
+                                to={'/dashboard?tab=dashboard'}
+                                className='flex justify-center items-center font-medium'
+                            >
+                                Trang cá nhân
+                            </Link>
+                        </Dropdown.Item>
                         <Dropdown.Divider />
-                        <Dropdown.Item onClick={handleSignOutAccount}>Đăng xuất</Dropdown.Item>
+                        <Dropdown.Item
+                            onClick={handleSignOutAccount}
+                            className='flex justify-center items-center font-semibold text-red-500'
+                        >
+                            Đăng xuất
+                        </Dropdown.Item>
                     </Dropdown>
                 ) : (
                     <Link to='/login' className='ml-2'>

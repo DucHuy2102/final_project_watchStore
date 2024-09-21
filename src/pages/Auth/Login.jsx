@@ -1,5 +1,5 @@
 import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { TfiHandPointRight } from 'react-icons/tfi';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { LoginSocialFacebook } from 'reactjs-social-login';
+import { getCartUser } from '../../redux/slices/cartSlice';
 
 export default function Login() {
     // state
@@ -26,7 +27,7 @@ export default function Login() {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
 
-    // handle submit form login using basic auth: username and password
+    // Login using username and password
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.username || !formData.password) {
@@ -49,6 +50,7 @@ export default function Login() {
             if (res?.status === 200) {
                 const { data } = res;
                 dispatch(user_SignIn({ access_token: data.access_token, user: data }));
+                getProductInCart(data.access_token);
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
                     if (state?.from) {
@@ -92,6 +94,7 @@ export default function Login() {
             if (res.status === 200) {
                 const { data } = res;
                 dispatch(user_SignIn({ access_token: data.access_token, user: data }));
+                getProductInCart(data.access_token);
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
                     if (state?.from) {
@@ -106,6 +109,7 @@ export default function Login() {
         }
     };
 
+    // Facebook Login
     const responseFacebook = async (response) => {
         const token = response.accessToken;
         try {
@@ -114,6 +118,7 @@ export default function Login() {
             if (res.status === 200) {
                 const { data } = res;
                 dispatch(user_SignIn({ access_token: data.access_token, user: data }));
+                getProductInCart(data.access_token);
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
                     if (state?.from) {
@@ -125,6 +130,28 @@ export default function Login() {
             }
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    // Get product in cart when user login
+    const getProductInCart = async (token) => {
+        if (token) {
+            try {
+                const res = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/api/cart/get-cart-user`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+                if (res?.status === 200) {
+                    const { data } = res;
+                    dispatch(getCartUser(data));
+                }
+            } catch (error) {
+                console.log(error);
+            }
         }
     };
 
