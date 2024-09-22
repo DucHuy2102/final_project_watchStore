@@ -806,7 +806,7 @@ export default function Profile_Component() {
                     </Modal.Body>
                 </Modal>
 
-                {/* delete account modal */}
+                {/* logout account modal */}
                 <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
                     <Modal.Header />
                     <Modal.Body>

@@ -6,12 +6,13 @@ import { CiHome, CiUser } from 'react-icons/ci';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { user_UpdateAddress } from '../../../redux/slices/userSlice';
+import { user_UpdateAddress, user_UpdateProfile } from '../../../redux/slices/userSlice';
 
 export default function DeliveryTo() {
     // get user from redux store to display the current user's address
     const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
+    const { id, access_token, admin, state, username, verified, ...rest } = currentUser;
 
     // states
     const [showModalChangeAddress, setShowModalChangeAddress] = useState(false);
@@ -73,7 +74,6 @@ export default function DeliveryTo() {
                     }
                 );
                 if (res?.status === 200) {
-                    console.log('district', res.data.data);
                     setDistricts(res.data.data);
                 }
             } catch (error) {
@@ -111,13 +111,14 @@ export default function DeliveryTo() {
         getWard();
     }, [formAddress.district?.value]);
 
+    // handle update address to api and redux store
     const handleUpdateAddress = async () => {
         const newAddress = `${formAddress.street}, ${formAddress.ward.label}, ${formAddress.district.label}, ${formAddress.province.label}`;
         setShowModalChangeAddress(false);
         try {
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/profile/update`,
-                newAddress,
+                { ...rest, address: newAddress },
                 {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
@@ -127,7 +128,7 @@ export default function DeliveryTo() {
             if (res?.status === 200) {
                 const { data } = res;
                 toast.success('Cập nhật địa chỉ giao hàng thành công!');
-                dispatch(user_UpdateAddress({ address: data }));
+                dispatch(user_UpdateProfile({ user: data }));
             }
         } catch (error) {
             console.log('Error update address', error);
@@ -157,17 +158,17 @@ export default function DeliveryTo() {
                                 rounded-lg p-6 flex flex-col justify-center gap-y-2'
             >
                 <div className='flex items-center justify-between'>
-                    <span className='text-gray-600 dark:text-gray-400 font-semibold'>Giao tới</span>
+                    <span className='text-gray-500 dark:text-gray-400 font-semibold'>Giao tới</span>
                     <span
                         onClick={() => setShowModalChangeAddress(true)}
-                        className='cursor-pointer text-blue-600 hover:underline'
+                        className='cursor-pointer text-blue-600 dark:text-blue-400 hover:underline'
                     >
-                        Thay đổi
+                        Đổi địa chỉ
                     </span>
                 </div>
                 <div className='w-full flex items-center gap-x-2'>
                     <CiUser className='text-blue-700 bg-blue-300 rounded-md p-[1px] h-5 w-8' />
-                    <span className='flex flex-wrap text-md font-semibold'>
+                    <span className='flex text-md font-medium'>
                         {currentUser.fullName}{' '}
                         <span className='border border-gray-300 dark:border-gray-600 mx-2' />
                         {currentUser.phone}
@@ -175,7 +176,7 @@ export default function DeliveryTo() {
                 </div>
                 <div className='w-full flex items-start gap-x-2'>
                     <CiHome className='text-green-700 bg-green-300 rounded-md p-[1px] h-5 w-8' />
-                    <span className='w-3/4 text-sm tracking-wide font-medium'>
+                    <span className='w-3/4 text-sm tracking-wide font-medium text-gray-500 dark:text-gray-400'>
                         {currentUser.address}
                     </span>
                 </div>

@@ -5,6 +5,7 @@ import {
     Dashboard_DefaultPage,
     DashboardCart_Page,
     DashboardProduct_Page,
+    DashCheckout_Page,
     EmailVerification_Page,
     ForgotPassword_Page,
     Home_Page,
@@ -43,17 +44,17 @@ export default function App() {
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
                         <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
+                        <Route path='/checkout' element={<DashCheckout_Page />} />
                     </Route>
-
-                    {/* route only for admin */}
 
                     {/* 
                     <Route path='/about' element={'<About_Page />'} />
                     <Route path='/search' element={'<Search_Page />'} />
                     <Route path='/projects' element={'<Projects_Page />'} />
-                    <Route path='/post/:postSlu g' element={'<PostDetail_Page />'} />
+                    <Route path='/post/:postSlug' element={'<PostDetail_Page />'} />
                     */}
 
+                    {/* route only for admin */}
                     <Route element={<AdminRoute_Page />}>
                         <Route path='/create-post' element={'<CreatePost_Page />'} />
                         <Route path='/update-post/:postID' element={'<UpdatePost_Page />'} />
