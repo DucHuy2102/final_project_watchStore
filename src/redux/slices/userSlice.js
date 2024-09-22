@@ -22,9 +22,14 @@ export const userSlice = createSlice({
             const { user } = action.payload;
             state.user = user;
         },
+        user_UpdateAddress: (state, action) => {
+            const { address } = action.payload;
+            state.user = { ...state.user, address };
+        },
     },
 });
 
-export const { user_SignIn, user_SignOut, user_UpdateProfile } = userSlice.actions;
+export const { user_SignIn, user_SignOut, user_UpdateProfile, user_UpdateAddress } =
+    userSlice.actions;
 
 export default userSlice.reducer;

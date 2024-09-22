@@ -145,7 +145,7 @@ export default function Profile_Component() {
     // get district from api
     useEffect(() => {
         const getDistrict = async () => {
-            if (!formAddress.province.value) return;
+            if (!formAddress.province?.value) return;
             try {
                 const res = await axios.get(
                     'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
@@ -166,12 +166,12 @@ export default function Profile_Component() {
         };
 
         getDistrict();
-    }, [formAddress.province.value]);
+    }, [formAddress.province?.value]);
 
     // get ward from api
     useEffect(() => {
         const getWard = async () => {
-            if (!formAddress.district.value) return;
+            if (!formAddress.district?.value) return;
             try {
                 const res = await axios.get(
                     'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
@@ -192,7 +192,7 @@ export default function Profile_Component() {
         };
 
         getWard();
-    }, [formAddress.district.value]);
+    }, [formAddress.district?.value]);
 
     // ======================================== Update user ========================================
     // handle change avatar function

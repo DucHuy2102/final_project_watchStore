@@ -111,7 +111,7 @@ export default function Login() {
 
     // Facebook Login
     const responseFacebook = async (response) => {
-        const token = response.accessToken;
+        const token = response.data.accessToken;
         try {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/facebook?token=${token}`);
             console.log(res);

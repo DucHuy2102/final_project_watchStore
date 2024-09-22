@@ -1,7 +1,7 @@
 import { Button, Modal } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
-import { FaMinus, FaPlus, FaRegUser } from 'react-icons/fa';
+import { FaMinus, FaPlus } from 'react-icons/fa';
 import { GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,8 +9,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
 import { set_Product_Detail } from '../../redux/slices/productSlice';
 import axios from 'axios';
-import { FaHouseChimney, FaUserLarge } from 'react-icons/fa6';
 import debounce from 'lodash.debounce';
+import { DeliveryTo_Component } from '../../components/exportComponent';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -531,27 +531,7 @@ export default function DashboardCart() {
 
                         {/* Summary Section */}
                         <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-14'>
-                            <div
-                                className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 
-                            rounded-lg p-6 flex flex-col gap-y-2'
-                            >
-                                <div className='flex items-center justify-between'>
-                                    <span className='text-gray-600 font-semibold'>Giao tới</span>
-                                    <span className='cursor-pointer text-blue-600'>Thay đổi</span>
-                                </div>
-                                <div className='flex items-center gap-x-2'>
-                                    <FaUserLarge className='text-blue-500' />
-                                    <span className='flex-wrap text-md font-medium'>
-                                        {currentUser.fullName}{' '}
-                                        <span className='border border-gray-300 dark:border-gray-600 mr-1' />
-                                        {currentUser.phone}
-                                    </span>
-                                </div>
-                                <div className='flex items-start gap-x-2'>
-                                    <FaHouseChimney className='text-green-500 w-7' />
-                                    <span className='text-sm'>{currentUser.address}</span>
-                                </div>
-                            </div>
+                            <DeliveryTo_Component />
                             <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
                                 <h2 className='text-lg font-semibold mb-4'>Thành tiền</h2>
 
