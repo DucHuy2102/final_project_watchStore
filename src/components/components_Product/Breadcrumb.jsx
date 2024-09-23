@@ -1,19 +1,10 @@
 import { Breadcrumb as Bread } from 'flowbite-react';
 import { HiHome } from 'react-icons/hi';
 import { useSelector } from 'react-redux';
-import { Link, useLocation, useParams } from 'react-router-dom';
-
-// format data products
-const formatData = (data) => {
-    let allProducts = [];
-    data?.forEach((item) => {
-        allProducts = allProducts.concat(item.products);
-    });
-    return allProducts;
-};
+import { useLocation, useParams } from 'react-router-dom';
 
 export default function Breadcrumb() {
-    const products = formatData(useSelector((state) => state.product.allProducts));
+    const products = useSelector((state) => state.product.allProducts);
     const { pathname } = useLocation();
     const { id } = useParams();
     const product = products.find((product) => product.id === id);

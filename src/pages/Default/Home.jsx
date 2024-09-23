@@ -7,8 +7,17 @@ import {
     ShopNow_Component,
 } from '../../components/exportComponent';
 import axios from 'axios';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { get_All_Product } from '../../redux/slices/productSlice';
+
+// format data products
+const formatData = (data) => {
+    let allProducts = [];
+    data?.forEach((item) => {
+        allProducts = allProducts.concat(item.products);
+    });
+    return allProducts;
+};
 
 export default function Home() {
     // state
@@ -22,8 +31,8 @@ export default function Home() {
                     `${import.meta.env.VITE_API_URL}/client/get-all-category`
                 );
                 if (res?.status === 200) {
-                    const { data } = res;
-                    dispatch(get_All_Product(data));
+                    const allProducts = formatData(res.data);
+                    dispatch(get_All_Product(allProducts));
                 }
             } catch (error) {
                 console.log('Error when get all product', error);

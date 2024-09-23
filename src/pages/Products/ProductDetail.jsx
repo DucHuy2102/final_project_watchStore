@@ -65,6 +65,7 @@ const prProduct = [
 export default function ProductDetail() {
     const tokenUser = useSelector((state) => state.user.access_token);
     const product = useSelector((state) => state.product.productDetail);
+    console.log(product);
     // destructuring product detail
     const {
         id,
@@ -179,8 +180,9 @@ export default function ProductDetail() {
 
     // format price & discountPrice to VND
     const priceFormat = formatPrice(price);
-    const discountPrice = discount !== 0 && !isNaN(discount) ? price * ((100 - discount) / 100) : 0;
-    const discountPriceFormat = formatPrice(discountPrice);
+    const discountPrice = formatPrice(price - discount);
+    const percentDiscount =
+        discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
 
     // more product of the same brand
     const allProducts = useSelector((state) => state.product.allProducts);
@@ -292,15 +294,28 @@ export default function ProductDetail() {
 
                     {/* price product */}
                     <div className='flex flex-wrap justify-start items-center gap-x-5 mt-5'>
-                        <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>
-                            {discountPriceFormat}
-                        </p>
-                        <p className='text-gray-400 text-xl flex justify-start items-center'>
-                            <strike>{priceFormat}</strike>
-                            <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3'>
-                                -{discount !== 0 && !isNaN(discount) ? discount : 0}%
-                            </span>
-                        </p>
+                        {discount === 0 ? (
+                            <>
+                                <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>
+                                    {discountPrice}
+                                </p>
+                                <p className='text-gray-400 text-xl flex justify-start items-center'>
+                                    <strike>{priceFormat}</strike>
+                                    <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3'>
+                                        -{percentDiscount !== 0 ? percentDiscount : 0}%
+                                    </span>
+                                </p>
+                            </>
+                        ) : (
+                            <div className='flex items-center'>
+                                <span className='text-blue-500 text-xl font-medium'>
+                                    Giá đang bán:{' '}
+                                    <span className='text-3xl text-red-500 font-bold'>
+                                        {priceFormat}
+                                    </span>
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* description */}

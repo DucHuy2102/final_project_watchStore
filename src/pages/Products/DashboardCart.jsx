@@ -16,19 +16,9 @@ import { DeliveryTo_Component, Vouchers_Component } from '../../components/expor
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-// format data products
-const formatData = (data) => {
-    let allProducts = [];
-    data?.forEach((item) => {
-        allProducts = allProducts.concat(item.products);
-    });
-    return allProducts;
-};
-
 export default function DashboardCart() {
     const tokenUser = useSelector((state) => state.user.access_token);
-    const products_From_Redux = useSelector((state) => state.product.allProducts);
-    const allProducts = formatData(products_From_Redux);
+    const allProducts = useSelector((state) => state.product.allProducts);
     const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
     const totalPrice = useSelector((state) => state.cart.cartTotalAmount);
     const productCartItem = useSelector((state) => state.cart.cartItem);
@@ -541,7 +531,7 @@ export default function DashboardCart() {
                                 onClick={() => navigate('/checkout')}
                                 type='button'
                                 className='group inline-flex w-full items-center justify-center rounded-md 
-                            bg-gray-700 dark:bg-gray-700 hover:bg-blue-500
+                            bg-gray-700 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-500
                             px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow'
                             >
                                 Mua hàng

@@ -1,8 +1,10 @@
 import { Button, Dropdown, Modal, TextInput } from 'flowbite-react';
 import { useState } from 'react';
-import { FaSortAlphaDown, FaSortAlphaUpAlt } from 'react-icons/fa';
+import { FaSortAlphaDown, FaSortAlphaUpAlt, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
 import { Chip_Filter_Component } from '../exportComponent';
+import { useDispatch } from 'react-redux';
+import { sortProducts } from '../../redux/slices/productSlice';
 
 // option values for advanced filter
 const options = [
@@ -41,6 +43,9 @@ const options = [
 ];
 
 export default function FilterSortPanel() {
+    // states
+    const dispatch = useDispatch();
+
     // state for sort
     const [sort, setSort] = useState(null);
 
@@ -53,6 +58,7 @@ export default function FilterSortPanel() {
     // handle sort change
     const handleSortChange = (value) => {
         setSort(value);
+        dispatch(sortProducts(value));
     };
 
     // ========================================= Filter =========================================
@@ -85,7 +91,7 @@ export default function FilterSortPanel() {
                 <Button outline onClick={() => setShowModalFilter(true)} className=''>
                     Bộ lọc
                 </Button>
-                <Dropdown outline label='Sắp xếp'>
+                <Dropdown outline label={sort ? sort : 'Sắp xếp'}>
                     <Dropdown.Item
                         onClick={() => handleSortChange('Giá tăng dần')}
                         icon={FaArrowUp}
@@ -105,10 +111,21 @@ export default function FilterSortPanel() {
                         Từ A - Z
                     </Dropdown.Item>
                     <Dropdown.Item
-                        onClick={() => handleSortChange('Giá Z - A')}
+                        onClick={() => handleSortChange('Từ Z - A')}
                         icon={FaSortAlphaUpAlt}
                     >
                         Từ Z - A
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                        className={`${
+                            sort
+                                ? 'bg-red-500 text-white hover:!bg-red-600 transition-colors duration-300'
+                                : 'hidden'
+                        }`}
+                        onClick={() => handleSortChange('Sắp xếp')}
+                        icon={FaTimes}
+                    >
+                        Bỏ chọn
                     </Dropdown.Item>
                 </Dropdown>
             </div>
