@@ -6,6 +6,7 @@ import {
     DashboardCart_Page,
     DashboardProduct_Page,
     DashCheckout_Page,
+    DashService_Page,
     EmailVerification_Page,
     ForgotPassword_Page,
     Home_Page,
@@ -18,10 +19,6 @@ import {
 } from './pages/exportPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { resetCart } from './redux/slices/cartSlice';
-import { user_SignOut } from './redux/slices/userSlice';
 
 export default function App() {
     return (
@@ -40,6 +37,7 @@ export default function App() {
                     <Route path='/products' element={<DashboardProduct_Page />} />
                     <Route path='/product-detail/:id' element={<ProductDetail_Page />} />
                     <Route path='/cart' element={<DashboardCart_Page />} />
+                    <Route path='/services' element={<DashService_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>

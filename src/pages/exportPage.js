@@ -29,3 +29,6 @@ export { default as DashboardCart_Page } from './Products/DashboardCart';
 
 // checkout
 export { default as DashCheckout_Page } from './Products/DashCheckout';
+
+// services
+export { default as DashService_Page } from './Services/DashService';

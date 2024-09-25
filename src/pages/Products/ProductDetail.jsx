@@ -294,7 +294,7 @@ export default function ProductDetail() {
 
                     {/* price product */}
                     <div className='flex flex-wrap justify-start items-center gap-x-5 mt-5'>
-                        {discount === 0 ? (
+                        {discount !== 0 ? (
                             <>
                                 <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>
                                     {discountPrice}

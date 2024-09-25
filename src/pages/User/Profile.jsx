@@ -40,6 +40,7 @@ export default function Profile_Component() {
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const [initialFormData, setInitialFormData] = useState(formData);
 
     // change password states
     const [modalVerifyResetPassword, setModalVerifyResetPassword] = useState(false);
@@ -211,15 +212,21 @@ export default function Profile_Component() {
             toast.error('Xin chờ hệ thống đang tải ảnh !!!');
             return;
         }
-        const isFormChanged = Object.values(formData).some((value) => value !== '');
-        if (isFormChanged) {
+        const isFormChanged = Object.keys(formData).some(
+            (key) => formData[key] !== initialFormData[key]
+        );
+
+        if (!isFormChanged) {
             toast.info('Không có gì thay đổi để cập nhật!');
             return;
         }
         try {
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/profile/update`,
-                formData,
+                {
+                    ...formData,
+                    fullName: formData.fullName.trim(),
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
@@ -412,7 +419,6 @@ export default function Profile_Component() {
                     <div className='grid grid-cols-1 gap-5'>
                         <TextInput
                             type='text'
-                            // id='fullname'
                             icon={CiUser}
                             className='w-full'
                             placeholder='Họ và tên'
@@ -421,12 +427,13 @@ export default function Profile_Component() {
                         />
                         <TextInput
                             type='text'
-                            // id='email'
                             icon={CiMail}
                             className='w-full'
                             placeholder='Email'
                             value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            onChange={(e) =>
+                                setFormData({ ...formData, email: e.target.value.trim() })
+                            }
                         />
                         <TextInput
                             type='text'
@@ -438,7 +445,7 @@ export default function Profile_Component() {
                             onChange={(e) => {
                                 const value = e.target.value;
                                 if (/^\d*$/.test(value) && value.length <= 10) {
-                                    setFormData({ ...formData, phone: value });
+                                    setFormData({ ...formData, phone: value.trim() });
                                 }
                             }}
                         />

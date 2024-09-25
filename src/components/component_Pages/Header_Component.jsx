@@ -5,16 +5,18 @@ import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleTheme } from '../../redux/slices/themeSlice';
 import { IoIosCart, IoIosHome } from 'react-icons/io';
-import { MdWatch } from 'react-icons/md';
+import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 import { Badge } from 'antd';
 import { user_SignOut } from '../../redux/slices/userSlice';
 import { resetCart } from '../../redux/slices/cartSlice';
+import { useEffect, useState } from 'react';
 
 export default function Header_Component() {
     // states
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const pathURL = useLocation().pathname;
+    const location = useLocation();
+    const pathURL = location.pathname;
     const theme = useSelector((state) => state.theme.theme);
     const tokenUser = useSelector(
         (state) => state.user.access_token || state.user.user?.access_token
@@ -22,12 +24,7 @@ export default function Header_Component() {
     const currentUser = useSelector((state) => state.user.user);
     const cartInRedux = useSelector((state) => state.cart.cartItem);
     const cartTotalQuantity = cartInRedux.length;
-
-    // handle search function
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('search');
-    };
+    const [searchTerm, setSearchTerm] = useState('');
 
     // handle sign out account
     const handleSignOutAccount = () => {
@@ -35,8 +32,31 @@ export default function Header_Component() {
         dispatch(resetCart());
     };
 
+    // ========================================= Search =========================================
+    // get search term from url params
+    useEffect(() => {
+        const urlParams = new URLSearchParams(location.search);
+        const searchURL = urlParams.get('q');
+        setSearchTerm(searchURL ?? '');
+    }, [location.search]);
+
+    // handle submit search form
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (searchTerm.trim() === '') {
+            return;
+        }
+        const urlParams = new URLSearchParams(location.search);
+        urlParams.set('q', searchTerm);
+        const newSearchTerm = urlParams.toString();
+        navigate(`/products?${newSearchTerm}`);
+    };
+
     return (
-        <Navbar className='shadow-2xl border-b-2 flex flex-wrap md:flex-nowrap items-center justify-between bg-white text-gray-800'>
+        <Navbar
+            className='shadow-2xl border-b-2 flex flex-wrap md:flex-nowrap 
+        items-center justify-between bg-white text-gray-800'
+        >
             {/* name app */}
             <Link
                 to='/'
@@ -52,14 +72,14 @@ export default function Header_Component() {
             </Link>
 
             {/* search form */}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSearch}>
                 <TextInput
                     type='text'
                     placeholder='Tìm kiếm...'
                     rightIcon={AiOutlineSearch}
                     className='w-60 hidden sm:inline md:inline-block md:w-36 lg:w-96'
-                    // value={searchTerm ?? ''}
-                    // onChange={(e) => setSearchTerm(e.target.value)}
+                    value={searchTerm ?? ''}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </form>
 
@@ -139,12 +159,23 @@ export default function Header_Component() {
                         Sản phẩm
                     </Link>
                 </Navbar.Link>
-                <Navbar.Link active={pathURL === '/cart'} as={'div'}>
+                <Navbar.Link className='group' active={pathURL === '/cart'} as={'div'}>
                     <Link to='/cart' className='flex justify-center items-center gap-x-2'>
                         <Badge count={tokenUser ? cartTotalQuantity : 0}>
-                            <IoIosCart size={'20px'} />
+                            <IoIosCart
+                                className={`dark:text-gray-400 dark:group-hover:!text-gray-200 group-hover:!text-[#0E7490] ${
+                                    pathURL === '/cart' ? 'text-[#0E7490]' : 'text-gray-700'
+                                }`}
+                                size={'20px'}
+                            />
                         </Badge>
                         Giỏ hàng
+                    </Link>
+                </Navbar.Link>
+                <Navbar.Link active={pathURL === '/services'} as={'div'}>
+                    <Link to='/services' className='flex justify-center items-center gap-x-2'>
+                        <MdHomeRepairService size={'20px'} />
+                        Dịch vụ
                     </Link>
                 </Navbar.Link>
             </Navbar.Collapse>

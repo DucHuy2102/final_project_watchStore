@@ -3,6 +3,7 @@ import themeReducer from './slices/themeSlice';
 import userReducer from './slices/userSlice';
 import productReducer from './slices/productSlice';
 import cartReducer from './slices/cartSlice';
+import FilterReducer from './slices/search_filter';
 import storage from 'redux-persist/lib/storage';
 import {
     persistReducer,
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
     user: userReducer,
     product: productReducer,
     cart: cartReducer,
+    filter: FilterReducer,
 });
 
 const persistConfig = {
