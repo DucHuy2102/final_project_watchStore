@@ -1,10 +1,15 @@
 import { Button, Dropdown, Modal, TextInput } from 'flowbite-react';
 import { useEffect, useState } from 'react';
-import { FaSortAlphaDown, FaSortAlphaUpAlt } from 'react-icons/fa';
+import { FaSortAlphaDown, FaSortAlphaUpAlt, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
 import { Chip_Filter_Component } from '../exportComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilters, sortProducts } from '../../redux/slices/search_filter';
+import {
+    resetSortProduct,
+    setFilterProduct,
+    setSortProduct,
+} from '../../redux/slices/search_filter';
+import { Badge } from 'antd';
 
 // option values for advanced filter
 const options = [
@@ -55,6 +60,7 @@ export default function FilterSortPanel() {
         value: '',
         label: '',
     });
+    const reduxSort = useSelector((state) => state.filter.sort);
 
     // state for filter
     const reduxFilters = useSelector((state) => state.filter.filter);
@@ -63,13 +69,24 @@ export default function FilterSortPanel() {
     const [selectedFilters, setSelectedFilters] = useState([]);
 
     // ========================================= Sort =========================================
+    useEffect(() => {
+        setSortValue(reduxSort || { value: '', label: '' });
+    }, [reduxSort]);
+
     // handle sort change
     const handleSortChange = (newValue, newLabel) => {
+        const sortOption = { value: newValue, label: newLabel };
+        setSortValue(sortOption);
+        dispatch(setSortProduct(sortOption));
+    };
+
+    // handle remove sort
+    const handleRemoveSort = () => {
         setSortValue({
-            value: newValue,
-            label: newLabel,
+            value: '',
+            label: '',
         });
-        dispatch(sortProducts(newValue));
+        dispatch(resetSortProduct());
     };
 
     // ========================================= Filter =========================================
@@ -83,10 +100,11 @@ export default function FilterSortPanel() {
             (item) => item.key === choice.key && item.value === choice.value
         );
         if (!isChoiceExist) {
-            setSelectedFilters([
+            const newFilters = [
                 ...selectedFilters,
                 { key: choice.key, value: choice.value, label: choice.label },
-            ]);
+            ];
+            setSelectedFilters(newFilters);
         }
     };
 
@@ -106,7 +124,7 @@ export default function FilterSortPanel() {
 
     // handle submit filter
     const handleSubmitFilter = () => {
-        dispatch(setFilters(selectedFilters));
+        dispatch(setFilterProduct(selectedFilters));
         setShowModalFilter(false);
     };
 
@@ -114,9 +132,11 @@ export default function FilterSortPanel() {
         <>
             <div className='flex justify-center items-center gap-x-2 sm:gap-x-5'>
                 {/* filter */}
-                <Button outline onClick={() => setShowModalFilter(true)} className=''>
-                    Bộ lọc
-                </Button>
+                <Badge count={selectedFilters.length}>
+                    <Button outline onClick={() => setShowModalFilter(true)} className=''>
+                        Bộ lọc
+                    </Button>
+                </Badge>
 
                 {/* sort */}
                 <Dropdown outline label={sortValue.label ? sortValue.label : 'Sắp xếp'}>
@@ -144,6 +164,11 @@ export default function FilterSortPanel() {
                     >
                         Từ Z - A
                     </Dropdown.Item>
+                    {sortValue.value && (
+                        <Dropdown.Item onClick={() => handleRemoveSort()} icon={FaTimes}>
+                            Bỏ chọn
+                        </Dropdown.Item>
+                    )}
                 </Dropdown>
             </div>
 

@@ -2,7 +2,6 @@ import { Button, Modal } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { GiShoppingCart } from 'react-icons/gi';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
@@ -351,7 +350,11 @@ export default function DashboardCart() {
         <div className='mx-auto px-4 py-8'>
             {totalQuantity === 0 ? (
                 <div className='w-full h-[85vh] flex flex-col items-center justify-center gap-y-3'>
-                    <GiShoppingCart size={200} className='text-[#0E7490]' />
+                    <img
+                        src={'../public/assets/cartEmpty.jpg'}
+                        alt='Empty product in cart image'
+                        className='w-auto h-96 object-cover'
+                    />
                     <span className='text-2xl font-bold'>Giỏ hàng trống</span>
                     <span className='text-xl'>Không có sản phẩm nào trong giỏ hàng của bạn</span>
                     <Link to='/products' className='w-full'>

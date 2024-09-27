@@ -7,7 +7,7 @@ export default function Breadcrumb() {
     const products = useSelector((state) => state.product.allProducts);
     const { pathname } = useLocation();
     const { id } = useParams();
-    const product = products.find((product) => product.id === id);
+    const product = products?.find((product) => product.id === id);
 
     let display;
     if (pathname === '/products') {

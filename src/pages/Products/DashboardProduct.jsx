@@ -4,52 +4,56 @@ import {
     Pagination_Component,
     ProductCard_Component,
 } from '../../components/exportComponent';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function DashboardProduct() {
-    // const products = useSelector((state) => state.product.allProducts);
+    // redux
+    const sortValueFromRedux = useSelector((state) => state.filter.sort?.value);
+    const filterParamsFromRedux = useSelector((state) => state.filter.filter);
+    const currentPage = useSelector((state) => state.filter.page);
 
-    // const [currentPage, setCurrentPage] = useState(1);
-    // const [productPerPage] = useState(12);
-    // const lastProductIndex = currentPage * productPerPage;
-    // const firstProductIndex = lastProductIndex - productPerPage;
-
-    // const displayData = useMemo(() => {
-    //     return Array.isArray(products) ? products.slice(firstProductIndex, lastProductIndex) : [];
-    // }, [products, firstProductIndex, lastProductIndex]);
-
+    // states
     const location = useLocation();
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
-    const sortValueFromRedux = useSelector((state) => state.filter.sort);
-    const filterParamsFromRedux = useSelector((state) => state.filter.filter);
+
+    // pagination
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         const getProducts = async () => {
+            window.scrollTo(0, 0, 'smooth');
             setLoading(true);
             try {
+                const newSearchParams = new URLSearchParams();
                 if (sortValueFromRedux) {
-                    searchParams.set('sortBy', sortValueFromRedux);
+                    newSearchParams.set('sortBy', sortValueFromRedux);
                 }
-                filterParamsFromRedux?.forEach((param) => {
-                    if (param.value) {
-                        searchParams.set(param.key, param.value);
-                    }
-                });
-                const newSearchTerm = searchParams.toString();
-                setSearchParams(searchParams, {
+                if (filterParamsFromRedux && filterParamsFromRedux.length > 0) {
+                    filterParamsFromRedux.forEach((param) => {
+                        if (param.value) {
+                            newSearchParams.set(param.key, param.value);
+                        }
+                    });
+                }
+                if (currentPage !== 1) {
+                    newSearchParams.set('pageNum', currentPage);
+                }
+                setSearchParams(newSearchParams, {
                     replace: true,
                 });
+                const newSearchTerm = newSearchParams.toString();
                 const res = await axios(
                     `${import.meta.env.VITE_API_URL}/client/get-all-product?${newSearchTerm}`
                 );
                 if (res?.status === 200) {
                     setProducts(res.data.productResponses);
+                    setTotalPages(res.data.totalPages);
                 }
             } catch (error) {
                 console.log(error);
@@ -58,7 +62,14 @@ export default function DashboardProduct() {
             }
         };
         getProducts();
-    }, [filterParamsFromRedux, location.search, searchParams, setSearchParams, sortValueFromRedux]);
+    }, [
+        currentPage,
+        filterParamsFromRedux,
+        location.search,
+        searchParams,
+        setSearchParams,
+        sortValueFromRedux,
+    ]);
 
     // loading
     if (loading) {
@@ -76,23 +87,34 @@ export default function DashboardProduct() {
 
     return (
         <div className='min-h-screen p-5 w-full'>
-            <Navbar_CardProduct_Component />
+            <Navbar_CardProduct_Component totalProduct={products?.length} />
 
-            <div
-                className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 
+            {products?.length > 0 ? (
+                <div
+                    className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 
             lg:grid-cols-3 lg:gap-x-3 xl:grid-cols-3 xl:gap-x-2
             my-10 gap-y-8 justify-items-center'
-            >
-                {products.map((product) => (
-                    <ProductCard_Component key={product.id} product={product} />
-                ))}
-            </div>
+                >
+                    {products.map((product) => (
+                        <ProductCard_Component key={product.id} product={product} />
+                    ))}
+                </div>
+            ) : (
+                <div className='w-full flex flex-col justify-center items-center'>
+                    <img
+                        src={'../public/assets/productNoFound.jpg'}
+                        alt=''
+                        className='h-96 w-auto object-cover'
+                    />
+                    <p className='text-gray-400 text-lg font-semibold'>
+                        Không có sản phẩm nào phù hợp với yêu cầu của bạn
+                    </p>
+                </div>
+            )}
 
-            {/* <Pagination_Component
-                totalProducts={products.length}
-                productPerPage={productPerPage}
-                setCurrentPageValue={setCurrentPage}
-            /> */}
+            {products && (
+                <Pagination_Component totalPages={totalPages} totalProduct={products?.length} />
+            )}
         </div>
     );
 }

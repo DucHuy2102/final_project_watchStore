@@ -7,14 +7,17 @@ export default function PageNotFound() {
             className='h-screen max-w-md w-full mx-auto 
             flex flex-col items-center justify-center gap-y-1'
         >
-            <span
+            <img src={'../public/assets/pageNotFound.jpg'} alt='Image page not found' />
+            {/* <span
                 className='text-[10rem] font-bold text-transparent 
             bg-gradient-to-r from-sky-500 to-red-500 bg-clip-text'
             >
                 Lỗi!
+            </span> */}
+            {/* <span className='uppercase text-xl font-bold'>Không tìm thấy trang</span> */}
+            <span className='text-lg font-semibold'>
+                Trang bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
             </span>
-            <span className='uppercase text-xl font-bold'>Không tìm thấy trang</span>
-            <span className='text-lg'>Trang bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</span>
             <Link className='w-full py-1' to={'/'}>
                 <Button
                     className='w-full transition ease-in-out duration-300 hover:scale-110'
