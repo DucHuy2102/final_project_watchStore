@@ -54,7 +54,7 @@ export default function Header_Component() {
 
     return (
         <Navbar
-            className='shadow-2xl border-b-2 flex flex-wrap md:flex-nowrap 
+            className='shadow-xl flex flex-wrap md:flex-nowrap 
         items-center justify-between bg-white text-gray-800'
         >
             {/* name app */}

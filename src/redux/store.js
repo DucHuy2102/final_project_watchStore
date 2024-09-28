@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice';
 import productReducer from './slices/productSlice';
 import cartReducer from './slices/cartSlice';
 import FilterReducer from './slices/search_filter';
+import checkoutReducer from './slices/checkoutSlice';
 import storage from 'redux-persist/lib/storage';
 import {
     persistReducer,
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
     product: productReducer,
     cart: cartReducer,
     filter: FilterReducer,
+    checkout: checkoutReducer,
 });
 
 const persistConfig = {

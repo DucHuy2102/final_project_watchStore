@@ -65,7 +65,6 @@ const prProduct = [
 export default function ProductDetail() {
     const tokenUser = useSelector((state) => state.user.access_token);
     const product = useSelector((state) => state.product.productDetail);
-    console.log(product);
     // destructuring product detail
     const {
         id,
