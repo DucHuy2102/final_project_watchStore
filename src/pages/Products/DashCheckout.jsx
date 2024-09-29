@@ -1,4 +1,4 @@
-import { Button, Label, Modal, Textarea, TextInput } from 'flowbite-react';
+import { Button, Checkbox, Label, Modal, Textarea, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { useDispatch, useSelector } from 'react-redux';
@@ -292,7 +292,69 @@ export default function DashCheckout() {
                         </div>
 
                         <div className='px-6 py-4'>
-                            <h4 className='text-xl font-semibold mb-5'>Thông tin sản phẩm</h4>
+                            <span className='text-xl font-semibold'>Chọn hình thức thanh toán</span>
+                            <form className='flex justify-between items-center mt-3'>
+                                <div className='flex items-center gap-2'>
+                                    <Checkbox id='cash' />
+                                    <Label
+                                        htmlFor='cash'
+                                        className='flex items-center justify-center gap-x-2 text-md'
+                                    >
+                                        <img
+                                            src={'../assets/payCash.png'}
+                                            alt=''
+                                            className='w-8 h-auto object-cover'
+                                        />
+                                        Thanh toán tiền mặt
+                                    </Label>
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <Checkbox id='vnpay' />
+                                    <Label
+                                        htmlFor='vnpay'
+                                        className='flex items-center justify-center gap-x-2 text-md'
+                                    >
+                                        <img
+                                            src={'../assets/vnpayPayment.jpg'}
+                                            alt=''
+                                            className='w-10 h-auto object-cover'
+                                        />
+                                        VNPAY
+                                    </Label>
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <Checkbox id='momo' />
+                                    <Label
+                                        htmlFor='momo'
+                                        className='flex items-center justify-center gap-x-2 text-md'
+                                    >
+                                        <img
+                                            src={'../assets/momoPayment.png'}
+                                            alt=''
+                                            className='w-7 h-auto object-cover'
+                                        />
+                                        Ví Momo
+                                    </Label>
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <Checkbox id='credit' />
+                                    <Label
+                                        htmlFor='credit'
+                                        className='flex items-center justify-center gap-x-2 text-md'
+                                    >
+                                        <img
+                                            src={'../assets/creditCard.png'}
+                                            alt=''
+                                            className='w-8 h-auto object-cover'
+                                        />
+                                        Thẻ tín dụng/ Ghi nợ
+                                    </Label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div className='px-6 py-4'>
+                            <span className='text-xl font-semibold mb-5'>Thông tin sản phẩm</span>
 
                             <table className='w-full'>
                                 <thead>

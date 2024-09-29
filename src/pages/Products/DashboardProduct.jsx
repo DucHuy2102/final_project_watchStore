@@ -13,6 +13,7 @@ export default function DashboardProduct() {
     // redux
     const sortValueFromRedux = useSelector((state) => state.filter.sort?.value);
     const filterParamsFromRedux = useSelector((state) => state.filter.filter);
+    const searchValueFromRedux = useSelector((state) => state.filter.search);
     const currentPage = useSelector((state) => state.filter.page);
 
     // states
@@ -31,6 +32,9 @@ export default function DashboardProduct() {
             setLoading(true);
             try {
                 const newSearchParams = new URLSearchParams();
+                if (searchValueFromRedux) {
+                    newSearchParams.set('q', searchValueFromRedux);
+                }
                 if (sortValueFromRedux) {
                     newSearchParams.set('sortBy', sortValueFromRedux);
                 }
@@ -62,14 +66,7 @@ export default function DashboardProduct() {
             }
         };
         getProducts();
-    }, [
-        currentPage,
-        filterParamsFromRedux,
-        location.search,
-        searchParams,
-        setSearchParams,
-        sortValueFromRedux,
-    ]);
+    }, [currentPage, filterParamsFromRedux, location.search, searchParams, searchValueFromRedux, setSearchParams, sortValueFromRedux]);
 
     // loading
     if (loading) {

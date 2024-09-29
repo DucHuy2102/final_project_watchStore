@@ -1,7 +1,8 @@
-import React from 'react';
+export default function CardVoucherMini({ voucher, onApplyVoucher }) {
+    const applyVoucher = () => {
+        onApplyVoucher(voucher);
+    };
 
-export default function CardVoucherMini({ voucher }) {
-    console.log(voucher);
     return (
         <div
             className='w-full border dark:border-gray-700 shadow-sm shadow-gray-200 
@@ -16,6 +17,7 @@ export default function CardVoucherMini({ voucher }) {
                 <span className='font-medium'>{voucher.couponName}</span>
             </div>
             <button
+                onClick={applyVoucher}
                 className='rounded-lg bg-blue-500 hover:bg-blue-600 transition-colors duration-300 
             text-white dark:text-gray-100 px-3 py-1'
             >

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-export default function CardVoucherFull({ voucher }) {
+export default function CardVoucherFull({ voucher, onApplyVoucher }) {
     const [showVoucherDetail, setShowVoucherDetail] = useState(false);
     const detailRef = useRef(null);
 
@@ -8,6 +8,10 @@ export default function CardVoucherFull({ voucher }) {
     const formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(
         date.getMonth() + 1
     ).padStart(2, '0')}/${date.getFullYear()}`;
+
+    const applyVoucher = () => {
+        onApplyVoucher(voucher);
+    };
 
     return (
         <div
@@ -41,7 +45,10 @@ export default function CardVoucherFull({ voucher }) {
                 </div>
                 <div className='flex items-center justify-between'>
                     <span className='text-gray-500 text-sm'>HSD: {formattedDate}</span>
-                    <button className='rounded-lg bg-blue-500 text-white text-sm px-3 py-[3px]'>
+                    <button
+                        onClick={applyVoucher}
+                        className='rounded-lg bg-blue-500 text-white text-sm px-3 py-[3px]'
+                    >
                         Áp dụng
                     </button>
                 </div>

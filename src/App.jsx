@@ -44,14 +44,7 @@ export default function App() {
                         <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
                         <Route path='/checkout' element={<DashCheckout_Page />} />
                     </Route>
-
-                    {/* 
-                    <Route path='/about' element={'<About_Page />'} />
-                    <Route path='/search' element={'<Search_Page />'} />
-                    <Route path='/projects' element={'<Projects_Page />'} />
-                    <Route path='/post/:postSlug' element={'<PostDetail_Page />'} />
-                    */}
-
+                    
                     {/* route only for admin */}
                     <Route element={<AdminRoute_Page />}>
                         <Route path='/create-post' element={'<CreatePost_Page />'} />

@@ -26,7 +26,9 @@ export default function Vouchers() {
         getAllVouchers();
     }, []);
 
-    const applyVoucher = () => {};
+    const applyVoucher = () => {
+        console.log('Apply voucher');
+    };
 
     return (
         <>
@@ -36,9 +38,14 @@ export default function Vouchers() {
             >
                 <div className='flex justify-between items-center text-md'>
                     <span className='font-medium'>Mã khuyến mãi</span>
-                    <span className='text-gray-500'>Có thể chọn {vouchers.length}</span>
+                    <span className='text-gray-500'>
+                        Có thể chọn{' '}
+                        <span className='font-bold text-blue-500'>{vouchers.length}</span> mã
+                    </span>
                 </div>
-                <CardVoucherMini voucher={vouchers[0]} />
+                {vouchers?.length > 0 && (
+                    <CardVoucherMini voucher={vouchers[0]} onApplyVoucher={applyVoucher} />
+                )}
                 <div
                     onClick={() => setShowModalVoucher(true)}
                     className='flex items-center gap-x-1'
@@ -64,13 +71,19 @@ export default function Vouchers() {
                 <Modal.Body>
                     <div className='flex flex-col gap-y-3 mt-3'>
                         {vouchers?.map((voucher) => {
-                            return <CardVoucherFull key={voucher.id} voucher={voucher} />;
+                            return (
+                                <CardVoucherFull
+                                    key={voucher.id}
+                                    voucher={voucher}
+                                    onApplyVoucher={applyVoucher}
+                                />
+                            );
                         })}
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
                     <button
-                        onClick={applyVoucher}
+                        onClick={() => setShowModalVoucher(false)}
                         className='w-full rounded-lg bg-blue-500 text-white py-2'
                     >
                         Xong
