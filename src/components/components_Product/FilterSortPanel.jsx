@@ -3,13 +3,8 @@ import { useEffect, useState } from 'react';
 import { FaSortAlphaDown, FaSortAlphaUpAlt, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
 import { Chip_Filter_Component } from '../exportComponent';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-    resetSortProduct,
-    setFilterProduct,
-    setSortProduct,
-} from '../../redux/slices/search_filter';
 import { Badge } from 'antd';
+import { useSearchParams } from 'react-router-dom';
 
 // option values for advanced filter
 const options = [
@@ -53,31 +48,20 @@ const options = [
 
 export default function FilterSortPanel() {
     // states
-    const dispatch = useDispatch();
-
-    // state for sort
+    const [searchParams, setSearchParams] = useSearchParams();
     const [sortValue, setSortValue] = useState({
         value: '',
         label: '',
     });
-    const reduxSort = useSelector((state) => state.filter.sort);
-
-    // state for filter
-    const reduxFilters = useSelector((state) => state.filter.filter);
     const [showModalFilter, setShowModalFilter] = useState(false);
     const [searchFilterOption, setSearchFilterOption] = useState('');
     const [selectedFilters, setSelectedFilters] = useState([]);
 
     // ========================================= Sort =========================================
-    useEffect(() => {
-        setSortValue(reduxSort || { value: '', label: '' });
-    }, [reduxSort]);
-
     // handle sort change
     const handleSortChange = (newValue, newLabel) => {
         const sortOption = { value: newValue, label: newLabel };
         setSortValue(sortOption);
-        dispatch(setSortProduct(sortOption));
     };
 
     // handle remove sort
@@ -86,35 +70,29 @@ export default function FilterSortPanel() {
             value: '',
             label: '',
         });
-        dispatch(resetSortProduct());
     };
 
     // ========================================= Filter =========================================
     useEffect(() => {
-        setSelectedFilters(reduxFilters || []);
-    }, [reduxFilters]);
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+        const initialFilters = [];
+        options.forEach((option) => {
+            const paramValue = searchParams.get(option.choices[0].key);
+            if (paramValue) {
+                const values = paramValue.split(',');
+                option.choices.forEach((choice) => {
+                    if (values.includes(choice.value)) {
+                        initialFilters.push(choice);
+                    }
+                });
+            }
+        });
+        setSelectedFilters(initialFilters);
+    }, []);
 
-    // handle select filter
-    const handleSelect = (choice) => {
-        const isChoiceExist = selectedFilters.some(
-            (item) => item.key === choice.key && item.value === choice.value
-        );
-        if (!isChoiceExist) {
-            const newFilters = [
-                ...selectedFilters,
-                { key: choice.key, value: choice.value, label: choice.label },
-            ];
-            setSelectedFilters(newFilters);
-        }
-    };
-
-    // handle remove filter
-    const handleRemoveOptionFilter = (filterToRemove) => {
-        const updatedFilters = selectedFilters.filter((filter) => filter !== filterToRemove);
-        setSelectedFilters(updatedFilters);
-    };
-
-    // handle filter options
     const filteredOptions = options.map((option) => ({
         ...option,
         choices: option.choices.filter((choice) =>
@@ -122,9 +100,52 @@ export default function FilterSortPanel() {
         ),
     }));
 
-    // handle submit filter
-    const handleSubmitFilter = () => {
-        dispatch(setFilterProduct(selectedFilters));
+    const handleSelect = (choice) => {
+        const isChoiceExist = selectedFilters.some(
+            (item) => item.key === choice.key && item.value === choice.value
+        );
+        if (!isChoiceExist) {
+            setSelectedFilters([...selectedFilters, choice]);
+        }
+    };
+
+    const handleRemoveOptionFilter = (filterToRemove) => {
+        const updatedFilters = selectedFilters.filter(
+            (filter) =>
+                !(filter.key === filterToRemove.key && filter.value === filterToRemove.value)
+        );
+        setSelectedFilters(updatedFilters);
+    };
+
+    const updateSearchParams = (filters) => {
+        const newSearchParams = new URLSearchParams();
+
+        const filterGroups = {};
+        filters.forEach((filter) => {
+            if (!filterGroups[filter.key]) {
+                filterGroups[filter.key] = [];
+            }
+            filterGroups[filter.key].push(filter.value);
+        });
+
+        Object.entries(filterGroups).forEach(([key, values]) => {
+            if (values.length > 0) {
+                newSearchParams.set(key, values.join(','));
+            }
+        });
+
+        searchParams.forEach((value, key) => {
+            if (!options.some((option) => option.choices[0].key === key)) {
+                newSearchParams.set(key, value);
+            }
+        });
+
+        setSearchParams(newSearchParams);
+    };
+
+    const handleSubmitFilter = (e) => {
+        e.preventDefault();
+        updateSearchParams(selectedFilters);
         setShowModalFilter(false);
     };
 

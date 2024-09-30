@@ -1,14 +1,14 @@
 import React from 'react';
 import { Button } from 'flowbite-react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setPageProduct } from '../../redux/slices/search_filter';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Pagination({ totalPages, totalProduct }) {
-    const dispatch = useDispatch();
-    const currentPage = useSelector((state) => state.filter.page);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentPage = parseInt(searchParams.get('pageNum')) || 1;
 
     const handlePageChange = (page) => {
-        dispatch(setPageProduct(page));
+        searchParams.set('pageNum', page);
+        setSearchParams(searchParams);
         window.scrollTo({
             top: 0,
             behavior: 'smooth',

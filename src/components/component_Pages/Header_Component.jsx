@@ -10,7 +10,6 @@ import { Badge } from 'antd';
 import { user_SignOut } from '../../redux/slices/userSlice';
 import { resetCart } from '../../redux/slices/cartSlice';
 import { useEffect, useState } from 'react';
-import { setSearchProduct } from '../../redux/slices/search_filter';
 
 export default function Header_Component() {
     // states
@@ -50,7 +49,6 @@ export default function Header_Component() {
         const urlParams = new URLSearchParams(location.search);
         urlParams.set('q', searchTerm);
         const newSearchTerm = urlParams.toString();
-        dispatch(setSearchProduct(searchTerm));
         navigate(`/products?${newSearchTerm}`);
     };
 

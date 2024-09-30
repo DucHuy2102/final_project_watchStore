@@ -425,7 +425,7 @@ export default function ProductDetail() {
                         1280: { slidesPerView: 4 },
                     }}
                 >
-                    {moreProduct.map((product) => (
+                    {moreProduct?.map((product) => (
                         <SwiperSlide key={product.id}>
                             <div
                                 className='bg-white p-4 min-h-[60vh] rounded-lg 

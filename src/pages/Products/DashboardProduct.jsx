@@ -1,4 +1,3 @@
-import { useSelector } from 'react-redux';
 import {
     Navbar_CardProduct_Component,
     Pagination_Component,
@@ -7,57 +6,41 @@ import {
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 export default function DashboardProduct() {
-    // redux
-    const sortValueFromRedux = useSelector((state) => state.filter.sort?.value);
-    const filterParamsFromRedux = useSelector((state) => state.filter.filter);
-    const searchValueFromRedux = useSelector((state) => state.filter.search);
-    const currentPage = useSelector((state) => state.filter.page);
-
     // states
-    const location = useLocation();
-    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
-
-    // pagination
     const [totalPages, setTotalPages] = useState(1);
+    const [totalProducts, setTotalProducts] = useState(0);
+    const page = parseInt(searchParams.get('pageNum')) || 1;
 
     useEffect(() => {
+        const getFilterParams = () => {
+            const filterParams = new URLSearchParams();
+            searchParams.forEach((value, key) => {
+                if (value) {
+                    filterParams.set(key, value);
+                }
+            });
+            filterParams.set('pageNum', page);
+            console.log(filterParams.toString());
+            return new URLSearchParams(filterParams).toString();
+        };
+
         const getProducts = async () => {
-            window.scrollTo(0, 0, 'smooth');
             setLoading(true);
             try {
-                const newSearchParams = new URLSearchParams();
-                if (searchValueFromRedux) {
-                    newSearchParams.set('q', searchValueFromRedux);
-                }
-                if (sortValueFromRedux) {
-                    newSearchParams.set('sortBy', sortValueFromRedux);
-                }
-                if (filterParamsFromRedux && filterParamsFromRedux.length > 0) {
-                    filterParamsFromRedux.forEach((param) => {
-                        if (param.value) {
-                            newSearchParams.set(param.key, param.value);
-                        }
-                    });
-                }
-                if (currentPage !== 1) {
-                    newSearchParams.set('pageNum', currentPage);
-                }
-                setSearchParams(newSearchParams, {
-                    replace: true,
-                });
-                const newSearchTerm = newSearchParams.toString();
+                const filterParams = getFilterParams();
                 const res = await axios(
-                    `${import.meta.env.VITE_API_URL}/client/get-all-product?${newSearchTerm}`
+                    `${import.meta.env.VITE_API_URL}/client/get-all-product?${filterParams}`
                 );
                 if (res?.status === 200) {
                     setProducts(res.data.productResponses);
                     setTotalPages(res.data.totalPages);
+                    setTotalProducts(res.data.totalProducts);
                 }
             } catch (error) {
                 console.log(error);
@@ -66,7 +49,7 @@ export default function DashboardProduct() {
             }
         };
         getProducts();
-    }, [currentPage, filterParamsFromRedux, location.search, searchParams, searchValueFromRedux, setSearchParams, sortValueFromRedux]);
+    }, [page, searchParams, setSearchParams]);
 
     // loading
     if (loading) {
@@ -84,7 +67,7 @@ export default function DashboardProduct() {
 
     return (
         <div className='min-h-screen p-5 w-full'>
-            <Navbar_CardProduct_Component totalProduct={products?.length} />
+            <Navbar_CardProduct_Component totalProducts={totalProducts} />
 
             {products?.length > 0 ? (
                 <div
