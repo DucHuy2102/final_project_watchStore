@@ -57,22 +57,6 @@ export default function FilterSortPanel() {
     const [searchFilterOption, setSearchFilterOption] = useState('');
     const [selectedFilters, setSelectedFilters] = useState([]);
 
-    // ========================================= Sort =========================================
-    // handle sort change
-    const handleSortChange = (newValue, newLabel) => {
-        const sortOption = { value: newValue, label: newLabel };
-        setSortValue(sortOption);
-    };
-
-    // handle remove sort
-    const handleRemoveSort = () => {
-        setSortValue({
-            value: '',
-            label: '',
-        });
-    };
-
-    // ========================================= Filter =========================================
     useEffect(() => {
         window.scrollTo({
             top: 0,
@@ -91,8 +75,52 @@ export default function FilterSortPanel() {
             }
         });
         setSelectedFilters(initialFilters);
-    }, []);
 
+        const sortByParam = searchParams.get('sortBy');
+        if (sortByParam) {
+            const sortOption = {
+                value: sortByParam,
+                label: getSortLabel(sortByParam),
+            };
+            setSortValue(sortOption);
+        }
+    }, [searchParams]);
+
+    // ========================================= Sort =========================================
+    const handleSortChange = (newValue, newLabel) => {
+        const sortOption = { value: newValue, label: newLabel };
+        setSortValue(sortOption);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('sortBy', newValue);
+        setSearchParams(newSearchParams);
+    };
+
+    const handleRemoveSort = () => {
+        setSortValue({
+            value: '',
+            label: '',
+        });
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('sortBy');
+        setSearchParams(newSearchParams);
+    };
+
+    const getSortLabel = (value) => {
+        switch (value) {
+            case 'gia-tang-dan':
+                return 'Giá tăng dần';
+            case 'gia-giam-dan':
+                return 'Giá giảm dần';
+            case 'a-z':
+                return 'Từ A - Z';
+            case 'z-a':
+                return 'Từ Z - A';
+            default:
+                return '';
+        }
+    };
+
+    // ========================================= Filter =========================================
     const filteredOptions = options.map((option) => ({
         ...option,
         choices: option.choices.filter((choice) =>
@@ -135,7 +163,7 @@ export default function FilterSortPanel() {
         });
 
         searchParams.forEach((value, key) => {
-            if (!options.some((option) => option.choices[0].key === key)) {
+            if (key !== 'pageNum' && !options.some((option) => option.choices[0].key === key)) {
                 newSearchParams.set(key, value);
             }
         });

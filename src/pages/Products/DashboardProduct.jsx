@@ -15,18 +15,15 @@ export default function DashboardProduct() {
     const [products, setProducts] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
-    const page = parseInt(searchParams.get('pageNum')) || 1;
 
     useEffect(() => {
         const getFilterParams = () => {
             const filterParams = new URLSearchParams();
             searchParams.forEach((value, key) => {
-                if (value) {
+                if (value && key !== 'sortBy' && key !== 'pageNum') {
                     filterParams.set(key, value);
                 }
             });
-            filterParams.set('pageNum', page);
-            console.log(filterParams.toString());
             return new URLSearchParams(filterParams).toString();
         };
 
@@ -34,8 +31,13 @@ export default function DashboardProduct() {
             setLoading(true);
             try {
                 const filterParams = getFilterParams();
+                const sortBy = searchParams.get('sortBy');
+                const pageNum = searchParams.get('pageNum') || '1';
+
                 const res = await axios(
-                    `${import.meta.env.VITE_API_URL}/client/get-all-product?${filterParams}`
+                    `${
+                        import.meta.env.VITE_API_URL
+                    }/client/get-all-product?${filterParams}&sortBy=${sortBy}&pageNum=${pageNum}`
                 );
                 if (res?.status === 200) {
                     setProducts(res.data.productResponses);
@@ -48,8 +50,9 @@ export default function DashboardProduct() {
                 setLoading(false);
             }
         };
+
         getProducts();
-    }, [page, searchParams, setSearchParams]);
+    }, [searchParams, setSearchParams]);
 
     // loading
     if (loading) {
