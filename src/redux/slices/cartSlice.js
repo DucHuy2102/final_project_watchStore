@@ -11,66 +11,67 @@ export const cartSlice = createSlice({
     initialState,
     reducers: {
         getCartUser: (state, action) => {
-            const data = action.payload;
-            const cartItem = data.map((item) => {
+            const cartData = action.payload;
+            state.cartItem = cartData.map((item) => {
                 return {
                     idCart: item.id,
                     idProduct: item.product.id,
-                    price: item.product.price,
+                    productItem: item.product,
                     quantity: item.quantity,
                 };
             });
-            state.cartItem = cartItem;
-            state.cartTotalQuantity = data.reduce((total, item) => total + item.quantity, 0);
-            state.cartTotalAmount = data.reduce(
-                (total, item) => total + item.product.price * item.quantity,
-                0
-            );
+            state.cartTotalQuantity = cartData.reduce((total, item) => total + item.quantity, 0);
+            state.cartTotalAmount = cartData.reduce((total, item) => {
+                const price = item.product.price || 0;
+                return total + price * item.quantity;
+            }, 0);
         },
         addProductToCart: (state, action) => {
-            const { idCart, product, quantity } = action.payload;
-            const itemIndex = state.cartItem.findIndex((item) => item.idProduct === product.id);
+            const { idCart, idProduct, productItem, quantity } = action.payload;
+            const itemIndex = state.cartItem.findIndex((item) => item.idProduct === idProduct);
             if (itemIndex === -1) {
                 state.cartItem.push({
                     idCart: idCart,
-                    idProduct: product.id,
-                    price: product.price,
+                    idProduct: idProduct,
+                    productItem: productItem,
                     quantity: quantity,
                 });
             } else {
                 state.cartItem[itemIndex].quantity += quantity;
             }
             state.cartTotalQuantity += quantity;
-            state.cartTotalAmount += product.price * quantity;
+            state.cartTotalAmount += productItem.price * quantity;
         },
         changeProductQuantity: (state, action) => {
             const { type, productId } = action.payload;
             const itemIndex = state.cartItem.findIndex((item) => item.idProduct === productId);
+            if (itemIndex === -1) return;
+            const cartItem = state.cartItem[itemIndex];
             if (type === 'increase') {
-                state.cartItem[itemIndex].quantity += 1;
+                cartItem.quantity += 1;
                 state.cartTotalQuantity += 1;
-                state.cartTotalAmount += state.cartItem[itemIndex].price;
-            } else {
-                if (state.cartItem[itemIndex].quantity > 0) {
-                    state.cartItem[itemIndex].quantity -= 1;
+                state.cartTotalAmount += cartItem.productItem.price;
+            } else if (type === 'decrease') {
+                if (cartItem.quantity > 1) {
+                    cartItem.quantity -= 1;
                     state.cartTotalQuantity -= 1;
-                    state.cartTotalAmount -= state.cartItem[itemIndex].price;
+                    state.cartTotalAmount -= cartItem.productItem.price;
                 } else {
                     state.cartTotalQuantity -= 1;
-                    state.cartTotalAmount -= state.cartItem[itemIndex].price;
+                    state.cartTotalAmount -= cartItem.productItem.price;
                     state.cartItem.splice(itemIndex, 1);
                 }
             }
         },
         deleteProductFromCart: (state, action) => {
-            const idProduct_Dispatch = action.payload;
-            const itemIndex = state.cartItem.findIndex(
-                (item) => item.idProduct === idProduct_Dispatch
-            );
+            const idProduct = action.payload;
+            const itemIndex = state.cartItem.findIndex((item) => item.idProduct === idProduct);
+            if (itemIndex === -1) return;
             if (itemIndex !== -1) {
                 state.cartTotalQuantity -= state.cartItem[itemIndex].quantity;
                 state.cartTotalAmount -=
-                    state.cartItem[itemIndex].price * state.cartItem[itemIndex].quantity;
+                    state.cartItem[itemIndex].productItem.price *
+                    state.cartItem[itemIndex].quantity;
                 state.cartItem.splice(itemIndex, 1);
             }
         },

@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { reset_Product_Detail, set_Product_Detail } from '../../redux/slices/productSlice';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
-import { Button, Modal } from 'flowbite-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Button, Modal, Spinner } from 'flowbite-react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
-import { addProductToCart, resetCart } from '../../redux/slices/cartSlice';
+import { addProductToCart } from '../../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { Breadcrumb_Component } from '../../components/exportComponent';
@@ -63,11 +62,43 @@ const prProduct = [
 ];
 
 export default function ProductDetail() {
+    // redux
     const tokenUser = useSelector((state) => state.user.access_token);
-    const product = useSelector((state) => state.product.productDetail);
+
+    // state
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
+    const { id } = useParams();
+    const [product, setProduct] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+    const [quantityProduct, setQuantityProduct] = useState(0);
+    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
+
+    // call API to get product detail by productId
+    useEffect(() => {
+        const getProductDetail = async () => {
+            try {
+                setLoading(true);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/product`, {
+                    params: { productId: id },
+                });
+                if (res?.status === 200) {
+                    const data = res.data;
+                    setProduct(data);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        getProductDetail();
+    }, [id]);
+
     // destructuring product detail
     const {
-        id,
         img,
         productName,
         brand,
@@ -87,6 +118,20 @@ export default function ProductDetail() {
         color,
         genderUser,
     } = product;
+
+    // loading
+    if (loading) {
+        return (
+            <div className='w-full min-h-screen flex justify-center items-center '>
+                <div className='flex flex-col items-center'>
+                    <Spinner size='xl' color='info' />
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>
+                        Vui lòng chờ trong giây lát...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     // specifications of product detail
     const specifications = [
@@ -157,25 +202,10 @@ export default function ProductDetail() {
         },
     ];
 
-    // state
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const { pathname } = useLocation();
-    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-    const [quantityProduct, setQuantityProduct] = useState(0);
-    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
-
     // toggle description
     const toggleDescription = () => {
         setIsDescriptionExpanded(!isDescriptionExpanded);
     };
-
-    // reset product detail when unmount
-    useEffect(() => {
-        return () => {
-            dispatch(reset_Product_Detail());
-        };
-    }, [dispatch]);
 
     // format price & discountPrice to VND
     const priceFormat = formatPrice(price);
@@ -184,18 +214,12 @@ export default function ProductDetail() {
         discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
 
     // more product of the same brand
-    const allProducts = useSelector((state) => state.product.allProducts);
-    const moreProduct = allProducts
-        ?.filter((item) => item.categoryName === brand)
-        .flatMap((item) => item.products)
-        .filter((item) => item.id !== id);
 
     // navgigate to another product detail page
-    const handleNavigateToProductDetail = (productId) => {
-        const navigateProduct = moreProduct.find((item) => item.id === productId);
-        dispatch(set_Product_Detail(navigateProduct));
-        navigate(`/product-detail/${productId}`);
-    };
+    // const handleNavigateToProductDetail = (productId) => {
+    //     const navigateProduct = moreProduct.find((item) => item.id === productId);
+    //     navigate(`/product-detail/${productId}`);
+    // };
 
     // handle verify user to buy now product:
     // if user not login, show modal to login page
@@ -220,7 +244,7 @@ export default function ProductDetail() {
             const res = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/cart/add-product-to-cart`,
                 {
-                    product: product.id,
+                    product: id,
                     quantity: quantityProduct,
                 },
                 {
@@ -234,7 +258,8 @@ export default function ProductDetail() {
                 dispatch(
                     addProductToCart({
                         idCart: data.id,
-                        product: product,
+                        idProduct: product.id,
+                        productItem: product,
                         quantity: quantityProduct,
                     })
                 );
@@ -412,7 +437,7 @@ export default function ProductDetail() {
                     <div className='max-w-5xl dark:max-w-7xl mx-auto bg-black dark:bg-gray-200 h-[1px] absolute inset-x-0 top-1/2 transform -translate-y-1/2' />
                 </div>
 
-                <Swiper
+                {/* <Swiper
                     className='mt-2 w-full flex items-center px-4 py-4 sm:py-2 bg-gray-100 dark:bg-gray-900'
                     spaceBetween={20}
                     slidesPerView={1}
@@ -450,7 +475,7 @@ export default function ProductDetail() {
                             </div>
                         </SwiperSlide>
                     ))}
-                </Swiper>
+                </Swiper> */}
 
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4 dark:bg-gray-900'>
                     {prProduct.map((item) => (

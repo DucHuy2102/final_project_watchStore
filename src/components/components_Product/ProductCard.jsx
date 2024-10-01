@@ -4,7 +4,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
-import { set_Product_Detail } from '../../redux/slices/productSlice';
 
 export default function ProductCard({ product }) {
     const { id, productName, price, img, size, genderUser } = product;
@@ -35,7 +34,6 @@ export default function ProductCard({ product }) {
 
     // function navigate to product detail
     const handleNavigateToProductDetail = () => {
-        dispatch(set_Product_Detail(product));
         navigate(`/product-detail/${id}`);
     };
 

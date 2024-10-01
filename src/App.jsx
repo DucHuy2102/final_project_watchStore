@@ -19,8 +19,42 @@ import {
 } from './pages/exportPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCartUser } from './redux/slices/cartSlice';
+import { useEffect } from 'react';
 
 export default function App() {
+    // state
+    const dispatch = useDispatch();
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const cartTotalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
+
+    // Get product in cart when user login
+    useEffect(() => {
+        const getProductInCart = async () => {
+            if (tokenUser && cartTotalQuantity === 0) {
+                try {
+                    const res = await axios.get(
+                        `${import.meta.env.VITE_API_URL}/api/cart/get-cart-user`,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${tokenUser}`,
+                            },
+                        }
+                    );
+                    if (res?.status === 200) {
+                        const { data } = res;
+                        dispatch(getCartUser(data));
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        };
+        getProductInCart();
+    }, [cartTotalQuantity, dispatch, tokenUser]);
+
     return (
         <>
             <Router>
@@ -44,7 +78,7 @@ export default function App() {
                         <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
                         <Route path='/checkout' element={<DashCheckout_Page />} />
                     </Route>
-                    
+
                     {/* route only for admin */}
                     <Route element={<AdminRoute_Page />}>
                         <Route path='/create-post' element={'<CreatePost_Page />'} />

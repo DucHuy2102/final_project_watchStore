@@ -1,12 +1,11 @@
 import { Button, Modal } from 'flowbite-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
-import { set_Product_Detail } from '../../redux/slices/productSlice';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { DeliveryTo_Component, Vouchers_Component } from '../../components/exportComponent';
@@ -17,19 +16,17 @@ const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 export default function DashboardCart() {
+    // redux
     const tokenUser = useSelector((state) => state.user.access_token);
-    const allProducts = useSelector((state) => state.product.allProducts);
     const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
     const totalPrice = useSelector((state) => state.cart.cartTotalAmount);
     const productCartItem = useSelector((state) => state.cart.cartItem);
-    const idProduct = productCartItem.map((item) => item.idProduct);
-    const productItem = allProducts.filter((item) => idProduct.includes(item.id));
-    const updateCartItem = productCartItem.map(({ idCart, quantity }) => {
-        return {
-            itemId: idCart,
-            quantity: quantity,
-        };
-    });
+    const cartItem = useSelector((state) => state.cart.cartItem);
+    const productItem = useMemo(() => {
+        return cartItem.map((item) => ({
+            product: item.productItem,
+        }));
+    }, [cartItem]);
 
     // state
     const dispatch = useDispatch();
@@ -38,8 +35,8 @@ export default function DashboardCart() {
     const [idProductToDelete, setIdProductToDelete] = useState(null);
     const { pathname } = useLocation();
 
-    // // update cart when unmount page
-    const updateCart = async () => {
+    // call API update cart when change quantity
+    const updateCartApiCall = async (updateCartItem) => {
         try {
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/cart/update-cart`,
@@ -60,20 +57,37 @@ export default function DashboardCart() {
     };
 
     // debounce update cart
-    const debounceUpdateCart = debounce(updateCart, 500);
+    const debouncedUpdateCart = useRef(
+        debounce((updatedCartItem) => {
+            updateCartApiCall(updatedCartItem);
+        }, 500)
+    ).current;
 
     // update cart when quantity change
     useEffect(() => {
-        debounceUpdateCart();
         return () => {
-            debounceUpdateCart.cancel();
+            debouncedUpdateCart.cancel();
         };
-    }, [updateCartItem]);
+    }, [debouncedUpdateCart]);
+
+    // get product cart item to update cart
+    // when unmount page or change quantity
+    useEffect(() => {
+        const updatedCartItem = cartItem.map(({ idCart, quantity }) => ({
+            itemId: idCart,
+            quantity: quantity,
+        }));
+
+        debouncedUpdateCart(updatedCartItem);
+    }, [cartItem, debouncedUpdateCart]);
 
     // handle change quantity
-    const handleChangeQuantity = (type, productId) => {
-        dispatch(changeProductQuantity({ type, productId }));
-    };
+    const handleChangeQuantity = useCallback(
+        (type, productId) => {
+            dispatch(changeProductQuantity({ type, productId }));
+        },
+        [dispatch]
+    );
 
     // handle delete product from cart
     const handleDeleteProductFromCart = () => {
@@ -83,8 +97,6 @@ export default function DashboardCart() {
 
     // function navigate to product detail
     const handleNavigateToProductDetail = (id) => {
-        const product = allProducts.find((item) => item.id === id);
-        dispatch(set_Product_Detail(product));
         navigate(`/product-detail/${id}`);
     };
 
@@ -111,29 +123,37 @@ export default function DashboardCart() {
     return (
         <div className='mx-auto px-4 py-8'>
             {totalQuantity === 0 ? (
-                <div className='h-[85vh] flex flex-col items-center justify-center gap-y-3'>
+                <div className='h-[85vh] flex flex-col items-center justify-center gap-y-6'>
+                    <span className='text-4xl font-bold text-gray-800'>
+                        Đẳng Cấp Thời Gian, Giá Trị Vượt Trội
+                    </span>
                     <img
                         src={'../public/assets/cartEmpty.jpg'}
-                        alt='Empty product in cart image'
-                        className='w-auto h-96 object-cover'
+                        alt='High-quality watch'
+                        className='w-auto h-80 object-contain rounded-lg shadow-sm'
                     />
-                    <span className='text-2xl font-bold'>Giỏ hàng trống</span>
-                    <span className='text-xl'>Không có sản phẩm nào trong giỏ hàng của bạn</span>
-                    <div className='flex items-center justify-center gap-x-5'>
-                        <Link to='/products'>
-                            <Button outline className='w-56'>
-                                Tiếp tục mua hàng
-                            </Button>
-                        </Link>
-                        {!tokenUser && (
-                            <>
-                                <span className='font-semibold text-lg'>Hoặc</span>
-                                <div onClick={handleNavigateToLoginPage}>
-                                    <Button className='w-56'>Đăng nhập để xem giỏ hàng</Button>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                    {tokenUser ? (
+                        <>
+                            <span className='text-2xl font-bold'>Giỏ hàng trống</span>
+                            <span className='text-xl'>
+                                Không có sản phẩm nào trong giỏ hàng của bạn
+                            </span>
+                            <div className='flex items-center justify-center gap-x-5'>
+                                <Link to='/products'>
+                                    <Button className='w-96'>Tiếp tục mua hàng</Button>
+                                </Link>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <span className='font-semibold text-lg'>
+                                Vui lòng đăng nhập để xem giỏ hàng của bạn
+                            </span>
+                            <div onClick={handleNavigateToLoginPage}>
+                                <Button className='w-96'>Đăng nhập</Button>
+                            </div>
+                        </>
+                    )}
                 </div>
             ) : (
                 <div className='min-h-[85vh] flex flex-col lg:flex-row gap-x-4'>
@@ -147,7 +167,7 @@ export default function DashboardCart() {
                                 <thead className='border-b border-gray-200 dark:border-gray-700'>
                                     <tr>
                                         <th className='text-left font-semibold py-2 px-2 sm:px-4'>
-                                            Tất cả {productItem.length} sản phẩm
+                                            Tất cả {productCartItem?.length} sản phẩm
                                         </th>
                                         <th className='font-semibold text-center py-2 px-2 sm:px-4'>
                                             Trạng thái
@@ -170,29 +190,35 @@ export default function DashboardCart() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {productItem?.map((item) => (
-                                        <tr key={item.id}>
+                                    {productItem?.map((item, index) => (
+                                        <tr key={index}>
                                             <td className='py-4'>
                                                 <div
                                                     className='flex items-center cursor-pointer'
                                                     onClick={() =>
-                                                        handleNavigateToProductDetail(item.id)
+                                                        handleNavigateToProductDetail(
+                                                            item.product.id
+                                                        )
                                                     }
                                                 >
                                                     <img
                                                         className='h-16 w-16 mr-4 rounded-lg'
-                                                        src={item.img[0]}
+                                                        src={item.product.img[0]}
                                                         alt='Product image'
                                                     />
                                                     <span className='w-32 lg:w-80 font-semibold'>
-                                                        {item.productName}
+                                                        {item.product.productName}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className='py-4 text-center'>{item.condition}</td>
-                                            <td className='py-4 text-center'>{item.color}</td>
                                             <td className='py-4 text-center'>
-                                                {formatPrice(item.price)}
+                                                {item.product.condition}
+                                            </td>
+                                            <td className='py-4 text-center'>
+                                                {item.product.color}
+                                            </td>
+                                            <td className='py-4 text-center'>
+                                                {formatPrice(item.product.price)}
                                             </td>
                                             <td className='py-4'>
                                                 <div className='flex items-center justify-center'>
@@ -200,7 +226,7 @@ export default function DashboardCart() {
                                                         onClick={() =>
                                                             handleChangeQuantity(
                                                                 'decrease',
-                                                                item.id
+                                                                item.product.id
                                                             )
                                                         }
                                                         className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
@@ -213,7 +239,8 @@ export default function DashboardCart() {
                                                         {
                                                             productCartItem.find(
                                                                 (product) =>
-                                                                    product.idProduct === item.id
+                                                                    product.idProduct ===
+                                                                    item.product.id
                                                             ).quantity
                                                         }
                                                     </span>
@@ -222,7 +249,7 @@ export default function DashboardCart() {
                                                         onClick={() =>
                                                             handleChangeQuantity(
                                                                 'increase',
-                                                                item.id
+                                                                item.product.id
                                                             )
                                                         }
                                                         className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
@@ -234,17 +261,18 @@ export default function DashboardCart() {
                                             </td>
                                             <td className='py-4 text-center'>
                                                 {formatPrice(
-                                                    item.price *
+                                                    item.product.price *
                                                         productCartItem.find(
                                                             (product) =>
-                                                                product.idProduct === item.id
+                                                                product.idProduct ===
+                                                                item.product.id
                                                         ).quantity
                                                 )}
                                             </td>
                                             <td className='pt-2 text-center'>
                                                 <button
                                                     onClick={() => {
-                                                        setIdProductToDelete(item.id);
+                                                        setIdProductToDelete(item.product.id);
                                                         setShowModalDeleteProduct(true);
                                                     }}
                                                 >
