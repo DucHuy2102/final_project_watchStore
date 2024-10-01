@@ -1,5 +1,6 @@
 import {
-    Navbar_CardProduct_Component,
+    Breadcrumb_Component,
+    FilterSortPanel_Component,
     Pagination_Component,
     ProductCard_Component,
 } from '../../components/exportComponent';
@@ -70,7 +71,26 @@ export default function DashboardProduct() {
 
     return (
         <div className='min-h-screen p-5 w-full'>
-            <Navbar_CardProduct_Component totalProducts={totalProducts} />
+            <div
+                className='text-white w-full border-b border-gray-200 dark:border-gray-600 pb-4
+        flex flex-col items-center justify-between gap-y-2 sm:flex-row sm:px-5'
+            >
+                <Breadcrumb_Component displayName={'Sản phẩm'} />
+
+                {searchParams.size !== 0 && totalProducts > 0 ? (
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg'>
+                        Tìm được <span className='text-teal-500 font-bold'>{totalProducts}</span>{' '}
+                        sản phẩm khớp với bộ lọc
+                    </span>
+                ) : (
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg'>
+                        Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản
+                        phẩm
+                    </span>
+                )}
+
+                <FilterSortPanel_Component />
+            </div>
 
             {products?.length > 0 ? (
                 <div

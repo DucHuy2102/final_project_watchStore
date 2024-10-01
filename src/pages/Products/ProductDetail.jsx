@@ -280,7 +280,7 @@ export default function ProductDetail() {
 
     return (
         <div className='p-6 lg:max-w-7xl max-w-4xl mx-auto'>
-            <Breadcrumb_Component />
+            <Breadcrumb_Component displayName={productName} />
 
             {/* top: images, info product & 2 buttons */}
             <div
