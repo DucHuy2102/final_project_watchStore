@@ -10,6 +10,7 @@ import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { DeliveryTo_Component, Vouchers_Component } from '../../components/exportComponent';
 import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
+import { FiMinus } from 'react-icons/fi';
 
 // format price to VND
 const formatPrice = (price) =>
@@ -323,13 +324,32 @@ export default function DashboardCart() {
 
                             <div className='flex justify-between mb-2 text-md'>
                                 <span>Giảm giá từ Deal</span>
-                                <span>0 ₫</span>
+                                <div className='text-green-500 font-medium flex justify-center items-center gap-x-1'>
+                                    <FiMinus />
+                                    <span>
+                                        {formatPrice(
+                                            productCartItem.reduce(
+                                                (total, item) =>
+                                                    total + item.discoutPrice * item.quantity,
+                                                0
+                                            )
+                                        )}
+                                    </span>
+                                </div>
                             </div>
 
                             <div className='my-2 h-[1px] bg-gray-300 dark:bg-gray-500' />
                             <div className='flex justify-between mb-3 text-xl font-semibold'>
                                 <span>Tổng tiền</span>
-                                <span>{formatPrice(totalPrice)}</span>
+                                <span className='text-blue-500 font-semibold'>
+                                    {formatPrice(
+                                        totalPrice -
+                                            productCartItem.reduce(
+                                                (total, item) => total + item.discoutPrice,
+                                                0
+                                            )
+                                    )}
+                                </span>
                             </div>
 
                             <button

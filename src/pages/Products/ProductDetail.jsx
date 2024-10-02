@@ -75,6 +75,7 @@ export default function ProductDetail() {
     const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
+    const [moreProduct, setMoreProduct] = useState([]);
 
     // call API to get product detail by productId
     useEffect(() => {
@@ -117,7 +118,27 @@ export default function ProductDetail() {
         weight,
         color,
         genderUser,
+        category,
     } = product;
+
+    // get more product of the same brand
+    useEffect(() => {
+        const getMoreProduct = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/category`, {
+                    params: { idCategory: category },
+                });
+                if (res?.status === 200) {
+                    const { data } = res;
+                    console.log('-->', data);
+                    setMoreProduct(data);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getMoreProduct();
+    }, [category]);
 
     // loading
     if (loading) {
@@ -213,13 +234,11 @@ export default function ProductDetail() {
     const percentDiscount =
         discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
 
-    // more product of the same brand
-
     // navgigate to another product detail page
-    // const handleNavigateToProductDetail = (productId) => {
-    //     const navigateProduct = moreProduct.find((item) => item.id === productId);
-    //     navigate(`/product-detail/${productId}`);
-    // };
+    const handleNavigateToProductDetail = (productId) => {
+        console.log(productId);
+        navigate(`/product-detail/${productId}`);
+    };
 
     // handle verify user to buy now product:
     // if user not login, show modal to login page
@@ -261,6 +280,7 @@ export default function ProductDetail() {
                         idProduct: product.id,
                         productItem: product,
                         quantity: quantityProduct,
+                        discountPrice: discount,
                     })
                 );
                 toast.success('Đã thêm sản phẩm vào giỏ hàng');
@@ -285,7 +305,7 @@ export default function ProductDetail() {
             {/* top: images, info product & 2 buttons */}
             <div
                 className='mt-1 grid items-start grid-cols-1 md:grid-cols-2 lg:grid-cols-5
-    gap-x-5 gap-y-5 rounded-lg shadow-md sm:shadow-lg sm:shadow-gray-200 dark:shadow-gray-800 sm:px-5 sm:py-3'
+    gap-x-5 gap-y-5 rounded-lg sm:px-5 sm:py-3'
             >
                 {/* image product */}
                 <div className='w-full md:col-span-1 lg:col-span-3 lg:sticky top-0 text-center'>
@@ -437,7 +457,7 @@ export default function ProductDetail() {
                     <div className='max-w-5xl dark:max-w-7xl mx-auto bg-black dark:bg-gray-200 h-[1px] absolute inset-x-0 top-1/2 transform -translate-y-1/2' />
                 </div>
 
-                {/* <Swiper
+                <Swiper
                     className='mt-2 w-full flex items-center px-4 py-4 sm:py-2 bg-gray-100 dark:bg-gray-900'
                     spaceBetween={20}
                     slidesPerView={1}
@@ -450,8 +470,8 @@ export default function ProductDetail() {
                         1280: { slidesPerView: 4 },
                     }}
                 >
-                    {moreProduct?.map((product) => (
-                        <SwiperSlide key={product.id}>
+                    {moreProduct?.map((product, index) => (
+                        <SwiperSlide key={index}>
                             <div
                                 className='bg-white p-4 min-h-[60vh] rounded-lg 
                                 shadow-md hover:shadow-lg transition-shadow cursor-pointer'
@@ -475,7 +495,7 @@ export default function ProductDetail() {
                             </div>
                         </SwiperSlide>
                     ))}
-                </Swiper> */}
+                </Swiper>
 
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4 dark:bg-gray-900'>
                     {prProduct.map((item) => (

@@ -204,7 +204,7 @@ export default function Login() {
                         )}
                     </Button>
                 </form>
-                <div className='w-full flex justify-between items-center mt-6'>
+                <div className='w-full flex flex-col sm:flex-row justify-between items-center gap-y-3 sm:gap-y-0 mt-6'>
                     <div className='flex gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400'>
                         <span>Bạn chưa có tài khoản?</span>
                         <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
@@ -222,7 +222,7 @@ export default function Login() {
                             className='rounded-full dark:bg-white'
                             onClick={() => loginGoogle()}
                         >
-                            <FcGoogle size={'30px'} />
+                            <FcGoogle size={'35px'} />
                         </button>
                         <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
                             hoặc

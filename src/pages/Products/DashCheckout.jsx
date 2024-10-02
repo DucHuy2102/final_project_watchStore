@@ -57,8 +57,6 @@ export default function DashCheckout() {
 
     return (
         <div className='mx-auto min-h-screen py-8 px-4'>
-            {/* <h1 className='text-3xl text-center font-bold'>Thanh toán đơn hàng</h1> */}
-
             <div className='lg:flex justify-between gap-2'>
                 <div className='lg:w-3/4'>
                     <div className='shadow-md rounded-lg mb-4'>
