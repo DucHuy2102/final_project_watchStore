@@ -1,15 +1,19 @@
 import { FaArrowRight } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function ShopNow() {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    // const handleFilterProduct = (value) => {
-    //     dispatch(filterProducts([{ key: value, title: 'Đối tượng' }]));
-    //     navigate('/products');
-    // };
+    const handleFilterProduct = (value) => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('gender', value);
+        setSearchParams(newSearchParams);
+        navigate({
+            pathname: '/products',
+            search: `?${newSearchParams.toString()}`,
+        });
+    };
 
     return (
         <div className='mt-7 font-semibold'>
@@ -24,6 +28,7 @@ export default function ShopNow() {
                     </div>
                     <div className='absolute bottom-10 inset-x-0 flex justify-center items-center p-4'>
                         <button
+                            onClick={() => handleFilterProduct('Nam')}
                             type='button'
                             className='w-full max-w-xs group inline-flex items-center justify-center rounded-md bg-white px-6 py-4 text-lg font-semibold text-black transition-all duration-500 hover:bg-gray-800 hover:text-white'
                         >
@@ -43,6 +48,7 @@ export default function ShopNow() {
                     </div>
                     <div className='absolute bottom-10 inset-x-0 flex justify-center items-center p-4'>
                         <button
+                            onClick={() => handleFilterProduct('Nữ')}
                             type='button'
                             className='w-full max-w-xs group inline-flex items-center justify-center rounded-md bg-white px-6 py-4 text-lg font-semibold text-black transition-all duration-500 hover:bg-gray-800 hover:text-white'
                         >

@@ -38,6 +38,10 @@ export default function DashboardCart() {
 
     // call API update cart when change quantity
     const updateCartApiCall = async (updateCartItem) => {
+        if (!tokenUser) {
+            console.log('Token user is null');
+            return;
+        }
         try {
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/cart/update-cart`,
@@ -57,19 +61,12 @@ export default function DashboardCart() {
         }
     };
 
-    // debounce update cart
+    // debounce update cart after 500ms when change quantity
     const debouncedUpdateCart = useRef(
         debounce((updatedCartItem) => {
             updateCartApiCall(updatedCartItem);
         }, 500)
     ).current;
-
-    // update cart when quantity change
-    useEffect(() => {
-        return () => {
-            debouncedUpdateCart.cancel();
-        };
-    }, [debouncedUpdateCart]);
 
     // get product cart item to update cart
     // when unmount page or change quantity
@@ -78,21 +75,33 @@ export default function DashboardCart() {
             itemId: idCart,
             quantity: quantity,
         }));
+        if (tokenUser && updatedCartItem.length > 0) {
+            debouncedUpdateCart(updatedCartItem);
+        }
+    }, [cartItem, debouncedUpdateCart, tokenUser]);
 
-        debouncedUpdateCart(updatedCartItem);
-    }, [cartItem, debouncedUpdateCart]);
+    // when unmount page, cancel debounce
+    useEffect(() => {
+        return () => {
+            debouncedUpdateCart.cancel();
+        };
+    }, [debouncedUpdateCart]);
 
     // handle change quantity
     const handleChangeQuantity = useCallback(
         (type, productId) => {
-            dispatch(changeProductQuantity({ type, productId }));
+            if (tokenUser) {
+                dispatch(changeProductQuantity({ type, productId }));
+            }
         },
-        [dispatch]
+        [dispatch, tokenUser]
     );
 
     // handle delete product from cart
     const handleDeleteProductFromCart = () => {
-        dispatch(deleteProductFromCart(idProductToDelete));
+        if (tokenUser) {
+            dispatch(deleteProductFromCart(idProductToDelete));
+        }
         setShowModalDeleteProduct(false);
     };
 
@@ -125,7 +134,7 @@ export default function DashboardCart() {
         <div className='mx-auto px-4 py-8'>
             {totalQuantity === 0 ? (
                 <div className='h-[85vh] flex flex-col items-center justify-center gap-y-6'>
-                    <span className='text-4xl font-bold text-gray-800'>
+                    <span className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
                         Đẳng Cấp Thời Gian, Giá Trị Vượt Trội
                     </span>
                     <img
@@ -219,7 +228,17 @@ export default function DashboardCart() {
                                                 {item.product.color}
                                             </td>
                                             <td className='py-4 text-center'>
-                                                {formatPrice(item.product.price)}
+                                                <div className='flex flex-col items-center justify-center gap-y-1'>
+                                                    <span className='text-red-500 font-medium text-sm line-through'>
+                                                        {formatPrice(item.product.price)}
+                                                    </span>
+                                                    <span className='text-blue-500 font-medium text-lg'>
+                                                        {formatPrice(
+                                                            item.product.price -
+                                                                item.product.discount
+                                                        )}
+                                                    </span>
+                                                </div>
                                             </td>
                                             <td className='py-4'>
                                                 <div className='flex items-center justify-center'>
@@ -262,7 +281,7 @@ export default function DashboardCart() {
                                             </td>
                                             <td className='py-4 text-center'>
                                                 {formatPrice(
-                                                    item.product.price *
+                                                    (item.product.price - item.product.discount) *
                                                         productCartItem.find(
                                                             (product) =>
                                                                 product.idProduct ===

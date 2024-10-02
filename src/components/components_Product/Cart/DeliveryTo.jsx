@@ -6,12 +6,12 @@ import { CiHome, CiUser } from 'react-icons/ci';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { user_UpdateAddress, user_UpdateProfile } from '../../../redux/slices/userSlice';
+import { user_UpdateProfile } from '../../../redux/slices/userSlice';
 
 export default function DeliveryTo() {
     // get user from redux store to display the current user's address
-    const tokenUser = useSelector((state) => state.user.access_token);
-    const currentUser = useSelector((state) => state.user.user);
+    const tokenUser = useSelector((state) => state.user.access_token ?? '');
+    const currentUser = useSelector((state) => state.user.user ?? {});
     const { id, access_token, admin, state, username, verified, ...rest } = currentUser;
 
     // states
@@ -169,15 +169,15 @@ export default function DeliveryTo() {
                 <div className='w-full flex items-center gap-x-2'>
                     <CiUser className='text-blue-700 bg-blue-300 rounded-md p-[1px] h-5 w-8' />
                     <span className='flex text-md font-medium'>
-                        {currentUser.fullName}{' '}
+                        {currentUser?.fullName}{' '}
                         <span className='border border-gray-300 dark:border-gray-600 mx-2' />
-                        {currentUser.phone}
+                        {currentUser?.phone}
                     </span>
                 </div>
                 <div className='w-full flex items-start gap-x-2'>
                     <CiHome className='text-green-700 bg-green-300 rounded-md p-[1px] h-5 w-8' />
                     <span className='w-3/4 text-sm tracking-wide font-medium text-gray-500 dark:text-gray-400'>
-                        {currentUser.address}
+                        {currentUser?.address}
                     </span>
                 </div>
             </div>

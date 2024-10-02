@@ -17,7 +17,6 @@ import { PasswordStrengthMeter } from '../../components/exportComponent';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { Select } from 'antd';
 import { FaBan } from 'react-icons/fa';
-import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Profile_Component() {
     // get token user from redux store
@@ -247,7 +246,6 @@ export default function Profile_Component() {
     // sign out function
     const handleSignOutAccount = async () => {
         dispatch(user_SignOut());
-        dispatch(resetCart());
     };
 
     // loading

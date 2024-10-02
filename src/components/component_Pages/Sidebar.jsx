@@ -12,7 +12,6 @@ import {
 } from 'react-icons/hi';
 import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
-import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Sidebar_Component() {
     // state
@@ -34,7 +33,6 @@ export default function Sidebar_Component() {
     // sign out function
     const handleSignOutAccount = async () => {
         dispatch(user_SignOut());
-        dispatch(resetCart());
     };
 
     return (

@@ -8,8 +8,8 @@ import { IoIosCart, IoIosHome } from 'react-icons/io';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 import { Badge } from 'antd';
 import { user_SignOut } from '../../redux/slices/userSlice';
-import { resetCart } from '../../redux/slices/cartSlice';
 import { useEffect, useState } from 'react';
+import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Header_Component() {
     // states
