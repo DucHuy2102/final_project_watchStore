@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { Modal } from 'flowbite-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RiCoupon3Fill } from 'react-icons/ri';
 import CardVoucherFull from './CardVoucherFull';
 import CardVoucherMini from './CardVoucherMini';
 
-export default function Vouchers() {
+export default function Vouchers({ onSelectVoucher }) {
     // state
     const [showModalVoucher, setShowModalVoucher] = useState(false);
     const [vouchers, setVouchers] = useState([]);
@@ -26,10 +26,6 @@ export default function Vouchers() {
         getAllVouchers();
     }, []);
 
-    const applyVoucher = () => {
-        console.log('Apply voucher');
-    };
-
     return (
         <>
             <div
@@ -44,7 +40,7 @@ export default function Vouchers() {
                     </span>
                 </div>
                 {vouchers?.length > 0 && (
-                    <CardVoucherMini voucher={vouchers[0]} onApplyVoucher={applyVoucher} />
+                    <CardVoucherMini voucher={vouchers[0]} onApplyVoucher={onSelectVoucher} />
                 )}
                 <div
                     onClick={() => setShowModalVoucher(true)}
@@ -75,7 +71,7 @@ export default function Vouchers() {
                                 <CardVoucherFull
                                     key={voucher.id}
                                     voucher={voucher}
-                                    onApplyVoucher={applyVoucher}
+                                    onApplyVoucher={onSelectVoucher}
                                 />
                             );
                         })}

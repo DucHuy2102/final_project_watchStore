@@ -17,23 +17,38 @@ const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 export default function DashboardCart() {
-    // redux
+    // ================================================ Get data from redux store ================================================
     const tokenUser = useSelector((state) => state.user.access_token);
     const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
     const totalPrice = useSelector((state) => state.cart.cartTotalAmount);
     const productCartItem = useSelector((state) => state.cart.cartItem);
-    const cartItem = useSelector((state) => state.cart.cartItem);
-    const productItem = useMemo(() => {
-        return cartItem.map((item) => ({
-            product: item.productItem,
-        }));
-    }, [cartItem]);
 
-    // state
+    // get product info from productCartItem
+    const infoProduct = useMemo(() => {
+        return productCartItem.map((item) => item.productItem);
+    }, [productCartItem]);
+
+    // calculate total discount price of all product in cart
+    const totalDiscountPrice = useMemo(() => {
+        return infoProduct.reduce((total, item) => {
+            const qualityProduct = productCartItem.find(
+                (product) => product.idProduct === item.id
+            ).quantity;
+            return total + item.discount * qualityProduct;
+        }, 0);
+    }, [infoProduct, productCartItem]);
+
+    // calculate total price of all product in cart
+    const totalAmountToPay = useMemo(() => {
+        return totalPrice - totalDiscountPrice;
+    }, [totalPrice, totalDiscountPrice]);
+
+    // ================================================ State ================================================
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
     const [idProductToDelete, setIdProductToDelete] = useState(null);
+    const [selectedVoucher, setSelectedVoucher] = useState('');
     const { pathname } = useLocation();
 
     // call API update cart when change quantity
@@ -53,9 +68,6 @@ export default function DashboardCart() {
                     },
                 }
             );
-            if (res.status === 200) {
-                console.log('Update cart success');
-            }
         } catch (error) {
             console.log(error);
         }
@@ -71,14 +83,14 @@ export default function DashboardCart() {
     // get product cart item to update cart
     // when unmount page or change quantity
     useEffect(() => {
-        const updatedCartItem = cartItem.map(({ idCart, quantity }) => ({
+        const updatedCartItem = productCartItem.map(({ idCart, quantity }) => ({
             itemId: idCart,
             quantity: quantity,
         }));
         if (tokenUser && updatedCartItem.length > 0) {
             debouncedUpdateCart(updatedCartItem);
         }
-    }, [cartItem, debouncedUpdateCart, tokenUser]);
+    }, [productCartItem, debouncedUpdateCart, tokenUser]);
 
     // when unmount page, cancel debounce
     useEffect(() => {
@@ -105,29 +117,35 @@ export default function DashboardCart() {
         setShowModalDeleteProduct(false);
     };
 
-    // function navigate to product detail
-    const handleNavigateToProductDetail = (id) => {
-        navigate(`/product-detail/${id}`);
+    // function navigate to login page
+    const handleNavigateToLoginPage = () => {
+        navigate('/login', { state: { from: pathname } });
     };
 
+    // ================================================ Checkout product ================================================
     // function navigate to checkout page
     const handleNavigateToCheckoutPage = () => {
+        // console.log('Navigate to checkout page', {
+        //     productItems: infoProduct,
+        //     totalPrice: totalPrice,
+        //     totalDiscountPrice: totalDiscountPrice,
+        //     totalAmountToPay: totalAmountToPay,
+        //     totalQuantity: totalQuantity,
+        //     voucher: selectedVoucher,
+        //     isBuyNow: false,
+        // });
         dispatch(
             setProductToCheckout({
                 productItems: productCartItem,
                 totalPrice: totalPrice,
+                totalDiscountPrice: totalDiscountPrice,
+                totalAmountToPay: totalAmountToPay,
                 totalQuantity: totalQuantity,
-                shipping: 0,
-                voucher: null,
+                voucher: selectedVoucher,
                 isBuyNow: false,
             })
         );
         navigate('/checkout');
-    };
-
-    // function navigate to login page
-    const handleNavigateToLoginPage = () => {
-        navigate('/login', { state: { from: pathname } });
     };
 
     return (
@@ -200,132 +218,127 @@ export default function DashboardCart() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {productItem?.map((item, index) => (
-                                        <tr key={index}>
-                                            <td className='py-4'>
-                                                <div
-                                                    className='flex items-center cursor-pointer'
-                                                    onClick={() =>
-                                                        handleNavigateToProductDetail(
-                                                            item.product.id
-                                                        )
-                                                    }
-                                                >
-                                                    <img
-                                                        className='h-16 w-16 mr-4 rounded-lg'
-                                                        src={item.product.img[0]}
-                                                        alt='Product image'
-                                                    />
-                                                    <span className='w-32 lg:w-80 font-semibold'>
-                                                        {item.product.productName}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className='py-4 text-center'>
-                                                {item.product.condition}
-                                            </td>
-                                            <td className='py-4 text-center'>
-                                                {item.product.color}
-                                            </td>
-                                            <td className='py-4 text-center'>
-                                                <div className='flex flex-col items-center justify-center gap-y-1'>
-                                                    <span className='text-red-500 font-medium text-sm line-through'>
-                                                        {formatPrice(item.product.price)}
-                                                    </span>
-                                                    <span className='text-blue-500 font-medium text-lg'>
-                                                        {formatPrice(
-                                                            item.product.price -
-                                                                item.product.discount
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className='py-4'>
-                                                <div className='flex items-center justify-center'>
-                                                    <button
+                                    {infoProduct?.map((item, index) => {
+                                        const currentSellPrice = item.price - item.discount;
+                                        const qualityProduct = productCartItem.find(
+                                            (product) => product.idProduct === item.id
+                                        ).quantity;
+                                        const totalPrice =
+                                            (item.price - item.discount) * qualityProduct;
+                                        return (
+                                            <tr key={index}>
+                                                <td className='py-4'>
+                                                    <div
+                                                        className='flex items-center cursor-pointer'
                                                         onClick={() =>
-                                                            handleChangeQuantity(
-                                                                'decrease',
-                                                                item.product.id
-                                                            )
+                                                            navigate(`/product-detail/${item.id}`)
                                                         }
-                                                        className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
-                                                    text-md py-2 px-2 mr-2 font-bold border-gray-400'
                                                     >
-                                                        <FaMinus />
-                                                    </button>
-
-                                                    <span className='text-center w-8'>
-                                                        {
-                                                            productCartItem.find(
-                                                                (product) =>
-                                                                    product.idProduct ===
-                                                                    item.product.id
-                                                            ).quantity
-                                                        }
-                                                    </span>
-
-                                                    <button
-                                                        onClick={() =>
-                                                            handleChangeQuantity(
-                                                                'increase',
-                                                                item.product.id
-                                                            )
-                                                        }
-                                                        className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
-                                                    text-md py-2 px-2 ml-2 font-bold border-gray-400'
-                                                    >
-                                                        <FaPlus />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td className='py-4 text-center'>
-                                                {formatPrice(
-                                                    (item.product.price - item.product.discount) *
-                                                        productCartItem.find(
-                                                            (product) =>
-                                                                product.idProduct ===
-                                                                item.product.id
-                                                        ).quantity
-                                                )}
-                                            </td>
-                                            <td className='pt-2 text-center'>
-                                                <button
-                                                    onClick={() => {
-                                                        setIdProductToDelete(item.product.id);
-                                                        setShowModalDeleteProduct(true);
-                                                    }}
-                                                >
-                                                    <MdDeleteOutline size={20} />
-                                                </button>
-                                            </td>
-                                            <Modal show={showModalDeleteProduct} size='lg' popup>
-                                                <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                                                    <CiWarning size='70px' color={'red'} />
-                                                    <span className='text-lg font-medium text-black'>
-                                                        Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?
-                                                    </span>
-                                                    <div className='w-full flex justify-between items-center gap-x-5'>
-                                                        <Button
-                                                            outline
-                                                            className='w-full'
-                                                            onClick={() =>
-                                                                setShowModalDeleteProduct(false)
-                                                            }
-                                                        >
-                                                            Hủy
-                                                        </Button>
-                                                        <Button
-                                                            className='w-full'
-                                                            onClick={handleDeleteProductFromCart}
-                                                        >
-                                                            Xóa
-                                                        </Button>
+                                                        <img
+                                                            className='h-16 w-16 mr-4 rounded-lg'
+                                                            src={item.img[0]}
+                                                            alt='Product image'
+                                                        />
+                                                        <span className='w-32 lg:w-80 font-semibold'>
+                                                            {item.productName}
+                                                        </span>
                                                     </div>
-                                                </Modal.Body>
-                                            </Modal>
-                                        </tr>
-                                    ))}
+                                                </td>
+                                                <td className='py-4 text-center'>
+                                                    {item.condition}
+                                                </td>
+                                                <td className='py-4 text-center'>{item.color}</td>
+                                                <td className='py-4 text-center'>
+                                                    <div className='flex flex-col items-center justify-center gap-y-1'>
+                                                        <span className='text-red-500 font-medium text-sm line-through'>
+                                                            {formatPrice(item.price)}
+                                                        </span>
+                                                        <span className='text-blue-500 font-medium text-lg'>
+                                                            {formatPrice(currentSellPrice)}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className='py-4'>
+                                                    <div className='flex items-center justify-center'>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleChangeQuantity(
+                                                                    'decrease',
+                                                                    item.id
+                                                                )
+                                                            }
+                                                            className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
+                                                text-md py-2 px-2 mr-2 font-bold border-gray-400'
+                                                        >
+                                                            <FaMinus />
+                                                        </button>
+
+                                                        <span className='text-center w-8'>
+                                                            {qualityProduct}
+                                                        </span>
+
+                                                        <button
+                                                            onClick={() =>
+                                                                handleChangeQuantity(
+                                                                    'increase',
+                                                                    item.id
+                                                                )
+                                                            }
+                                                            className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
+                                                text-md py-2 px-2 ml-2 font-bold border-gray-400'
+                                                        >
+                                                            <FaPlus />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td className='py-4 text-center'>
+                                                    {formatPrice(totalPrice)}
+                                                </td>
+                                                <td className='pt-2 text-center'>
+                                                    <button
+                                                        onClick={() => {
+                                                            setIdProductToDelete(item.id);
+                                                            setShowModalDeleteProduct(true);
+                                                        }}
+                                                    >
+                                                        <MdDeleteOutline size={20} />
+                                                    </button>
+                                                </td>
+                                                <Modal
+                                                    show={showModalDeleteProduct}
+                                                    size='lg'
+                                                    popup
+                                                >
+                                                    <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                                                        <CiWarning size='70px' color={'red'} />
+                                                        <span className='text-lg font-medium text-black'>
+                                                            Bạn có muốn xóa sản phẩm này khỏi giỏ
+                                                            hàng?
+                                                        </span>
+                                                        <div className='w-full flex justify-between items-center gap-x-5'>
+                                                            <Button
+                                                                outline
+                                                                className='w-full'
+                                                                onClick={() =>
+                                                                    setShowModalDeleteProduct(false)
+                                                                }
+                                                            >
+                                                                Hủy
+                                                            </Button>
+                                                            <Button
+                                                                className='w-full'
+                                                                onClick={
+                                                                    handleDeleteProductFromCart
+                                                                }
+                                                            >
+                                                                Xóa
+                                                            </Button>
+                                                        </div>
+                                                    </Modal.Body>
+                                                </Modal>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -334,40 +347,29 @@ export default function DashboardCart() {
                     {/* Summary & Vouchers Section */}
                     <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-5'>
                         <DeliveryTo_Component />
-                        <Vouchers_Component />
+                        <Vouchers_Component onSelectVoucher={setSelectedVoucher} />
                         <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
                             <div className='flex justify-between mb-2 text-md font-medium'>
                                 <span>Tạm tính</span>
-                                <span>{formatPrice(totalPrice)}</span>
+                                <span className='text-red-500 font-semibold'>
+                                    {formatPrice(totalPrice)}
+                                </span>
                             </div>
 
                             <div className='flex justify-between mb-2 text-md'>
                                 <span>Giảm giá từ Deal</span>
                                 <div className='text-green-500 font-medium flex justify-center items-center gap-x-1'>
                                     <FiMinus />
-                                    <span>
-                                        {formatPrice(
-                                            productCartItem.reduce(
-                                                (total, item) =>
-                                                    total + item.discoutPrice * item.quantity,
-                                                0
-                                            )
-                                        )}
-                                    </span>
+                                    <span>{formatPrice(totalDiscountPrice)}</span>
                                 </div>
                             </div>
 
                             <div className='my-2 h-[1px] bg-gray-300 dark:bg-gray-500' />
+
                             <div className='flex justify-between mb-3 text-xl font-semibold'>
                                 <span>Tổng tiền</span>
                                 <span className='text-blue-500 font-semibold'>
-                                    {formatPrice(
-                                        totalPrice -
-                                            productCartItem.reduce(
-                                                (total, item) => total + item.discoutPrice,
-                                                0
-                                            )
-                                    )}
+                                    {formatPrice(totalAmountToPay)}
                                 </span>
                             </div>
 

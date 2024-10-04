@@ -105,7 +105,7 @@ export default function DashboardProduct() {
             ) : (
                 <div className='w-full flex flex-col justify-center items-center'>
                     <img
-                        src={'../public/assets/productNoFound.jpg'}
+                        src={'../assets/productNoFound.jpg'}
                         alt=''
                         className='h-96 w-auto object-cover'
                     />

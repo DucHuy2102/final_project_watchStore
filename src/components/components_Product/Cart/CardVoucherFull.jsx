@@ -9,10 +9,6 @@ export default function CardVoucherFull({ voucher, onApplyVoucher }) {
         date.getMonth() + 1
     ).padStart(2, '0')}/${date.getFullYear()}`;
 
-    const applyVoucher = () => {
-        onApplyVoucher(voucher);
-    };
-
     return (
         <div
             className='w-full border dark:border-gray-700 shadow-sm shadow-gray-200
@@ -46,7 +42,7 @@ export default function CardVoucherFull({ voucher, onApplyVoucher }) {
                 <div className='flex items-center justify-between'>
                     <span className='text-gray-500 text-sm'>HSD: {formattedDate}</span>
                     <button
-                        onClick={applyVoucher}
+                        onClick={() => onApplyVoucher(voucher.id)}
                         className='rounded-lg bg-blue-500 text-white text-sm px-3 py-[3px]'
                     >
                         Áp dụng

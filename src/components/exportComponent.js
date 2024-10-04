@@ -21,5 +21,6 @@ export { default as FilterSortPanel_Component } from './components_Product/Filte
 export { default as Chip_Filter_Component } from './components_Product/Chip_Filter';
 export { default as DeliveryTo_Component } from './components_Product/Cart/DeliveryTo';
 export { default as Vouchers_Component } from './components_Product/Cart/Vouchers';
+export { default as ProductInfo_CheckoutPage_Component } from './components_Product/ProductInfo_CheckoutPage';
 
 // Admin components

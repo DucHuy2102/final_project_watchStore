@@ -1,512 +1,536 @@
-import { Button, Checkbox, Label, Modal, Textarea, TextInput } from 'flowbite-react';
-import { useState } from 'react';
+// import { useMemo, useState } from 'react';
+// import { useSelector } from 'react-redux';
+// import { useNavigate } from 'react-router-dom';
+// import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
+// import { FaTimes } from 'react-icons/fa';
+// import { RiSave3Fill } from 'react-icons/ri';
+// import { FiMinus } from 'react-icons/fi';
+// import { Button, Checkbox, Label, Modal, Textarea, TextInput } from 'flowbite-react';
+// import { ProductInfo_CheckoutPage_Component } from '../../components/exportComponent';
+
+// const formatPrice = (price) =>
+//     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
+// const PaymentMethod = ({ id, label, imageSrc }) => (
+//     <div className='flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm'>
+//         <Checkbox id={id} />
+//         <Label htmlFor={id} className='flex items-center gap-x-2 text-md cursor-pointer'>
+//             <img src={imageSrc} alt='' className='w-8 h-8 object-contain' />
+//             {label}
+//         </Label>
+//     </div>
+// );
+
+// const InfoField = ({ label, icon: Icon, value, onChange, disabled }) => (
+//     <div className='mb-4'>
+//         <Label value={label} className='text-gray-700 dark:text-gray-300 mb-1 block' />
+//         <TextInput
+//             icon={Icon}
+//             type='text'
+//             className='w-full'
+//             value={value}
+//             onChange={onChange}
+//             disabled={disabled}
+//         />
+//     </div>
+// );
+
+// export default function DashCheckout() {
+//     const navigate = useNavigate();
+//     const [isEditing, setIsEditing] = useState(false);
+//     const [showModalEditAddress, setShowModalEditAddress] = useState(false);
+//     const { totalPrice, totalDiscountPrice, totalAmountToPay, productItems } = useSelector(
+//         (state) => state.checkout
+//     );
+//     const currentUser = useSelector((state) => state.user.user);
+
+//     const [formData, setFormData] = useState({
+//         fullName: currentUser.fullName || '',
+//         email: currentUser.email || '',
+//         phone: currentUser.phone || '',
+//         address: currentUser.address || '',
+//     });
+
+//     const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
+
+//     const shippingFee = 0;
+
+//     return (
+//         <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>
+//             <div className='max-w-7xl mx-auto'>
+//                 <div className='flex flex-col lg:flex-row gap-8'>
+//                     {/* Left Column */}
+//                     <div className='w-full lg:w-3/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
+//                         <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6'>
+//                             Thông tin thanh toán
+//                         </h2>
+//                         <div className='mb-8'>
+//                             <h3 className='font-semibold text-lg text-gray-700 dark:text-gray-300 mb-4'>
+//                                 Phương thức thanh toán
+//                             </h3>
+//                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+//                                 <PaymentMethod
+//                                     id='cash'
+//                                     label='Tiền mặt'
+//                                     imageSrc='../assets/payCash.png'
+//                                 />
+//                                 <PaymentMethod
+//                                     id='vnpay'
+//                                     label='VNPAY'
+//                                     imageSrc='../assets/vnpayPayment.jpg'
+//                                 />
+//                                 <PaymentMethod
+//                                     id='momo'
+//                                     label='Ví Momo'
+//                                     imageSrc='../assets/momoPayment.png'
+//                                 />
+//                                 <PaymentMethod
+//                                     id='credit'
+//                                     label='Thẻ tín dụng/Ghi nợ'
+//                                     imageSrc='../assets/creditCard.png'
+//                                 />
+//                             </div>
+//                         </div>
+//                         <div className='mb-6'>
+//                             <div className='flex items-center justify-between mb-4'>
+//                                 <h3 className='font-semibold text-lg text-gray-700 dark:text-gray-300'>
+//                                     Thông tin người nhận
+//                                 </h3>
+//                                 {!isEditing ? (
+//                                     <div className='flex gap-2'>
+//                                         <Button
+//                                             onClick={() => setIsEditing(true)}
+//                                             size='sm'
+//                                             outline
+//                                         >
+//                                             <CiEdit className='mr-2' />
+//                                             Chỉnh sửa
+//                                         </Button>
+//                                         <Button
+//                                             onClick={() => setShowModalEditAddress(true)}
+//                                             size='sm'
+//                                             outline
+//                                         >
+//                                             <CiEdit className='mr-2' />
+//                                             Gửi đến địa chỉ khác
+//                                         </Button>
+//                                     </div>
+//                                 ) : (
+//                                     <div className='flex gap-2'>
+//                                         <Button
+//                                             onClick={() => setIsEditing(false)}
+//                                             size='sm'
+//                                             outline
+//                                         >
+//                                             <FaTimes className='mr-2' />
+//                                             Hủy
+//                                         </Button>
+//                                         <Button
+//                                             onClick={() => {
+//                                                 /* Handle update */
+//                                             }}
+//                                             size='sm'
+//                                             outline
+//                                         >
+//                                             <RiSave3Fill className='mr-2' />
+//                                             Lưu
+//                                         </Button>
+//                                     </div>
+//                                 )}
+//                             </div>
+//                             <InfoField
+//                                 label='Họ và Tên'
+//                                 icon={CiUser}
+//                                 value={formData.fullName}
+//                                 onChange={(e) =>
+//                                     setFormData({ ...formData, fullName: e.target.value })
+//                                 }
+//                                 disabled={!isEditing}
+//                             />
+//                             <InfoField
+//                                 label='Email'
+//                                 icon={CiMail}
+//                                 value={formData.email}
+//                                 onChange={(e) =>
+//                                     setFormData({ ...formData, email: e.target.value.trim() })
+//                                 }
+//                                 disabled={!isEditing}
+//                             />
+//                             <InfoField
+//                                 label='Số điện thoại'
+//                                 icon={CiPhone}
+//                                 value={formData.phone}
+//                                 onChange={(e) => {
+//                                     const value = e.target.value;
+//                                     if (/^\d*$/.test(value) && value.length <= 10) {
+//                                         setFormData({ ...formData, phone: value.trim() });
+//                                     }
+//                                 }}
+//                                 disabled={!isEditing}
+//                             />
+//                             <InfoField
+//                                 label='Địa chỉ nhận hàng'
+//                                 icon={CiHome}
+//                                 value={formData.address}
+//                                 onChange={(e) =>
+//                                     setFormData({ ...formData, address: e.target.value })
+//                                 }
+//                                 disabled={!isEditing}
+//                             />
+//                         </div>
+//                     </div>
+
+//                     {/* Right Column */}
+//                     <div className='w-full lg:w-2/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
+//                         <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6'>
+//                             Thông tin đơn hàng
+//                         </h2>
+//                         <div className='space-y-4 mb-6'>
+//                             {infoProduct.map((_, index) => {
+//                                 return (
+//                                     <ProductInfo_CheckoutPage_Component
+//                                         key={index}
+//                                         dataProduct={productItems[index]}
+//                                     />
+//                                 );
+//                             })}
+//                         </div>
+//                         <div className='mb-6'>
+//                             <div className='flex items-center mb-4'>
+//                                 <TextInput
+//                                     type='text'
+//                                     placeholder='Mã khuyến mãi'
+//                                     className='flex-grow mr-2'
+//                                 />
+//                                 <Button color='blue'>Áp dụng</Button>
+//                             </div>
+//                         </div>
+//                         <div className='space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4'>
+//                             <div className='flex justify-between'>
+//                                 <span className='text-gray-600 dark:text-gray-400'>Tạm tính</span>
+//                                 <span className='font-semibold text-gray-800 dark:text-gray-200'>
+//                                     {formatPrice(totalPrice)}
+//                                 </span>
+//                             </div>
+//                             <div className='flex justify-between'>
+//                                 <span className='text-gray-600 dark:text-gray-400'>
+//                                     Phí vận chuyển
+//                                 </span>
+//                                 <span className='font-semibold text-gray-800 dark:text-gray-200'>
+//                                     {formatPrice(shippingFee)}
+//                                 </span>
+//                             </div>
+//                             <div className='flex justify-between'>
+//                                 <span className='text-gray-600 dark:text-gray-400'>Giảm giá</span>
+//                                 <span className='font-semibold text-green-600'>
+//                                     - {formatPrice(totalDiscountPrice)}
+//                                 </span>
+//                             </div>
+//                         </div>
+//                         <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
+//                             <div className='flex justify-between items-center mb-4'>
+//                                 <span className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
+//                                     Tổng cộng
+//                                 </span>
+//                                 <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
+//                                     {formatPrice(totalAmountToPay - shippingFee)}
+//                                 </span>
+//                             </div>
+//                             <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>
+//                                 (Đã bao gồm thuế VAT)
+//                             </p>
+//                             <Button
+//                                 color='blue'
+//                                 size='lg'
+//                                 className='w-full'
+//                                 onClick={() => navigate('/checkout')}
+//                             >
+//                                 Đặt hàng
+//                             </Button>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// }
+import React, { useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
-import { DeliveryTo_Component, Vouchers_Component } from '../../components/exportComponent';
 import { FaTimes } from 'react-icons/fa';
 import { RiSave3Fill } from 'react-icons/ri';
+import { Button, Checkbox, Label, TextInput } from 'flowbite-react';
+import { ProductInfo_CheckoutPage_Component } from '../../components/exportComponent';
 
-// format data products
-const formatData = (data) => {
-    let allProducts = [];
-    data?.forEach((item) => {
-        allProducts = allProducts.concat(item.products);
-    });
-    return allProducts;
-};
+const formatPrice = (price) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
+const PaymentMethod = ({ id, label, imageSrc }) => (
+    <div className='flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm'>
+        <Checkbox id={id} />
+        <Label htmlFor={id} className='flex items-center gap-x-2 text-md cursor-pointer'>
+            <img src={imageSrc} alt='' className='w-8 h-8 object-contain' />
+            {label}
+        </Label>
+    </div>
+);
+
+const InfoField = ({ label, icon: Icon, value, onChange, disabled }) => (
+    <div className='mb-4'>
+        <Label value={label} className='text-gray-700 dark:text-gray-300 mb-1 block' />
+        <TextInput
+            icon={Icon}
+            type='text'
+            className='w-full'
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+        />
+    </div>
+);
+
+const ReadOnlyField = ({ label, icon: Icon, value }) => (
+    <div className='mb-4'>
+        <Label value={label} className='text-gray-700 dark:text-gray-300 mb-1 block' />
+        <div className='flex items-center text-gray-800 dark:text-gray-200'>
+            <Icon className='mr-2' />
+            <span>{value}</span>
+        </div>
+    </div>
+);
 
 export default function DashCheckout() {
-    // redux
-    const tokenUser = useSelector((state) => state.user.access_token);
+    const navigate = useNavigate();
+    const [isEditing, setIsEditing] = useState(false);
+    const [showModalEditAddress, setShowModalEditAddress] = useState(false);
+    const { totalPrice, totalDiscountPrice, totalAmountToPay, productItems } = useSelector(
+        (state) => state.checkout
+    );
     const currentUser = useSelector((state) => state.user.user);
 
-    // state
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const [isEditting, setIsEditting] = useState(false);
-    const [showModalEditAddress, setShowModalEditAddress] = useState(false);
     const [formData, setFormData] = useState({
         fullName: currentUser.fullName || '',
         email: currentUser.email || '',
         phone: currentUser.phone || '',
         address: currentUser.address || '',
     });
-    const [formModal, setFormModal] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-    });
 
-    const handleEditAddress = () => {
-        setFormData({
-            fullName: formModal.fullName,
-            email: formModal.email,
-            phone: formModal.phone,
-            address: formModal.address,
-        });
-        setShowModalEditAddress(false);
+    const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
+
+    const shippingFee = 0;
+
+    const renderUserInfo = () => {
+        if (isEditing) {
+            return (
+                <>
+                    <InfoField
+                        label='Họ và Tên'
+                        icon={CiUser}
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        disabled={false}
+                    />
+                    <InfoField
+                        label='Email'
+                        icon={CiMail}
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
+                        disabled={false}
+                    />
+                    <InfoField
+                        label='Số điện thoại'
+                        icon={CiPhone}
+                        value={formData.phone}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (/^\d*$/.test(value) && value.length <= 10) {
+                                setFormData({ ...formData, phone: value.trim() });
+                            }
+                        }}
+                        disabled={false}
+                    />
+                    <InfoField
+                        label='Địa chỉ nhận hàng'
+                        icon={CiHome}
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        disabled={false}
+                    />
+                </>
+            );
+        } else {
+            return (
+                <div className='bg-gray-50 dark:bg-gray-700 p-4 rounded-lg'>
+                    <ReadOnlyField label='Họ và Tên' icon={CiUser} value={formData.fullName} />
+                    <ReadOnlyField label='Email' icon={CiMail} value={formData.email} />
+                    <ReadOnlyField label='Số điện thoại' icon={CiPhone} value={formData.phone} />
+                    <ReadOnlyField
+                        label='Địa chỉ nhận hàng'
+                        icon={CiHome}
+                        value={formData.address}
+                    />
+                </div>
+            );
+        }
     };
 
-    const handleUpdateInfo = async () => {};
-
-    const handleSubmitForm = async () => {};
-
-    const handleCheckout = async () => {};
-
     return (
-        <div className='mx-auto min-h-screen py-8 px-4'>
-            <div className='lg:flex justify-between gap-2'>
-                <div className='lg:w-3/4'>
-                    <div className='shadow-md rounded-lg mb-4'>
-                        <div className='px-6 py-4'>
-                            <div className='flex items-center justify-between mb-5'>
-                                <h4 className='text-xl font-semibold mb-5'>Thông tin cá nhân</h4>
-                                <div className='flex items-center justify-between gap-x-2'>
-                                    {!isEditting && (
-                                        <>
-                                            <Button onClick={() => setIsEditting(true)} outline>
-                                                <div className='flex items-center justify-center gap-x-1'>
-                                                    <CiEdit />
-                                                    <span>Chỉnh sửa</span>
-                                                </div>
-                                            </Button>
-                                            <Button
-                                                onClick={() => setShowModalEditAddress(true)}
-                                                outline
-                                            >
-                                                <div className='flex items-center justify-center gap-x-1'>
-                                                    <CiEdit />
-                                                    <span>Gửi đến địa chỉ khác</span>
-                                                </div>
-                                            </Button>
-                                            <Modal
-                                                show={showModalEditAddress}
-                                                onClose={() => setShowModalEditAddress(false)}
-                                                size='md'
-                                                popup
-                                            >
-                                                <Modal.Body>
-                                                    <div className='w-full flex flex-col justify-center items-center gap-y-3 px-5'>
-                                                        <div className='mt-5 w-full flex flex-col justify-center items-center'>
-                                                            <span className='text-xl font-semibold'>
-                                                                Cập nhật thông tin mới
-                                                            </span>
-                                                            <span className='text-sm text-gray-400'>
-                                                                Điền thông tin địa chỉ nhận hàng của
-                                                                bạn
-                                                            </span>
-                                                        </div>
-                                                        <div className='w-full'>
-                                                            <Label
-                                                                htmlFor='fullName'
-                                                                value='Họ và tên'
-                                                                className='text-gray-700 font-semibold'
-                                                            />
-                                                            <TextInput
-                                                                type='text'
-                                                                id='fullName'
-                                                                className='mt-2'
-                                                                placeholder='Nguyễn Văn A'
-                                                                value={formModal.fullName}
-                                                                onChange={(e) =>
-                                                                    setFormModal({
-                                                                        ...formModal,
-                                                                        fullName: e.target.value,
-                                                                    })
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        <div className='w-full'>
-                                                            <Label
-                                                                htmlFor='email1'
-                                                                value='Địa chỉ email'
-                                                                className='text-gray-700 font-semibold'
-                                                            />
-                                                            <TextInput
-                                                                id='email1'
-                                                                type='email'
-                                                                className='mt-2'
-                                                                placeholder='email@gmail.com'
-                                                                value={formModal.email}
-                                                                onChange={(e) =>
-                                                                    setFormModal({
-                                                                        ...formModal,
-                                                                        email: e.target.value,
-                                                                    })
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        <div className='w-full'>
-                                                            <Label
-                                                                htmlFor='phone'
-                                                                value='Số điện thoại'
-                                                                className='text-gray-700 font-semibold'
-                                                            />
-                                                            <TextInput
-                                                                id='phone'
-                                                                type='text'
-                                                                className='mt-2'
-                                                                placeholder='(+84) 123 456 789'
-                                                                value={formModal.phone}
-                                                                onChange={(e) => {
-                                                                    const value = e.target.value;
-                                                                    if (
-                                                                        /^\d*$/.test(value) &&
-                                                                        value.length <= 10
-                                                                    ) {
-                                                                        setFormData({
-                                                                            ...formData,
-                                                                            phone: value.trim(),
-                                                                        });
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </div>
-
-                                                        <div className='w-full'>
-                                                            <Label
-                                                                htmlFor='address'
-                                                                value='Địa chỉ nhận hàng'
-                                                                className='text-gray-700 font-semibold'
-                                                            />
-                                                            <Textarea
-                                                                rows={3}
-                                                                id='address'
-                                                                className='mt-2'
-                                                                placeholder='Số nhà, đường, phường, quận, thành phố'
-                                                                value={formModal.address}
-                                                                onChange={(e) =>
-                                                                    setFormModal({
-                                                                        ...formModal,
-                                                                        address: e.target.value,
-                                                                    })
-                                                                }
-                                                            />
-                                                        </div>
-                                                        <div className='w-full flex justify-between items-center'>
-                                                            <Button
-                                                                color='gray'
-                                                                className='w-full mr-2'
-                                                                onClick={() =>
-                                                                    setShowModalEditAddress(false)
-                                                                }
-                                                            >
-                                                                Hủy
-                                                            </Button>
-                                                            <Button
-                                                                color='blue'
-                                                                className='w-full ml-2'
-                                                                onClick={handleEditAddress}
-                                                            >
-                                                                Xác nhận
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </Modal.Body>
-                                            </Modal>
-                                        </>
-                                    )}
-                                    {isEditting && (
-                                        <>
-                                            <Button onClick={() => setIsEditting(false)} outline>
-                                                <div className='flex items-center justify-center gap-x-1'>
-                                                    <FaTimes className='w-4 h-auto' />
-                                                    <span>Hủy</span>
-                                                </div>
-                                            </Button>
-                                            <Button onClick={handleUpdateInfo} outline>
-                                                <div className='flex items-center justify-center gap-x-1'>
-                                                    <RiSave3Fill className='w-4 h-auto' />
-                                                    <span>Lưu</span>
-                                                </div>
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
+        <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>
+            <div className='max-w-7xl mx-auto'>
+                <div className='flex flex-col lg:flex-row gap-8'>
+                    {/* Left Column */}
+                    <div className='w-full lg:w-3/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
+                        <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6'>
+                            Thông tin thanh toán
+                        </h2>
+                        <div className='mb-8'>
+                            <h3 className='font-semibold text-lg text-gray-700 dark:text-gray-300 mb-4'>
+                                Phương thức thanh toán
+                            </h3>
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                <PaymentMethod
+                                    id='cash'
+                                    label='Tiền mặt'
+                                    imageSrc='../assets/payCash.png'
+                                />
+                                <PaymentMethod
+                                    id='vnpay'
+                                    label='VNPAY'
+                                    imageSrc='../assets/vnpayPayment.jpg'
+                                />
+                                <PaymentMethod
+                                    id='momo'
+                                    label='Ví Momo'
+                                    imageSrc='../assets/momoPayment.png'
+                                />
+                                <PaymentMethod
+                                    id='credit'
+                                    label='Thẻ tín dụng/Ghi nợ'
+                                    imageSrc='../assets/creditCard.png'
+                                />
                             </div>
-                            <form onSubmit={handleSubmitForm}>
-                                <div className='grid grid-cols-2 gap-5'>
-                                    <TextInput
-                                        disabled={!isEditting}
-                                        type='text'
-                                        icon={CiUser}
-                                        className='w-full'
-                                        placeholder='Họ và tên'
-                                        value={formData.fullName}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                fullName: e.target.value,
-                                            })
-                                        }
-                                    />
-                                    <TextInput
-                                        disabled={!isEditting}
-                                        type='text'
-                                        icon={CiMail}
-                                        className='w-full'
-                                        placeholder='Email'
-                                        value={formData.email}
-                                        onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
-                                                email: e.target.value.trim(),
-                                            })
-                                        }
-                                    />
-                                    <TextInput
-                                        disabled={!isEditting}
-                                        type='text'
-                                        id='phone'
-                                        icon={CiPhone}
-                                        className='w-full'
-                                        value={formData.phone}
-                                        placeholder='Số điện thoại'
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            if (/^\d*$/.test(value) && value.length <= 10) {
-                                                setFormData({
-                                                    ...formData,
-                                                    phone: value.trim(),
-                                                });
-                                            }
-                                        }}
-                                    />
-                                    <TextInput
-                                        disabled={!isEditting}
-                                        type='text'
-                                        id='address'
-                                        icon={CiHome}
-                                        className='w-full'
-                                        value={formData.address}
-                                        placeholder='Địa chỉ'
-                                    />
-                                </div>
-                            </form>
                         </div>
-
-                        <div className='px-6 py-4'>
-                            <span className='text-xl font-semibold'>Chọn hình thức thanh toán</span>
-                            <form className='flex justify-between items-center mt-3'>
-                                <div className='flex items-center gap-2'>
-                                    <Checkbox id='cash' />
-                                    <Label
-                                        htmlFor='cash'
-                                        className='flex items-center justify-center gap-x-2 text-md'
-                                    >
-                                        <img
-                                            src={'../assets/payCash.png'}
-                                            alt=''
-                                            className='w-8 h-auto object-cover'
-                                        />
-                                        Thanh toán tiền mặt
-                                    </Label>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <Checkbox id='vnpay' />
-                                    <Label
-                                        htmlFor='vnpay'
-                                        className='flex items-center justify-center gap-x-2 text-md'
-                                    >
-                                        <img
-                                            src={'../assets/vnpayPayment.jpg'}
-                                            alt=''
-                                            className='w-10 h-auto object-cover'
-                                        />
-                                        VNPAY
-                                    </Label>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <Checkbox id='momo' />
-                                    <Label
-                                        htmlFor='momo'
-                                        className='flex items-center justify-center gap-x-2 text-md'
-                                    >
-                                        <img
-                                            src={'../assets/momoPayment.png'}
-                                            alt=''
-                                            className='w-7 h-auto object-cover'
-                                        />
-                                        Ví Momo
-                                    </Label>
-                                </div>
-                                <div className='flex items-center gap-2'>
-                                    <Checkbox id='credit' />
-                                    <Label
-                                        htmlFor='credit'
-                                        className='flex items-center justify-center gap-x-2 text-md'
-                                    >
-                                        <img
-                                            src={'../assets/creditCard.png'}
-                                            alt=''
-                                            className='w-8 h-auto object-cover'
-                                        />
-                                        Thẻ tín dụng/ Ghi nợ
-                                    </Label>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div className='px-6 py-4'>
-                            <span className='text-xl font-semibold mb-5'>Thông tin sản phẩm</span>
-
-                            <table className='w-full'>
-                                <thead>
-                                    <tr>
-                                        <th className='text-left font-semibold'>Sản phẩm</th>
-                                        <th className='font-semibold text-center'>Đơn giá</th>
-                                        <th className='font-semibold text-center'>Số lượng</th>
-                                        <th className='font-semibold text-center'>Thành tiền</th>
-                                    </tr>
-                                </thead>
-
-                                {/* <tbody>
-                                            {checkBuyNow
-                                                ? orders_Redux?.productBuyNow.map((item) => {
-                                                      return (
-                                                          <tr key={item.id}>
-                                                              <td className='py-4'>
-                                                                  <div className='flex items-center'>
-                                                                      <img
-                                                                          className='h-16 w-16 mr-4'
-                                                                          src={item.product.img[0]}
-                                                                          alt='Product image'
-                                                                      />
-
-                                                                      <span className='w-80 font-semibold'>
-                                                                          {item.product.productName}
-                                                                      </span>
-                                                                  </div>
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {formatData(item.product.price)}
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {item.quantity}
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {formatData(
-                                                                      item.product.price *
-                                                                          item.quantity
-                                                                  )}
-                                                              </td>
-                                                          </tr>
-                                                      );
-                                                  })
-                                                : orders_Redux?.data.map((item) => {
-                                                      return (
-                                                          <tr key={item.id}>
-                                                              <td className='py-4'>
-                                                                  <div className='flex items-center'>
-                                                                      <img
-                                                                          className='h-16 w-16 mr-4'
-                                                                          src={item.product.img[0]}
-                                                                          alt='Product image'
-                                                                      />
-
-                                                                      <span className='w-80 font-semibold'>
-                                                                          {item.product.productName}
-                                                                      </span>
-                                                                  </div>
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {formatData(item.product.price)}
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {item.quantity}
-                                                              </td>
-
-                                                              <td className='py-4 text-center'>
-                                                                  {formatData(
-                                                                      item.product.price *
-                                                                          item.quantity
-                                                                  )}
-                                                              </td>
-                                                          </tr>
-                                                      );
-                                                  })}
-                                        </tbody> */}
-                            </table>
+                        <div className='mb-6'>
+                            <div className='flex items-center justify-between mb-4'>
+                                <h3 className='font-semibold text-lg text-gray-700 dark:text-gray-300'>
+                                    Thông tin người nhận
+                                </h3>
+                                {!isEditing ? (
+                                    <div className='flex gap-2'>
+                                        <Button
+                                            onClick={() => setIsEditing(true)}
+                                            size='sm'
+                                            outline
+                                        >
+                                            <CiEdit className='mr-2' />
+                                            Chỉnh sửa
+                                        </Button>
+                                        <Button
+                                            onClick={() => setShowModalEditAddress(true)}
+                                            size='sm'
+                                            outline
+                                        >
+                                            <CiEdit className='mr-2' />
+                                            Gửi đến địa chỉ khác
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className='flex gap-2'>
+                                        <Button
+                                            onClick={() => setIsEditing(false)}
+                                            size='sm'
+                                            outline
+                                        >
+                                            <FaTimes className='mr-2' />
+                                            Hủy
+                                        </Button>
+                                        <Button
+                                            onClick={() => {
+                                                /* Handle update */
+                                                setIsEditing(false);
+                                            }}
+                                            size='sm'
+                                            outline
+                                        >
+                                            <RiSave3Fill className='mr-2' />
+                                            Lưu
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                            {renderUserInfo()}
                         </div>
                     </div>
-                </div>
 
-                <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-5'>
-                    {/* <DeliveryTo_Component /> */}
-                    <Vouchers_Component />
-                    <div
-                        className='w-full shadow-sm border border-gray-200 
-                    dark:border-none dark:bg-gray-800 rounded-lg p-6'
-                    >
-                        <div className='flex items-center justify-between mb-1'>
-                            <span className='font-semibold text-lg'>Thanh toán đơn hàng</span>
-                            <Link
-                                className='text-blue-500 cursor-pointer hover:underline'
-                                to={'/cart'}
-                            >
-                                Thay đổi
-                            </Link>
+                    {/* Right Column */}
+                    <div className='w-full lg:w-2/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
+                        <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6'>
+                            Thông tin đơn hàng
+                        </h2>
+                        <div className='space-y-4 mb-6'>
+                            {infoProduct.map((_, index) => {
+                                return (
+                                    <ProductInfo_CheckoutPage_Component
+                                        key={index}
+                                        dataProduct={productItems[index]}
+                                    />
+                                );
+                            })}
                         </div>
-
-                        <div className='border-t border-b py-3'>
-                            <div className='flex justify-between text-md'>
-                                <span>Tạm tính</span>
-                                <span>{'formatData(totalPrice)'}</span>
-                            </div>
-                            <div className='flex justify-between text-md'>
-                                <span>Phí vận chuyển</span>
-                                <span>0 ₫</span>
-                            </div>
-                            <div className='flex justify-between text-md'>
-                                <span>Giảm giá từ Deal</span>
-                                <span className='text-green-500'>0 ₫</span>
-                            </div>
-                        </div>
-
-                        <div className='flex justify-between mt-2 text-xl font-semibold'>
-                            <span>Tổng tiền</span>
-                            <span className='text-red-500'>{'formatData(totalPrice)'}</span>
-                        </div>
-
-                        <div className='flex justify-end my-1'>
-                            <span className='text-sm text-end text-gray-500'>
-                                (Giá này đã bao gồm thuế GTGT, phí đóng gói và các chi phí phát sinh
-                                khác)
-                            </span>
-                        </div>
-
-                        <button
-                            onClick={() => navigate('/checkout')}
-                            type='button'
-                            className='group inline-flex w-full items-center justify-center rounded-md 
-                            bg-blue-500 dark:bg-blue-500 hover:bg-red-500 dark:hover:bg-red-500
-                            px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow'
-                        >
-                            Đặt hàng
-                            <svg
-                                xmlns='http://www.w3.org/2000/svg'
-                                className='group-hover:ml-8 ml-4 h-6 w-6 transition-all'
-                                fill='none'
-                                viewBox='0 0 24 24'
-                                stroke='currentColor'
-                                strokeWidth='2'
-                            >
-                                <path
-                                    strokeLinecap='round'
-                                    strokeLinejoin='round'
-                                    d='M13 7l5 5m0 0l-5 5m5-5H6'
+                        <div className='mb-6'>
+                            <div className='flex items-center mb-4'>
+                                <TextInput
+                                    type='text'
+                                    placeholder='Mã khuyến mãi'
+                                    className='flex-grow mr-2'
                                 />
-                            </svg>
-                        </button>
+                                <Button color='blue'>Áp dụng</Button>
+                            </div>
+                        </div>
+                        <div className='space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4'>
+                            <div className='flex justify-between'>
+                                <span className='text-gray-600 dark:text-gray-400'>Tạm tính</span>
+                                <span className='font-semibold text-gray-800 dark:text-gray-200'>
+                                    {formatPrice(totalPrice)}
+                                </span>
+                            </div>
+                            <div className='flex justify-between'>
+                                <span className='text-gray-600 dark:text-gray-400'>
+                                    Phí vận chuyển
+                                </span>
+                                <span className='font-semibold text-gray-800 dark:text-gray-200'>
+                                    {formatPrice(shippingFee)}
+                                </span>
+                            </div>
+                            <div className='flex justify-between'>
+                                <span className='text-gray-600 dark:text-gray-400'>Giảm giá</span>
+                                <span className='font-semibold text-green-600'>
+                                    - {formatPrice(totalDiscountPrice)}
+                                </span>
+                            </div>
+                        </div>
+                        <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
+                            <div className='flex justify-between items-center mb-4'>
+                                <span className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
+                                    Tổng cộng
+                                </span>
+                                <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
+                                    {formatPrice(totalAmountToPay - shippingFee)}
+                                </span>
+                            </div>
+                            <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>
+                                (Đã bao gồm thuế VAT)
+                            </p>
+                            <Button
+                                color='blue'
+                                size='lg'
+                                className='w-full'
+                                onClick={() => navigate('/checkout')}
+                            >
+                                Đặt hàng
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

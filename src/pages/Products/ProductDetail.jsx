@@ -130,7 +130,6 @@ export default function ProductDetail() {
                 });
                 if (res?.status === 200) {
                     const { data } = res;
-                    console.log('-->', data);
                     setMoreProduct(data);
                 }
             } catch (error) {
