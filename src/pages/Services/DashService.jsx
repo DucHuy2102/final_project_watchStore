@@ -1,7 +1,7 @@
 export default function DashService() {
     return (
         <div className='mx-auto min-h-screen'>
-            <img src={'../public/assets/suaDongHo.avif'} alt='' />
+            <img src={'../assets/suaDongHo.avif'} alt='' />
             <div className='px-4 py-5'>
                 <div className='px-20'>
                     <span className='text-xl italic'>

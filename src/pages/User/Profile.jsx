@@ -235,11 +235,46 @@ export default function Profile_Component() {
             if (res?.status === 200) {
                 const { data } = res;
                 toast.success('Cập nhật thông tin thành công!');
-                dispatch(user_UpdateProfile({ user: data }));
+                dispatch(
+                    user_UpdateProfile({
+                        user: data,
+                        address: {
+                            province: {
+                                label: formAddress.province.label,
+                                value: formAddress.province.value,
+                            },
+                            district: {
+                                label: formAddress.district.label,
+                                value: formAddress.district.value,
+                            },
+                            ward: {
+                                label: formAddress.ward.label,
+                                value: formAddress.ward.value,
+                            },
+                            street: formAddress.street,
+                        },
+                    })
+                );
             }
         } catch (error) {
             toast.error('Hệ thống đang bận, vui lòng thử lại sau');
             console.log(error);
+        } finally {
+            setFormAddress({
+                province: {
+                    label: '',
+                    value: null,
+                },
+                district: {
+                    label: '',
+                    value: null,
+                },
+                ward: {
+                    label: '',
+                    value: null,
+                },
+                street: '',
+            });
         }
     };
 
@@ -345,21 +380,6 @@ export default function Profile_Component() {
             address: newAddress,
         });
         setModalChangeAddress(false);
-        setFormAddress({
-            province: {
-                label: '',
-                value: null,
-            },
-            district: {
-                label: '',
-                value: null,
-            },
-            ward: {
-                label: '',
-                value: null,
-            },
-            street: '',
-        });
     };
 
     return (
@@ -689,14 +709,8 @@ export default function Profile_Component() {
                                 Cập nhật địa chỉ của bạn
                             </span>
                             <Select
-                                showSearch
                                 placeholder='Chọn Thành Phố'
                                 className='w-full h-10'
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '')
-                                        .toLowerCase()
-                                        .includes(input.toLowerCase())
-                                }
                                 options={
                                     provinces?.map((province) => ({
                                         label: province.ProvinceName,
@@ -716,14 +730,8 @@ export default function Profile_Component() {
                                 }}
                             />
                             <Select
-                                showSearch
                                 placeholder='Chọn Quận/Huyện'
                                 className='w-full h-10'
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '')
-                                        .toLowerCase()
-                                        .includes(input.toLowerCase())
-                                }
                                 options={
                                     districts?.map((district) => ({
                                         label: district.DistrictName,
@@ -743,14 +751,8 @@ export default function Profile_Component() {
                                 }}
                             />
                             <Select
-                                showSearch
                                 placeholder='Chọn Phường/Xã'
                                 className='w-full h-10'
-                                filterOption={(input, option) =>
-                                    (option?.label ?? '')
-                                        .toLowerCase()
-                                        .includes(input.toLowerCase())
-                                }
                                 options={
                                     wards?.map((ward) => ({
                                         label: ward.WardName,
