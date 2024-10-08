@@ -206,7 +206,7 @@ export default function Login() {
                 </form>
                 <div className='w-full flex flex-col sm:flex-row justify-between items-center gap-y-3 sm:gap-y-0 mt-6'>
                     <div className='flex gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400'>
-                        <span>Bạn chưa có tài khoản?</span>
+                        <span className='md:hidden lg:inline'>Bạn chưa có tài khoản?</span>
                         <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
                             <TfiHandPointRight />
                             <Link to='/register' className='dark:text-blue-400 hover:underline'>

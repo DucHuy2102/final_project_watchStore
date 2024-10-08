@@ -6,7 +6,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 
 export default function ProductCard({ product }) {
-    const { id, productName, price, img, size, genderUser } = product;
+    const { id, productName, price, img, genderUser, shape, length, width } = product;
+    const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
     const handleRenderGenderUser = genderUser === 'Male' ? 'Nam' : 'Nữ';
 
     // state
@@ -14,6 +15,7 @@ export default function ProductCard({ product }) {
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const [quantity, setQuantity] = useState(1);
 
     // format price to VND
     const priceFormat = new Intl.NumberFormat('vi-VN', {
@@ -75,7 +77,7 @@ export default function ProductCard({ product }) {
                     {productName}
                 </h3>
                 <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
-                    {size} | {handleRenderGenderUser} giới
+                    {sizeProduct} | {handleRenderGenderUser} giới
                 </p>
                 <p
                     className='text-lg sm:font-medium lg:font-bold lg:text-xl 
@@ -100,7 +102,6 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Modal Buy Now */}
-
             <Modal size='md' popup show={showModalBuyNow} onClick={() => setShowModalBuyNow(false)}>
                 {tokenUser ? (
                     <>
@@ -126,27 +127,25 @@ export default function ProductCard({ product }) {
                                     {productName}
                                 </h4>
                                 <p className='text-sm sm:text-base text-gray-500'>
-                                    {size} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
+                                    {sizeProduct} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
                                 </p>
-                                <p className='text-lg sm:text-xl text-gray-900'>{priceFormat}</p>
+                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>
+                                    {priceFormat}
+                                </p>
                                 <div className='flex items-center mt-4'>
-                                    <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-300'>
+                                    <Button pill color={'gray'}>
                                         -
-                                    </button>
+                                    </Button>
                                     <span className='text-center font-semibold text-lg w-10 sm:w-12'>
                                         1
                                     </span>
-                                    <button className='text-center font-semibold text-lg sm:text-xl w-10 sm:w-12 h-10 sm:h-12 rounded-full bg-gray-200 hover:bg-gray-300 transition-colors duration-300'>
+                                    <Button pill color={'gray'}>
                                         +
-                                    </button>
+                                    </Button>
                                 </div>
-                                <button
-                                    onClick={handleBuyNow}
-                                    className='mt-4 w-full bg-gray-300 text-black font-medium py-2 rounded-lg
-                                    hover:bg-blue-500 hover:text-white transition-colors duration-300'
-                                >
+                                <Button className='w-full mt-4' onClick={handleBuyNow}>
                                     Mua hàng ngay
-                                </button>
+                                </Button>
                             </div>
                         </Modal.Body>
                     </>

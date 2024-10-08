@@ -8,7 +8,7 @@ import { IoIosCart, IoIosHome } from 'react-icons/io';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 import { Badge } from 'antd';
 import { user_SignOut } from '../../redux/slices/userSlice';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Header_Component() {
@@ -25,6 +25,8 @@ export default function Header_Component() {
     const cartInRedux = useSelector((state) => state.cart.cartItem);
     const cartTotalQuantity = cartInRedux.length;
     const [searchTerm, setSearchTerm] = useState('');
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const searchRef = useRef(null);
 
     // handle sign out account
     const handleSignOutAccount = () => {
@@ -52,18 +54,27 @@ export default function Header_Component() {
         navigate(`/products?${newSearchTerm}`);
     };
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setShowMobileSearch(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     return (
-        <Navbar
-            className='shadow-xl flex flex-wrap md:flex-nowrap 
-        items-center justify-between bg-white text-gray-800'
-        >
-            {/* name app */}
+        <Navbar className='shadow-md'>
             <Link
                 to='/'
-                className='self-center tracking-widest outline-none whitespace-nowrap text-xl sm:text-2xl md:text-3xl font-semibold'
+                className='self-center tracking-widest outline-none whitespace-nowrap text-xl sm:text-2xl font-semibold md:font-bold'
             >
                 <span
-                    className='bg-clip-text text-transparent bg-gradient-to-r 
+                    className='bg-clip-text text-transparent bg-gradient-to-r
                 from-gray-600 via-gray-800 to-gray-500 dark:from-gray-200 dark:to-gray-400'
                 >
                     Watc<span className='font-extrabold text-yellow-400 dark:text-blue-400'>H</span>
@@ -71,23 +82,27 @@ export default function Header_Component() {
                 </span>
             </Link>
 
-            {/* search form */}
             <form onSubmit={handleSearch}>
                 <TextInput
                     type='text'
                     placeholder='Tìm kiếm...'
                     rightIcon={AiOutlineSearch}
-                    className='w-60 hidden sm:inline md:inline-block md:w-36 lg:w-96'
+                    className='hidden lg:inline-block lg:w-96 rounded-lg'
                     value={searchTerm ?? ''}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </form>
 
-            {/* button change theme & sign-in */}
+            <div className='lg:hidden' onClick={() => setShowMobileSearch(!showMobileSearch)}>
+                <Button className='rounded-full w-10'>
+                    <AiOutlineSearch size={20} />
+                </Button>
+            </div>
+
             <div className='flex gap-2 md:order-2'>
                 <Button
                     onClick={() => dispatch(toggleTheme())}
-                    className='w-12 h-10 sm:inline flex justify-center items-center'
+                    className='w-12 h-10 hidden sm:inline'
                     color='gray'
                     pill
                 >
@@ -145,22 +160,27 @@ export default function Header_Component() {
                 <Navbar.Toggle />
             </div>
 
-            {/* menu */}
-            <Navbar.Collapse className=''>
+            <Navbar.Collapse>
                 <Navbar.Link active={pathURL === '/'} as={'div'}>
-                    <Link to='/' className='flex justify-center items-center gap-x-2'>
+                    <Link to='/' className='flex justify-center items-center gap-x-2 md:gap-x-1'>
                         <IoIosHome size={'20px'} />
                         Trang chủ
                     </Link>
                 </Navbar.Link>
                 <Navbar.Link active={pathURL === '/products'} as={'div'}>
-                    <Link to='/products' className='flex justify-center items-center gap-x-2'>
+                    <Link
+                        to='/products'
+                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
+                    >
                         <MdWatch size={'20px'} />
                         Sản phẩm
                     </Link>
                 </Navbar.Link>
                 <Navbar.Link className='group' active={pathURL === '/cart'} as={'div'}>
-                    <Link to='/cart' className='flex justify-center items-center gap-x-2'>
+                    <Link
+                        to='/cart'
+                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
+                    >
                         <Badge count={tokenUser ? cartTotalQuantity : 0}>
                             <IoIosCart
                                 className={`dark:text-gray-400 dark:group-hover:!text-gray-200 group-hover:!text-[#0E7490] ${
@@ -173,12 +193,28 @@ export default function Header_Component() {
                     </Link>
                 </Navbar.Link>
                 <Navbar.Link active={pathURL === '/services'} as={'div'}>
-                    <Link to='/services' className='flex justify-center items-center gap-x-2'>
+                    <Link
+                        to='/services'
+                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
+                    >
                         <MdHomeRepairService size={'20px'} />
                         Dịch vụ
                     </Link>
                 </Navbar.Link>
             </Navbar.Collapse>
+
+            {showMobileSearch && (
+                <form ref={searchRef} onSubmit={handleSearch} className='w-full mt-2'>
+                    <TextInput
+                        type='text'
+                        placeholder='Tìm kiếm...'
+                        rightIcon={AiOutlineSearch}
+                        className='w-full'
+                        value={searchTerm ?? ''}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </form>
+            )}
         </Navbar>
     );
 }

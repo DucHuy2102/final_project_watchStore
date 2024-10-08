@@ -107,8 +107,6 @@ export default function ProductDetail() {
         discount,
         price,
         description,
-        thickness,
-        size,
         wireMaterial,
         shellMaterial,
         style,
@@ -119,7 +117,11 @@ export default function ProductDetail() {
         color,
         genderUser,
         category,
+        length,
+        width,
+        height,
     } = product;
+    const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
 
     // get more product of the same brand
     useEffect(() => {
@@ -168,12 +170,12 @@ export default function ProductDetail() {
         {
             id: 3,
             title: 'Độ dầy',
-            value: thickness,
+            value: `${height} mm`,
         },
         {
             id: 4,
             title: 'Kích thước mặt',
-            value: size,
+            value: sizeProduct,
         },
         {
             id: 5,
@@ -208,7 +210,7 @@ export default function ProductDetail() {
         {
             id: 11,
             title: 'Trọng lượng',
-            value: weight,
+            value: `${weight} g`,
         },
         {
             id: 12,
