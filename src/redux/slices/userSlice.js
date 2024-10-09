@@ -8,6 +8,7 @@ const initialState = {
         district: null,
         ward: null,
         street: null,
+        fullAddress: null,
     },
 };
 
@@ -19,11 +20,18 @@ export const userSlice = createSlice({
             const { access_token, user } = action.payload;
             state.access_token = access_token;
             state.user = user;
+            state.address.fullAddress = user.address;
         },
         user_SignOut: (state) => {
             state.access_token = null;
             state.user = null;
-            state.address = null;
+            state.address = {
+                province: null,
+                district: null,
+                ward: null,
+                street: null,
+                fullAddress: null,
+            };
         },
         user_UpdateProfile: (state, action) => {
             const { user, address } = action.payload;
@@ -32,6 +40,7 @@ export const userSlice = createSlice({
             state.address.district = address.district;
             state.address.ward = address.ward;
             state.address.street = address.street;
+            state.address.fullAddress = address.fullAddress
         },
     },
 });

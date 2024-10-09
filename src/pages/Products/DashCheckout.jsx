@@ -45,9 +45,9 @@ export default function DashCheckout() {
         (state) => state.checkout
     );
     const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
-    console.log('infoProduct', infoProduct);
     const currentUser = useSelector((state) => state.user.user);
     const addressUser = useSelector((state) => state.user.address);
+    console.log('address', addressUser);
 
     // ==================================== State ====================================
     const [shippingFee, setShippingFee] = useState(0);

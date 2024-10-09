@@ -6,7 +6,6 @@ const initialState = {
     totalQuantity: 0,
     totalDiscountPrice: 0,
     totalAmountToPay: 0,
-    voucher: null,
     isBuyNow: false,
 };
 
@@ -22,7 +21,6 @@ export const checkoutSlice = createSlice({
                 totalDiscountPrice,
                 totalAmountToPay,
                 isBuyNow,
-                voucher,
             } = action.payload;
             state.productItems = productItems;
             state.totalPrice = totalPrice;
@@ -30,14 +28,14 @@ export const checkoutSlice = createSlice({
             state.totalDiscountPrice = totalDiscountPrice;
             state.totalAmountToPay = totalAmountToPay;
             state.isBuyNow = isBuyNow;
-            state.voucher = voucher;
         },
         setResetCheckout: (state) => {
             state.productItems = [];
             state.totalPrice = 0;
             state.totalQuantity = 0;
-            state.voucher = null;
             state.isBuyNow = false;
+            state.totalDiscountPrice = 0;
+            state.totalAmountToPay = 0;
         },
     },
 });

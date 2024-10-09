@@ -91,6 +91,7 @@ export default function Login() {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/google?token=${token}`);
             if (res.status === 200) {
                 const { data } = res;
+                console.log('Login --> ', data);
                 dispatch(user_SignIn({ access_token: data.access_token, user: data }));
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {

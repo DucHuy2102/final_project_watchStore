@@ -125,15 +125,6 @@ export default function DashboardCart() {
     // ================================================ Checkout product ================================================
     // function navigate to checkout page
     const handleNavigateToCheckoutPage = () => {
-        // console.log('Navigate to checkout page', {
-        //     productItems: infoProduct,
-        //     totalPrice: totalPrice,
-        //     totalDiscountPrice: totalDiscountPrice,
-        //     totalAmountToPay: totalAmountToPay,
-        //     totalQuantity: totalQuantity,
-        //     voucher: selectedVoucher,
-        //     isBuyNow: false,
-        // });
         dispatch(
             setProductToCheckout({
                 productItems: productCartItem,
@@ -141,7 +132,6 @@ export default function DashboardCart() {
                 totalDiscountPrice: totalDiscountPrice,
                 totalAmountToPay: totalAmountToPay,
                 totalQuantity: totalQuantity,
-                voucher: selectedVoucher,
                 isBuyNow: false,
             })
         );
@@ -149,7 +139,7 @@ export default function DashboardCart() {
     };
 
     return (
-        <div className='mx-auto px-4 py-8'>
+        <div className='mx-auto px-4 py-4'>
             {totalQuantity === 0 ? (
                 <div className='h-[85vh] flex flex-col items-center justify-center gap-y-6'>
                     <span className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
@@ -184,35 +174,35 @@ export default function DashboardCart() {
                     )}
                 </div>
             ) : (
-                <div className='min-h-[85vh] flex flex-col lg:flex-row gap-x-4'>
+                <div className='flex flex-col lg:flex-row gap-x-4'>
                     {/* Product Table Section */}
                     <div className='lg:w-3/4 w-full dark:bg-gray-800 rounded-lg'>
                         <div
                             className='border border-gray-200 dark:border-none shadow-gray-100 dark:shadow-gray-800/50 
-                        px-6 py-3 overflow-x-auto rounded-lg shadow-sm'
+                        p-6 overflow-x-auto rounded-lg shadow-sm'
                         >
                             <table className='w-full'>
-                                <thead className='border-b border-gray-200 dark:border-gray-700'>
-                                    <tr>
-                                        <th className='text-left font-semibold py-2 px-2 sm:px-4'>
-                                            Tất cả {productCartItem?.length} sản phẩm
+                                <thead>
+                                    <tr className='border-b border-gray-200 dark:border-gray-700'>
+                                        <th className='text-left font-semibold pb-5'>
+                                            Tất cả{' '}
+                                            <span className='text-blue-600 font-bold'>
+                                                {productCartItem?.length}
+                                            </span>{' '}
+                                            sản phẩm
                                         </th>
-                                        <th className='font-semibold text-center py-2 px-2 sm:px-4'>
+                                        <th className='font-semibold text-center pb-5'>
                                             Trạng thái
                                         </th>
-                                        <th className='font-semibold text-center py-2 px-2 sm:px-4'>
-                                            Màu sắc
-                                        </th>
-                                        <th className='font-semibold text-center py-2 px-2 sm:px-4'>
+                                        <th className='font-semibold text-center pb-5'>Màu sắc</th>
+                                        <th className='font-semibold text-center pb-5'>
                                             Đơn giá (VNĐ)
                                         </th>
-                                        <th className='font-semibold text-center py-2 px-2 sm:px-4'>
-                                            Số lượng
-                                        </th>
-                                        <th className='font-semibold text-center py-2 px-2 sm:px-4'>
+                                        <th className='font-semibold text-center pb-5'>Số lượng</th>
+                                        <th className='font-semibold text-center pb-5'>
                                             Thành tiền (VNĐ)
                                         </th>
-                                        <th className='text-center flex justify-center items-center pt-6 px-2 sm:px-4'>
+                                        <th className='text-center flex justify-center items-center pt-1'>
                                             <MdDeleteOutline size={20} />
                                         </th>
                                     </tr>
@@ -226,8 +216,15 @@ export default function DashboardCart() {
                                         const totalPrice =
                                             (item.price - item.discount) * qualityProduct;
                                         return (
-                                            <tr key={index}>
-                                                <td className='py-4'>
+                                            <tr
+                                                key={index}
+                                                className={`${
+                                                    index % 2 === 0
+                                                        ? 'bg-gray-50 dark:bg-gray-800'
+                                                        : ''
+                                                } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer`}
+                                            >
+                                                <td className='py-5 w-1/3'>
                                                     <div
                                                         className='flex items-center cursor-pointer'
                                                         onClick={() =>
@@ -235,30 +232,30 @@ export default function DashboardCart() {
                                                         }
                                                     >
                                                         <img
-                                                            className='h-16 w-16 mr-4 rounded-lg'
+                                                            className='h-20 w-20 object-cover ml-4 mr-4 rounded-lg'
                                                             src={item.img[0]}
                                                             alt='Product image'
                                                         />
-                                                        <span className='w-32 lg:w-80 font-semibold'>
+                                                        <span className='font-semibold line-clamp-2 hover:text-blue-600'>
                                                             {item.productName}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className='py-4 text-center'>
+                                                <td className='py-5 text-center'>
                                                     {item.condition}
                                                 </td>
-                                                <td className='py-4 text-center'>{item.color}</td>
-                                                <td className='py-4 text-center'>
+                                                <td className='py-5 text-center'>{item.color}</td>
+                                                <td className='py-5 text-center'>
                                                     <div className='flex flex-col items-center justify-center gap-y-1'>
                                                         <span className='text-red-500 font-medium text-sm line-through'>
                                                             {formatPrice(item.price)}
                                                         </span>
-                                                        <span className='text-blue-500 font-medium text-lg'>
+                                                        <span className='text-blue-500 font-semibold text-lg'>
                                                             {formatPrice(currentSellPrice)}
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className='py-4'>
+                                                <td className='py-5'>
                                                     <div className='flex items-center justify-center'>
                                                         <button
                                                             onClick={() =>
@@ -267,13 +264,13 @@ export default function DashboardCart() {
                                                                     item.id
                                                                 )
                                                             }
-                                                            className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
-                                                text-md py-2 px-2 mr-2 font-bold border-gray-400'
+                                                            className='hover:bg-blue-100 hover:text-blue-600 border rounded-l-lg 
+                                                        text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
                                                         >
                                                             <FaMinus />
                                                         </button>
 
-                                                        <span className='text-center w-8'>
+                                                        <span className='text-center w-10 py-1 border-t border-b border-gray-300'>
                                                             {qualityProduct}
                                                         </span>
 
@@ -284,17 +281,17 @@ export default function DashboardCart() {
                                                                     item.id
                                                                 )
                                                             }
-                                                            className='hover:bg-gray-100 hover:text-blue-500 border rounded-lg 
-                                                text-md py-2 px-2 ml-2 font-bold border-gray-400'
+                                                            className='hover:bg-blue-100 hover:text-blue-600 border rounded-r-lg 
+                                                        text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
                                                         >
                                                             <FaPlus />
                                                         </button>
                                                     </div>
                                                 </td>
-                                                <td className='py-4 text-center'>
+                                                <td className='py-5 text-center text-blue-600 text-lg font-semibold'>
                                                     {formatPrice(totalPrice)}
                                                 </td>
-                                                <td className='pt-2 text-center'>
+                                                <td className='py-5 text-center'>
                                                     <button
                                                         onClick={() => {
                                                             setIdProductToDelete(item.id);
@@ -304,42 +301,33 @@ export default function DashboardCart() {
                                                         <MdDeleteOutline size={20} />
                                                     </button>
                                                 </td>
-                                                <Modal
-                                                    show={showModalDeleteProduct}
-                                                    size='lg'
-                                                    popup
-                                                >
-                                                    <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                                                        <CiWarning size='70px' color={'red'} />
-                                                        <span className='text-lg font-medium text-black'>
-                                                            Bạn có muốn xóa sản phẩm này khỏi giỏ
-                                                            hàng?
-                                                        </span>
-                                                        <div className='w-full flex justify-between items-center gap-x-5'>
-                                                            <Button
-                                                                outline
-                                                                className='w-full'
-                                                                onClick={() =>
-                                                                    setShowModalDeleteProduct(false)
-                                                                }
-                                                            >
-                                                                Hủy
-                                                            </Button>
-                                                            <Button
-                                                                className='w-full'
-                                                                onClick={
-                                                                    handleDeleteProductFromCart
-                                                                }
-                                                            >
-                                                                Xóa
-                                                            </Button>
-                                                        </div>
-                                                    </Modal.Body>
-                                                </Modal>
                                             </tr>
                                         );
                                     })}
                                 </tbody>
+                                <Modal show={showModalDeleteProduct} size='lg' popup>
+                                    <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                                        <CiWarning size='70px' color={'red'} />
+                                        <span className='text-lg font-medium text-black'>
+                                            Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?
+                                        </span>
+                                        <div className='w-full flex justify-between items-center gap-x-5'>
+                                            <Button
+                                                outline
+                                                className='w-full'
+                                                onClick={() => setShowModalDeleteProduct(false)}
+                                            >
+                                                Hủy
+                                            </Button>
+                                            <Button
+                                                className='w-full'
+                                                onClick={handleDeleteProductFromCart}
+                                            >
+                                                Xóa
+                                            </Button>
+                                        </div>
+                                    </Modal.Body>
+                                </Modal>
                             </table>
                         </div>
                     </div>
@@ -347,7 +335,7 @@ export default function DashboardCart() {
                     {/* Summary & Vouchers Section */}
                     <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-5'>
                         <DeliveryTo_Component />
-                        <Vouchers_Component onSelectVoucher={setSelectedVoucher} />
+                        {/* <Vouchers_Component onSelectVoucher={setSelectedVoucher} /> */}
                         <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
                             <div className='flex justify-between mb-2 text-md font-medium'>
                                 <span>Tạm tính</span>
