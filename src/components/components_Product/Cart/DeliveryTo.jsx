@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { user_UpdateProfile } from '../../../redux/slices/userSlice';
 import { FaHouseUser, FaPhone, FaUser } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 export default function DeliveryTo() {
     // get user from redux store to display the current user's address
@@ -15,8 +16,11 @@ export default function DeliveryTo() {
     const currentUser = useSelector((state) => state.user.user ?? {});
     const address = useSelector((state) => state.user.address ?? {});
     const { id, access_token, admin, state, username, verified, ...rest } = currentUser;
+    const checkedUser =
+        currentUser.fullName === 'unknow' || currentUser.address === 'unknow' ? true : false;
 
     // states
+    const navigate = useNavigate();
     const [showModalChangeAddress, setShowModalChangeAddress] = useState(false);
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
@@ -176,64 +180,88 @@ export default function DeliveryTo() {
     return (
         <>
             <div
-                className='bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden 
+                className='bg-white dark:bg-gray-800 w-full rounded-lg shadow-sm overflow-hidden 
             border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-md'
             >
-                <div className='p-6 space-y-5'>
-                    <div className='flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4'>
-                        <h3 className='text-lg font-bold text-gray-800 dark:text-gray-200'>
-                            Địa chỉ giao hàng
-                        </h3>
-                        <button
-                            onClick={() => setShowModalChangeAddress(true)}
-                            className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center space-x-2 transition-all duration-200 group'
-                        >
-                            <CiEdit className='w-4 h-4 transition-transform duration-200 group-hover:rotate-12' />
-                            <span className='font-medium group-hover:underline'>Thay đổi</span>
-                        </button>
-                    </div>
-
-                    <div className='space-y-2'>
-                        <div className='flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
-                            <div className='flex-shrink-0'>
-                                <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center'>
-                                    <FaUser className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+                {checkedUser ? (
+                    <div className='p-6 space-y-5'>
+                        <div className='flex flex-col items-center justify-between '>
+                            <h3 className='text-lg font-bold text-gray-800 dark:text-gray-200'>
+                                Cập nhật địa chỉ giao hàng
+                            </h3>
+                            <Button
+                                className='w-full mt-3'
+                                onClick={() => {
+                                    setShowModalChangeAddress(true);
+                                    navigate('/dashboard?tab=profile');
+                                }}
+                            >
+                                <div className='flex items-center justify-center gap-x-1'>
+                                    <CiEdit className='w-4 h-4 transition-transform duration-200 group-hover:rotate-12' />
+                                    <span className='font-medium group-hover:underline'>
+                                        Cập nhật
+                                    </span>
                                 </div>
-                            </div>
-                            <div className='flex-grow'>
-                                <p className='text-lg font-medium text-gray-800 dark:text-gray-200'>
-                                    {currentUser?.fullName}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className='flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
-                            <div className='flex-shrink-0'>
-                                <div className='w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center'>
-                                    <FaPhone className='w-5 h-5 text-green-600 dark:text-green-400' />
-                                </div>
-                            </div>
-                            <div className='flex-grow'>
-                                <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
-                                    {currentUser?.phone}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className='flex items-start space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
-                            <div className='flex-shrink-0 pt-1'>
-                                <div className='w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center'>
-                                    <FaHouseUser className='w-5 h-5 text-yellow-600 dark:text-yellow-400' />
-                                </div>
-                            </div>
-                            <div className='flex-grow'>
-                                <p className='text-base font-medium text-gray-700 dark:text-gray-300 leading-relaxed'>
-                                    {address?.fullAddress}
-                                </p>
-                            </div>
+                            </Button>
                         </div>
                     </div>
-                </div>
+                ) : (
+                    <div className='p-6 space-y-5'>
+                        <div className='flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4'>
+                            <h3 className='text-lg font-bold text-gray-800 dark:text-gray-200'>
+                                Địa chỉ giao hàng
+                            </h3>
+                            <button
+                                onClick={() => setShowModalChangeAddress(true)}
+                                className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center space-x-2 transition-all duration-200 group'
+                            >
+                                <CiEdit className='w-4 h-4 transition-transform duration-200 group-hover:rotate-12' />
+                                <span className='font-medium group-hover:underline'>Thay đổi</span>
+                            </button>
+                        </div>
+
+                        <div className='space-y-2'>
+                            <div className='flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
+                                <div className='flex-shrink-0'>
+                                    <div className='w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center'>
+                                        <FaUser className='w-5 h-5 text-blue-600 dark:text-blue-400' />
+                                    </div>
+                                </div>
+                                <div className='flex-grow'>
+                                    <p className='text-lg font-medium text-gray-800 dark:text-gray-200'>
+                                        {currentUser?.fullName}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className='flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
+                                <div className='flex-shrink-0'>
+                                    <div className='w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center'>
+                                        <FaPhone className='w-5 h-5 text-green-600 dark:text-green-400' />
+                                    </div>
+                                </div>
+                                <div className='flex-grow'>
+                                    <p className='text-lg font-medium text-gray-700 dark:text-gray-300'>
+                                        {currentUser?.phone}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className='flex items-start space-x-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'>
+                                <div className='flex-shrink-0 pt-1'>
+                                    <div className='w-10 h-10 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center'>
+                                        <FaHouseUser className='w-5 h-5 text-yellow-600 dark:text-yellow-400' />
+                                    </div>
+                                </div>
+                                <div className='flex-grow'>
+                                    <p className='text-base font-medium text-gray-700 dark:text-gray-300 leading-relaxed'>
+                                        {address?.fullAddress}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Modal change address */}

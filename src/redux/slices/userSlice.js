@@ -40,11 +40,19 @@ export const userSlice = createSlice({
             state.address.district = address.district;
             state.address.ward = address.ward;
             state.address.street = address.street;
-            state.address.fullAddress = address.fullAddress
+            state.address.fullAddress = address.fullAddress;
+        },
+        update_Address: (state, action) => {
+            const { province, district, ward, street, fullAddress } = action.payload;
+            state.address.province = province;
+            state.address.district = district;
+            state.address.ward = ward;
+            state.address.street = street;
+            state.address.fullAddress = fullAddress;
         },
     },
 });
 
-export const { user_SignIn, user_SignOut, user_UpdateProfile } = userSlice.actions;
+export const { user_SignIn, user_SignOut, user_UpdateProfile, update_Address } = userSlice.actions;
 
 export default userSlice.reducer;

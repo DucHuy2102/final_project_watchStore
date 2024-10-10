@@ -126,6 +126,7 @@ export default function ProductDetail() {
     // get more product of the same brand
     useEffect(() => {
         const getMoreProduct = async () => {
+            if (!category) return;
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/category`, {
                     params: { idCategory: category },

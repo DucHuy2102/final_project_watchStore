@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaTimes, FaUserEdit } from 'react-icons/fa';
@@ -11,6 +11,7 @@ import { Select } from 'antd';
 import axios from 'axios';
 import { SlNote } from 'react-icons/sl';
 import { toast } from 'react-toastify';
+import { update_Address, user_UpdateProfile } from '../../redux/slices/userSlice';
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -47,13 +48,12 @@ export default function DashCheckout() {
     const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
     const currentUser = useSelector((state) => state.user.user);
     const addressUser = useSelector((state) => state.user.address);
-    console.log('address', addressUser);
 
     // ==================================== State ====================================
+    const dispatch = useDispatch();
     const [shippingFee, setShippingFee] = useState(0);
     const [expectedDeliveryTime, setExpectedDeliveryTime] = useState(null);
     const date = new Date(expectedDeliveryTime * 1000);
-    const vietnamTime = date.toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
     const daysOfWeek = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
     const dayOfWeek = daysOfWeek[date.getDay()];
     const hours = date.getHours() + 1;
@@ -68,17 +68,8 @@ export default function DashCheckout() {
         email: currentUser.email || '',
         phone: currentUser.phone || '',
         address: currentUser.address || '',
-        province: addressUser.province?.label || { label: '', value: '' },
-        district: addressUser.district?.label || { label: '', value: '' },
-        ward: addressUser.ward?.label || { label: '', value: '' },
-        street: addressUser.street || '',
     });
-    const [formReadOnly, setFormReadOnly] = useState({
-        fullName: formData.fullName || '',
-        email: formData.email || '',
-        phone: formData.phone || '',
-        address: formData.address || '',
-    });
+
     useEffect(() => {
         if (selectedOption === 'anotherUser') {
             setFormData({
@@ -97,10 +88,10 @@ export default function DashCheckout() {
                 email: currentUser.email || '',
                 phone: currentUser.phone || '',
                 address: currentUser.address || '',
-                province: addressUser.province.label || { label: '', value: '' },
-                district: addressUser.district.label || { label: '', value: '' },
-                ward: addressUser.ward.label || { label: '', value: '' },
-                street: addressUser.street || '',
+                province: addressUser?.province?.label || { label: '', value: '' },
+                district: addressUser?.district?.label || { label: '', value: '' },
+                ward: addressUser?.ward?.label || { label: '', value: '' },
+                street: addressUser?.street || '',
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -116,17 +107,21 @@ export default function DashCheckout() {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-
-    // handle select change for province, district, ward
-    const handleSelectChange = (name, value, label) => {
-        setFormData({
-            ...formData,
-            [name]: {
-                label: label,
-                value: value,
-            },
-        });
-    };
+    const [formAddress, setFormAddress] = useState({
+        province: {
+            label: addressUser.province?.label || '',
+            value: addressUser.province?.value || null,
+        },
+        district: {
+            label: addressUser.district?.label || '',
+            value: addressUser.district?.value || null,
+        },
+        ward: {
+            label: addressUser.ward?.label || '',
+            value: addressUser.ward?.value || null,
+        },
+        street: addressUser.street || '',
+    });
 
     // get province from api
     useEffect(() => {
@@ -154,37 +149,38 @@ export default function DashCheckout() {
     // get district from api
     useEffect(() => {
         const getDistrict = async () => {
-            if (!formData.province?.value) return;
+            if (!formAddress.province?.value) return;
             try {
                 const res = await axios.get(
                     'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
                     {
+                        params: { province_id: formAddress.province.value },
                         headers: {
                             Token: import.meta.env.VITE_TOKEN_GHN,
                         },
                     }
                 );
                 if (res?.status === 200) {
-                    setDistricts(res.data);
+                    setDistricts(res.data.data);
                 }
             } catch (error) {
                 console.log('Error get api district', error);
-                console.log('district', formData.province.value);
+                console.log('district', formAddress.province.value);
             }
         };
 
         getDistrict();
-    }, [formData.province?.value]);
+    }, [formAddress.province?.value]);
 
     // get ward from api
     useEffect(() => {
         const getWard = async () => {
-            if (!formData.district?.value) return;
+            if (!formAddress.district?.value) return;
             try {
                 const res = await axios.get(
                     'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
                     {
-                        params: { district_id: formData.district.value },
+                        params: { district_id: formAddress.district.value },
                         headers: {
                             Token: import.meta.env.VITE_TOKEN_GHN,
                         },
@@ -195,12 +191,12 @@ export default function DashCheckout() {
                 }
             } catch (error) {
                 console.log('Error get api ward', error);
-                console.log('ward', formData.district.value);
+                console.log('ward', formAddress.district.value);
             }
         };
 
         getWard();
-    }, [formData.district?.value]);
+    }, [formAddress.district?.value]);
 
     // handle confirm info
     const handleConfirmInfo = () => {
@@ -208,43 +204,40 @@ export default function DashCheckout() {
             !formData.fullName ||
             !formData.email ||
             !formData.phone ||
-            !formData.street ||
-            !formData.ward ||
-            !formData.district ||
-            !formData.province
+            !formAddress.ward ||
+            !formAddress.district ||
+            !formAddress.province
         ) {
             toast.error('Vui lòng điền đầy đủ thông tin');
             return;
         }
-
+        const fullAddress = `${formAddress.street}, ${formAddress.ward.label}, ${formAddress.district.label}, ${formAddress.province.label}`;
         setFormData({
             fullName: formData.fullName,
             email: formData.email,
             phone: formData.phone,
-            address: `${formData.street}, ${formData.ward.label}, ${formData.district.label}, ${formData.province.label}`,
-            province: formData.province,
-            district: formData.district,
-            ward: formData.ward,
-            street: formData.street,
+            address: fullAddress,
         });
-
-        setFormReadOnly({
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
-            address: `${formData.street}, ${formData.ward.label}, ${formData.district.label}, ${formData.province.label}`,
-        });
+        dispatch(
+            update_Address({
+                province: formAddress.province,
+                district: formAddress.district,
+                ward: formAddress.ward,
+                street: formAddress.street,
+                fullAddress: fullAddress,
+            })
+        );
         setShowModalEditAddress(false);
     };
 
     // ==================================== Call API GNH ====================================
+    const totalWeight = useMemo(
+        () => productItems.reduce((total, item) => total + item.productItem.weight, 0),
+        [productItems]
+    );
     // calculate fee ship
     useEffect(() => {
         const calculateFeeShip = async () => {
-            const totalWeight = productItems.reduce(
-                (total, item) => total + item.productItem.weight,
-                0
-            );
             console.log(
                 '-->',
                 totalAmountToPay,
@@ -338,18 +331,18 @@ export default function DashCheckout() {
                                 <InfoItem
                                     icon={CiUser}
                                     label='Họ và Tên'
-                                    value={formReadOnly.fullName}
+                                    value={formData.fullName}
                                 />
-                                <InfoItem icon={CiMail} label='Email' value={formReadOnly.email} />
+                                <InfoItem icon={CiMail} label='Email' value={formData.email} />
                                 <InfoItem
                                     icon={CiPhone}
                                     label='Số điện thoại'
-                                    value={formReadOnly.phone}
+                                    value={formData.phone}
                                 />
                                 <InfoItem
                                     icon={CiHome}
                                     label='Địa chỉ nhận hàng'
-                                    value={formReadOnly.address}
+                                    value={formData.address}
                                 />
                             </div>
                         </div>
@@ -453,60 +446,77 @@ export default function DashCheckout() {
                                         onChange={handleInputChange}
                                     />
                                     <Select
+                                        placeholder='Chọn Thành Phố'
                                         className='w-full h-10'
-                                        placeholder='Chọn Tỉnh/Thành phố'
                                         options={
                                             provinces?.map((province) => ({
                                                 label: province.ProvinceName,
                                                 value: province.ProvinceID,
                                             })) ?? []
                                         }
-                                        value={
-                                            selectedOption === 'thisUser' ? formData.province : null
-                                        }
-                                        onChange={(value, option) => {
-                                            handleSelectChange('province', value, option.label);
+                                        onChange={(value) => {
+                                            setFormAddress({
+                                                ...formAddress,
+                                                province: {
+                                                    label: provinces.find(
+                                                        (province) => province.ProvinceID === value
+                                                    ).NameExtension[1],
+                                                    value: value,
+                                                },
+                                            });
                                         }}
                                     />
                                     <Select
-                                        className='w-full h-10'
                                         placeholder='Chọn Quận/Huyện'
+                                        className='w-full h-10'
                                         options={
                                             districts?.map((district) => ({
                                                 label: district.DistrictName,
                                                 value: district.DistrictID,
                                             })) ?? []
                                         }
-                                        name='district'
-                                        value={
-                                            selectedOption === 'thisUser' ? formData.district : null
-                                        }
-                                        onChange={(value, option) => {
-                                            handleSelectChange('district', value, option.label);
+                                        onChange={(value) => {
+                                            setFormAddress({
+                                                ...formAddress,
+                                                district: {
+                                                    label: districts.find(
+                                                        (district) => district.DistrictID === value
+                                                    ).NameExtension[0],
+                                                    value: value,
+                                                },
+                                            });
                                         }}
                                     />
                                     <Select
-                                        className='w-full h-10'
                                         placeholder='Chọn Phường/Xã'
+                                        className='w-full h-10'
                                         options={
                                             wards?.map((ward) => ({
                                                 label: ward.WardName,
                                                 value: ward.WardCode,
                                             })) ?? []
                                         }
-                                        value={selectedOption === 'thisUser' ? formData.ward : null}
-                                        onChange={(value, option) => {
-                                            handleSelectChange('ward', value, option.label);
+                                        onChange={(value) => {
+                                            setFormAddress({
+                                                ...formAddress,
+                                                ward: {
+                                                    label: wards.find(
+                                                        (ward) => ward.WardCode === value
+                                                    ).NameExtension[0],
+                                                    value: value,
+                                                },
+                                            });
                                         }}
                                     />
+
                                     <TextInput
                                         type='text'
+                                        className='w-full'
                                         placeholder='Số nhà, tên đường'
-                                        name='street'
-                                        value={formData.street}
+                                        value={formAddress.street}
                                         onChange={(e) =>
-                                            setFormData({
-                                                ...formData,
+                                            setFormAddress({
+                                                ...formAddress,
                                                 street: e.target.value,
                                             })
                                         }

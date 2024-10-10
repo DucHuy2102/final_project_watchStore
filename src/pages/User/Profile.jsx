@@ -31,11 +31,11 @@ export default function Profile_Component() {
     const [imgURL, setImgURL] = useState(null);
     const [imgUploadProgress, setImgUploadProgress] = useState(null);
     const [formData, setFormData] = useState({
-        fullName: currentUser.fullName ?? '',
-        email: currentUser.email ?? '',
-        phone: currentUser.phone ?? '',
-        address: currentUser.address ?? '',
-        avatarImg: currentUser.avatarImg ?? '',
+        fullName: currentUser.fullName !== 'unknow' ? currentUser.fullName : '',
+        email: currentUser.email !== 'unknow' ? currentUser.email : '',
+        phone: currentUser.phone !== 'unknow' ? currentUser.phone : '',
+        address: currentUser.address !== 'unknow' ? currentUser.address : '',
+        avatarImg: currentUser.avatarImg !== 'unknow' ? currentUser.avatarImg : '',
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -421,11 +421,7 @@ export default function Profile_Component() {
                             />
                         )}
                         <img
-                            src={
-                                imgURL ||
-                                formData.avatarImg ||
-                                'https://t4.ftcdn.net/jpg/05/49/98/39/360_F_549983970_bRCkYfk0P6PP5fKbMhZMIb07mCJ6esXL.jpg'
-                            }
+                            src={imgURL || formData.avatarImg || '/assets/default_Avatar.jpg'}
                             className={`rounded-full h-full w-full object-cover border-8 border-[lightgray] ${
                                 imgUploadProgress && imgUploadProgress < 100 && 'opacity-60'
                             }`}

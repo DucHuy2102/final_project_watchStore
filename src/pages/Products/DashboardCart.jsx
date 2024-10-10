@@ -141,12 +141,12 @@ export default function DashboardCart() {
     return (
         <div className='mx-auto px-4 py-4'>
             {totalQuantity === 0 ? (
-                <div className='h-[85vh] flex flex-col items-center justify-center gap-y-6'>
-                    <span className='text-4xl font-bold text-gray-800 dark:text-gray-200'>
+                <div className='h-[42rem] flex flex-col items-center justify-center gap-y-6'>
+                    <span className='text-4xl font-bold text-[#0E7490] dark:text-gray-200'>
                         Đẳng Cấp Thời Gian, Giá Trị Vượt Trội
                     </span>
                     <img
-                        src={'../public/assets/cartEmpty.jpg'}
+                        src={'../assets/cartEmpty.jpg'}
                         alt='High-quality watch'
                         className='w-auto h-80 object-contain rounded-lg shadow-sm'
                     />
@@ -164,7 +164,7 @@ export default function DashboardCart() {
                         </>
                     ) : (
                         <>
-                            <span className='font-semibold text-lg'>
+                            <span className='font-semibold text-gray-600 text-lg'>
                                 Vui lòng đăng nhập để xem giỏ hàng của bạn
                             </span>
                             <div onClick={handleNavigateToLoginPage}>

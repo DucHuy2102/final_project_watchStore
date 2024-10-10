@@ -120,7 +120,10 @@ export default function Header_Component() {
                         label={
                             <Avatar
                                 alt='Avatar_User'
-                                img={currentUser.avatarImg || '../assets/default_Avatar.jpg'}
+                                img={
+                                    currentUser.avatarImg !== 'unknow' ||
+                                    '../assets/default_Avatar.jpg'
+                                }
                                 rounded
                             />
                         }

@@ -42,7 +42,7 @@ export default function Sidebar_Component() {
             >
                 <div className='flex flex-col justify-center items-center pt-5'>
                     <img
-                        src={currentUser.avatarImg}
+                        src={currentUser.avatarImg !== 'unknow' || '/assets/default_Avatar.jpg'}
                         className='rounded-full w-20 h-20 object-cover'
                         alt='Avatar User'
                     />
