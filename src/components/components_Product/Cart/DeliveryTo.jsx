@@ -229,7 +229,7 @@ export default function DeliveryTo() {
                                 </div>
                                 <div className='flex-grow'>
                                     <p className='text-lg font-medium text-gray-800 dark:text-gray-200'>
-                                        {currentUser?.fullName}
+                                        {currentUser?.fullName || 'Chưa cập nhật'}
                                     </p>
                                 </div>
                             </div>
@@ -255,7 +255,7 @@ export default function DeliveryTo() {
                                 </div>
                                 <div className='flex-grow'>
                                     <p className='text-base font-medium text-gray-700 dark:text-gray-300 leading-relaxed'>
-                                        {address?.fullAddress}
+                                        {currentUser?.address}
                                     </p>
                                 </div>
                             </div>

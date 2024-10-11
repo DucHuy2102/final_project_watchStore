@@ -174,7 +174,7 @@ export default function DashboardCart() {
                     )}
                 </div>
             ) : (
-                <div className='flex flex-col lg:flex-row gap-x-4'>
+                <div className='w-full flex flex-col lg:flex-row gap-x-4'>
                     {/* Product Table Section */}
                     <div className='lg:w-3/4 w-full dark:bg-gray-800 rounded-lg'>
                         <div

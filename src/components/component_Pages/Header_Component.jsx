@@ -22,6 +22,7 @@ export default function Header_Component() {
         (state) => state.user.access_token || state.user.user?.access_token
     );
     const currentUser = useSelector((state) => state.user.user);
+    const avatarUser = currentUser?.avatarImg || '../assets/default_Avatar.jpg';
     const cartInRedux = useSelector((state) => state.cart.cartItem);
     const cartTotalQuantity = cartInRedux.length;
     const [searchTerm, setSearchTerm] = useState('');
@@ -114,21 +115,12 @@ export default function Header_Component() {
                 </Button>
                 {tokenUser ? (
                     <Dropdown
-                        className='mt-1'
+                        className='mt-[2px]'
                         inline
                         arrowIcon={false}
-                        label={
-                            <Avatar
-                                alt='Avatar_User'
-                                img={
-                                    currentUser.avatarImg !== 'unknow' ||
-                                    '../assets/default_Avatar.jpg'
-                                }
-                                rounded
-                            />
-                        }
+                        label={<Avatar alt='Avatar_User' img={avatarUser} rounded />}
                     >
-                        <Dropdown.Header>
+                        <Dropdown.Header className='cursor-pointer'>
                             <span
                                 className={`block text-center text-sm font-medium truncate ${
                                     currentUser.admin ? 'text-orange-500' : 'text-blue-500'
@@ -137,18 +129,20 @@ export default function Header_Component() {
                                 {currentUser?.username}
                             </span>
                         </Dropdown.Header>
-                        <Dropdown.Item>
-                            <Link
-                                to={'/dashboard?tab=dashboard'}
-                                className='flex justify-center items-center font-medium'
-                            >
+                        <Dropdown.Item className='flex justify-center items-center'>
+                            <Link to={'/dashboard?tab=dashboard'} className='font-medium'>
                                 Trang cá nhân
+                            </Link>
+                        </Dropdown.Item>
+                        <Dropdown.Item className='flex justify-center items-center'>
+                            <Link to={'/dashboard?tab=orders'} className='font-medium'>
+                                Giỏ hàng
                             </Link>
                         </Dropdown.Item>
                         <Dropdown.Divider />
                         <Dropdown.Item
-                            onClick={handleSignOutAccount}
                             className='flex justify-center items-center font-semibold text-red-500'
+                            onClick={handleSignOutAccount}
                         >
                             Đăng xuất
                         </Dropdown.Item>

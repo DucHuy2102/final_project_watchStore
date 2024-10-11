@@ -36,6 +36,7 @@ export default function Footer_Component() {
             container
             className={`${
                 pathname === '/register' ||
+                pathname === '/cart' ||
                 pathname === '/login' ||
                 pathname === '/forgot-password' ||
                 pathname === '/verify-email' ||

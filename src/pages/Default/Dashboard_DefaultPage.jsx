@@ -5,6 +5,7 @@ import {
     ManageOrders_Page,
     ManageProducts_Page,
     ManageUsers_Page,
+    ManageVouchers_Page,
     Order_Page,
     Profile_Page,
 } from '../exportPage';
@@ -21,7 +22,7 @@ export default function Dashboard_DefaultPage() {
 
     return (
         <div className='min-h-full flex flex-col md:flex-row'>
-            <div className='md:w-56'>
+            <div className='md:w-72 h-full'>
                 <Sidebar_Component />
             </div>
 
@@ -31,6 +32,7 @@ export default function Dashboard_DefaultPage() {
             {tab === 'products' && <ManageProducts_Page />}
             {tab === 'users' && <ManageUsers_Page />}
             {tab === 'orders' && <ManageOrders_Page />}
+            {tab === 'vouchers' && <ManageVouchers_Page />}
         </div>
     );
 }

@@ -1,4 +1,4 @@
-import { Alert, Button, Modal, Spinner, TextInput } from 'flowbite-react';
+import { Alert, Button, Card, Modal, Spinner, TextInput } from 'flowbite-react';
 import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
@@ -35,11 +35,12 @@ export default function Profile_Component() {
         email: currentUser.email !== 'unknow' ? currentUser.email : '',
         phone: currentUser.phone !== 'unknow' ? currentUser.phone : '',
         address: currentUser.address !== 'unknow' ? currentUser.address : '',
-        avatarImg: currentUser.avatarImg !== 'unknow' ? currentUser.avatarImg : '',
+        avatarImg: currentUser.avatarImg ? currentUser.avatarImg : '',
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [initialFormData, setInitialFormData] = useState(formData);
+    console.log('--> ', formData.avatarImg, imgURL);
 
     // change password states
     const [modalVerifyResetPassword, setModalVerifyResetPassword] = useState(false);
@@ -384,7 +385,8 @@ export default function Profile_Component() {
 
     return (
         <div className='w-full my-auto max-w-5xl mx-auto'>
-            <div className='p-10 border border-gray-100 dark:border-gray-700 shadow-lg rounded-2xl'>
+            {/* <div className='p-10 border border-gray-100 dark:border-gray-700 shadow-lg rounded-2xl'> */}
+            <Card className='p-6 border border-gray-200 dark:border-gray-700 shadow-lg rounded-2xl'>
                 <h1 className='text-center font-semibold text-3xl my-7'>Trang cá nhân</h1>
 
                 {/* form */}
@@ -532,304 +534,300 @@ export default function Profile_Component() {
                         Đăng xuất
                     </button>
                 </div>
+            </Card>
 
-                {/* confirm change password */}
+            {/* confirm change password */}
+            <Modal
+                show={modalVerifyResetPassword}
+                onClose={() => setModalVerifyResetPassword(false)}
+                size='md'
+                popup
+            >
+                <Modal.Header />
+                <Modal.Body>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-3'>
+                        <TfiLock className='text-blue-500 text-5xl mx-auto' />
+                        <span className='text-lg font-medium text-black'>
+                            Nhập mật khẩu hiện tại để xác nhận thay đổi
+                        </span>
+                        <TextInput
+                            type='password'
+                            icon={GoLock}
+                            className='w-full'
+                            placeholder='Mật khẩu hiện tại'
+                            value={formPassword.oldPassword}
+                            onChange={(e) =>
+                                setFormPassword({
+                                    ...formPassword,
+                                    oldPassword: e.target.value,
+                                })
+                            }
+                        />
+
+                        <div className='w-full flex justify-between items-center'>
+                            <Button color='gray' onClick={() => setModalVerifyResetPassword(false)}>
+                                Hủy
+                            </Button>
+                            <Button color='blue' onClick={handleVerifyResetPassword}>
+                                Xác nhận
+                            </Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+            {/* modal loading confirm password */}
+            {loadingPassword && (
                 <Modal
-                    show={modalVerifyResetPassword}
-                    onClose={() => setModalVerifyResetPassword(false)}
+                    show={loadingPassword}
                     size='md'
                     popup
+                    onClose={() => setLoadingPassword(false)}
                 >
                     <Modal.Header />
                     <Modal.Body>
                         <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                            <TfiLock className='text-blue-500 text-5xl mx-auto' />
+                            <Spinner size='xl' color='info' />
                             <span className='text-lg font-medium text-black'>
-                                Nhập mật khẩu hiện tại để xác nhận thay đổi
+                                Hệ thống đang xác thực. Vui lòng chờ...
                             </span>
-                            <TextInput
-                                type='password'
-                                icon={GoLock}
-                                className='w-full'
-                                placeholder='Mật khẩu hiện tại'
-                                value={formPassword.oldPassword}
-                                onChange={(e) =>
-                                    setFormPassword({
-                                        ...formPassword,
-                                        oldPassword: e.target.value,
-                                    })
-                                }
-                            />
-
-                            <div className='w-full flex justify-between items-center'>
-                                <Button
-                                    color='gray'
-                                    onClick={() => setModalVerifyResetPassword(false)}
-                                >
-                                    Hủy
-                                </Button>
-                                <Button color='blue' onClick={handleVerifyResetPassword}>
-                                    Xác nhận
-                                </Button>
-                            </div>
                         </div>
                     </Modal.Body>
                 </Modal>
+            )}
 
-                {/* modal loading confirm password */}
-                {loadingPassword && (
-                    <Modal
-                        show={loadingPassword}
-                        size='md'
-                        popup
-                        onClose={() => setLoadingPassword(false)}
-                    >
-                        <Modal.Header />
-                        <Modal.Body>
-                            <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                                <Spinner size='xl' color='info' />
-                                <span className='text-lg font-medium text-black'>
-                                    Hệ thống đang xác thực. Vui lòng chờ...
-                                </span>
-                            </div>
-                        </Modal.Body>
-                    </Modal>
-                )}
-
-                {/* modal check password fail */}
-                {checkPasswordFail && (
-                    <Modal
-                        show={checkPasswordFail}
-                        size='md'
-                        popup
-                        onClose={() => setCheckPasswordFail(false)}
-                    >
-                        <Modal.Body>
-                            <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                                <FaBan size='50px' color='red' />
-                                <span className='text-lg font-medium text-black'>
-                                    Xác thực mật khẩu thất bại !!!
-                                </span>
-                                <Button className='w-full' onClick={handleNavigateUser}>
-                                    Đăng nhập
-                                </Button>
-                            </div>
-                        </Modal.Body>
-                    </Modal>
-                )}
-
-                {/* change password modal */}
+            {/* modal check password fail */}
+            {checkPasswordFail && (
                 <Modal
-                    show={modalChangePassword}
-                    onClose={() => setModalChangePassword(false)}
+                    show={checkPasswordFail}
                     size='md'
                     popup
+                    onClose={() => setCheckPasswordFail(false)}
                 >
-                    <Modal.Header />
                     <Modal.Body>
-                        <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                            <TfiLock className='text-blue-500 text-5xl mx-auto' />
+                        <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
+                            <FaBan size='50px' color='red' />
                             <span className='text-lg font-medium text-black'>
-                                Nhập mật khẩu mới
+                                Xác thực mật khẩu thất bại !!!
                             </span>
-                            <TextInput
-                                type='password'
-                                id='newPassword'
-                                icon={GoLock}
-                                className='w-full'
-                                placeholder='Mật khẩu mới'
-                                value={formPassword.newPassword}
-                                onChange={(e) => {
-                                    setFormPassword({
-                                        ...formPassword,
-                                        newPassword: e.target.value,
-                                    });
-                                    setPasswordStrength(getStrength(e.target.value));
-                                }}
-                            />
-                            {formPassword.newPassword && (
-                                <div className='w-full'>
-                                    <PasswordStrengthMeter
-                                        password={formPassword.newPassword}
-                                        strength={passwordStrength}
-                                    />
-                                </div>
-                            )}
-                            <TextInput
-                                type='password'
-                                id='verifyPassword'
-                                icon={GoLock}
-                                className='w-full'
-                                placeholder='Xác thực mật khẩu mới'
-                                value={formPassword.verifyPassword}
-                                onChange={(e) =>
-                                    setFormPassword({
-                                        ...formPassword,
-                                        verifyPassword: e.target.value,
-                                    })
-                                }
-                            />
-                            {formPassword.newPassword !== formPassword.verifyPassword && (
-                                <Alert
-                                    color='failure'
-                                    className='w-full flex justify-center items-center'
-                                >
-                                    Mật khẩu không khớp
-                                </Alert>
-                            )}
-
-                            <div className='w-full flex justify-between items-center'>
-                                <Button color='gray' onClick={() => setModalChangePassword(false)}>
-                                    Hủy
-                                </Button>
-                                <Button color='blue' onClick={handleResetPassword}>
-                                    Xác nhận
-                                </Button>
-                            </div>
+                            <Button className='w-full' onClick={handleNavigateUser}>
+                                Đăng nhập
+                            </Button>
                         </div>
                     </Modal.Body>
                 </Modal>
+            )}
 
-                {/* change address modal */}
-                <Modal
-                    show={modalChangeAddress}
-                    onClose={() => setModalChangeAddress(false)}
-                    size='md'
-                    popup
-                >
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                            <PiHouseLineLight className='text-blue-500 text-5xl mx-auto' />
-                            <span className='text-lg font-medium text-black'>
-                                Cập nhật địa chỉ của bạn
-                            </span>
-                            <Select
-                                placeholder='Chọn Thành Phố'
-                                className='w-full h-10'
-                                options={
-                                    provinces?.map((province) => ({
-                                        label: province.ProvinceName,
-                                        value: province.ProvinceID,
-                                    })) ?? []
-                                }
-                                onChange={(value) => {
-                                    setFormAddress({
-                                        ...formAddress,
-                                        province: {
-                                            label: provinces.find(
-                                                (province) => province.ProvinceID === value
-                                            ).NameExtension[1],
-                                            value: value,
-                                        },
-                                    });
-                                }}
-                            />
-                            <Select
-                                placeholder='Chọn Quận/Huyện'
-                                className='w-full h-10'
-                                options={
-                                    districts?.map((district) => ({
-                                        label: district.DistrictName,
-                                        value: district.DistrictID,
-                                    })) ?? []
-                                }
-                                onChange={(value) => {
-                                    setFormAddress({
-                                        ...formAddress,
-                                        district: {
-                                            label: districts.find(
-                                                (district) => district.DistrictID === value
-                                            ).NameExtension[0],
-                                            value: value,
-                                        },
-                                    });
-                                }}
-                            />
-                            <Select
-                                placeholder='Chọn Phường/Xã'
-                                className='w-full h-10'
-                                options={
-                                    wards?.map((ward) => ({
-                                        label: ward.WardName,
-                                        value: ward.WardCode,
-                                    })) ?? []
-                                }
-                                onChange={(value) => {
-                                    setFormAddress({
-                                        ...formAddress,
-                                        ward: {
-                                            label: wards.find((ward) => ward.WardCode === value)
-                                                .NameExtension[0],
-                                            value: value,
-                                        },
-                                    });
-                                }}
-                            />
+            {/* change password modal */}
+            <Modal
+                show={modalChangePassword}
+                onClose={() => setModalChangePassword(false)}
+                size='md'
+                popup
+            >
+                <Modal.Header />
+                <Modal.Body>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-3'>
+                        <TfiLock className='text-blue-500 text-5xl mx-auto' />
+                        <span className='text-lg font-medium text-black'>Nhập mật khẩu mới</span>
+                        <TextInput
+                            type='password'
+                            id='newPassword'
+                            icon={GoLock}
+                            className='w-full'
+                            placeholder='Mật khẩu mới'
+                            value={formPassword.newPassword}
+                            onChange={(e) => {
+                                setFormPassword({
+                                    ...formPassword,
+                                    newPassword: e.target.value,
+                                });
+                                setPasswordStrength(getStrength(e.target.value));
+                            }}
+                        />
+                        {formPassword.newPassword && (
+                            <div className='w-full'>
+                                <PasswordStrengthMeter
+                                    password={formPassword.newPassword}
+                                    strength={passwordStrength}
+                                />
+                            </div>
+                        )}
+                        <TextInput
+                            type='password'
+                            id='verifyPassword'
+                            icon={GoLock}
+                            className='w-full'
+                            placeholder='Xác thực mật khẩu mới'
+                            value={formPassword.verifyPassword}
+                            onChange={(e) =>
+                                setFormPassword({
+                                    ...formPassword,
+                                    verifyPassword: e.target.value,
+                                })
+                            }
+                        />
+                        {formPassword.newPassword !== formPassword.verifyPassword && (
+                            <Alert
+                                color='failure'
+                                className='w-full flex justify-center items-center'
+                            >
+                                Mật khẩu không khớp
+                            </Alert>
+                        )}
 
-                            <TextInput
-                                type='text'
-                                className='w-full'
-                                placeholder='Số nhà, tên đường'
-                                value={formAddress.street}
-                                onChange={(e) =>
-                                    setFormAddress({
-                                        ...formAddress,
-                                        street: e.target.value,
-                                    })
-                                }
-                            />
+                        <div className='w-full flex justify-between items-center'>
+                            <Button color='gray' onClick={() => setModalChangePassword(false)}>
+                                Hủy
+                            </Button>
+                            <Button color='blue' onClick={handleResetPassword}>
+                                Xác nhận
+                            </Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
 
-                            {/* Display the formatted address */}
-                            {formAddress.street &&
-                                formAddress.ward &&
-                                formAddress.district &&
-                                formAddress.province && (
-                                    <div className='w-full p-2 border rounded-lg text-center'>
-                                        <h4 className='font-semibold text-gray-800'>
-                                            Địa chỉ của bạn:
-                                        </h4>
-                                        <p className='text-gray-600 break-words text-ellipsis overflow-hidden'>
-                                            {`${formAddress.street}, ${formAddress.ward.label},
+            {/* change address modal */}
+            <Modal
+                show={modalChangeAddress}
+                onClose={() => setModalChangeAddress(false)}
+                size='md'
+                popup
+            >
+                <Modal.Header />
+                <Modal.Body>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-3'>
+                        <PiHouseLineLight className='text-blue-500 text-5xl mx-auto' />
+                        <span className='text-lg font-medium text-black'>
+                            Cập nhật địa chỉ của bạn
+                        </span>
+                        <Select
+                            placeholder='Chọn Thành Phố'
+                            className='w-full h-10'
+                            options={
+                                provinces?.map((province) => ({
+                                    label: province.ProvinceName,
+                                    value: province.ProvinceID,
+                                })) ?? []
+                            }
+                            onChange={(value) => {
+                                setFormAddress({
+                                    ...formAddress,
+                                    province: {
+                                        label: provinces.find(
+                                            (province) => province.ProvinceID === value
+                                        ).NameExtension[1],
+                                        value: value,
+                                    },
+                                });
+                            }}
+                        />
+                        <Select
+                            placeholder='Chọn Quận/Huyện'
+                            className='w-full h-10'
+                            options={
+                                districts?.map((district) => ({
+                                    label: district.DistrictName,
+                                    value: district.DistrictID,
+                                })) ?? []
+                            }
+                            onChange={(value) => {
+                                setFormAddress({
+                                    ...formAddress,
+                                    district: {
+                                        label: districts.find(
+                                            (district) => district.DistrictID === value
+                                        ).NameExtension[0],
+                                        value: value,
+                                    },
+                                });
+                            }}
+                        />
+                        <Select
+                            placeholder='Chọn Phường/Xã'
+                            className='w-full h-10'
+                            options={
+                                wards?.map((ward) => ({
+                                    label: ward.WardName,
+                                    value: ward.WardCode,
+                                })) ?? []
+                            }
+                            onChange={(value) => {
+                                setFormAddress({
+                                    ...formAddress,
+                                    ward: {
+                                        label: wards.find((ward) => ward.WardCode === value)
+                                            .NameExtension[0],
+                                        value: value,
+                                    },
+                                });
+                            }}
+                        />
+
+                        <TextInput
+                            type='text'
+                            className='w-full'
+                            placeholder='Số nhà, tên đường'
+                            value={formAddress.street}
+                            onChange={(e) =>
+                                setFormAddress({
+                                    ...formAddress,
+                                    street: e.target.value,
+                                })
+                            }
+                        />
+
+                        {/* Display the formatted address */}
+                        {formAddress.street &&
+                            formAddress.ward &&
+                            formAddress.district &&
+                            formAddress.province && (
+                                <div className='w-full p-2 border rounded-lg text-center'>
+                                    <h4 className='font-semibold text-gray-800'>
+                                        Địa chỉ của bạn:
+                                    </h4>
+                                    <p className='text-gray-600 break-words text-ellipsis overflow-hidden'>
+                                        {`${formAddress.street}, ${formAddress.ward.label},
                                             ${formAddress.district.label},
                                             ${formAddress.province.label}`}
-                                        </p>
-                                    </div>
-                                )}
+                                    </p>
+                                </div>
+                            )}
 
-                            <div className='w-full flex justify-between items-center'>
-                                <Button color='gray' onClick={() => setModalChangeAddress(false)}>
-                                    Hủy
-                                </Button>
-                                <Button color='blue' onClick={handleUpdateAddress}>
-                                    Xác nhận
-                                </Button>
-                            </div>
+                        <div className='w-full flex justify-between items-center'>
+                            <Button color='gray' onClick={() => setModalChangeAddress(false)}>
+                                Hủy
+                            </Button>
+                            <Button color='blue' onClick={handleUpdateAddress}>
+                                Xác nhận
+                            </Button>
                         </div>
-                    </Modal.Body>
-                </Modal>
+                    </div>
+                </Modal.Body>
+            </Modal>
 
-                {/* logout account modal */}
-                <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className='text-center'>
-                            <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
-                            <span className='text-lg font-medium text-black'>
-                                Bạn có chắc chắn muốn đăng xuất?
-                            </span>
-                            <div className='flex justify-between items-center mt-5'>
-                                <Button color='gray' onClick={() => setShowModal(false)}>
-                                    Hủy
-                                </Button>
-                                <Button color='warning' onClick={handleSignOutAccount}>
-                                    Xác nhận
-                                </Button>
-                            </div>
+            {/* logout account modal */}
+            <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
+                <Modal.Header />
+                <Modal.Body>
+                    <div className='text-center'>
+                        <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
+                        <span className='text-lg font-medium text-black'>
+                            Bạn có chắc chắn muốn đăng xuất?
+                        </span>
+                        <div className='flex justify-between items-center mt-5'>
+                            <Button color='gray' onClick={() => setShowModal(false)}>
+                                Hủy
+                            </Button>
+                            <Button color='warning' onClick={handleSignOutAccount}>
+                                Xác nhận
+                            </Button>
                         </div>
-                    </Modal.Body>
-                </Modal>
-            </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
+            {/* </div> */}
         </div>
     );
 }
