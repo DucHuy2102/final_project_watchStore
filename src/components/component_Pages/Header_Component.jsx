@@ -13,6 +13,7 @@ import { resetCart } from '../../redux/slices/cartSlice';
 
 export default function Header_Component() {
     // states
+    const { pathname } = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
@@ -69,10 +70,20 @@ export default function Header_Component() {
     }, []);
 
     return (
-        <Navbar className='shadow-md'>
+        <Navbar
+            className={`${
+                pathname === '/login' ||
+                pathname === '/register' ||
+                pathname === '/forgot-password' ||
+                pathname === '/verify-email' ||
+                pathname === '/dashboard'
+                    ? 'hidden sm:hidden md:hidden lg:hidden'
+                    : 'block'
+            } border-b border-gray-200 dark:border-gray-700`}
+        >
             <Link
                 to='/'
-                className='self-center tracking-widest outline-none whitespace-nowrap text-xl sm:text-2xl font-semibold md:font-bold'
+                className='self-center tracking-widest outline-none whitespace-nowrap text-2xl sm:text-2xl font-semibold md:font-bold'
             >
                 <span
                     className='bg-clip-text text-transparent bg-gradient-to-r
@@ -94,72 +105,91 @@ export default function Header_Component() {
                 />
             </form>
 
-            <div className='lg:hidden' onClick={() => setShowMobileSearch(!showMobileSearch)}>
-                <Button className='rounded-full w-10'>
+            <div className='md:hidden ml-14'>
+                <Button
+                    className='rounded-full w-10'
+                    onClick={() => {
+                        setShowMobileSearch(!showMobileSearch);
+                    }}
+                >
                     <AiOutlineSearch size={20} />
                 </Button>
             </div>
+            {showMobileSearch && (
+                <form ref={searchRef} onSubmit={handleSearch} className='w-full mt-2'>
+                    <TextInput
+                        type='text'
+                        placeholder='Tìm kiếm...'
+                        rightIcon={AiOutlineSearch}
+                        className='w-full'
+                        value={searchTerm ?? ''}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </form>
+            )}
 
-            <div className='flex gap-2 md:order-2'>
-                <Button
-                    onClick={() => dispatch(toggleTheme())}
-                    className='w-12 h-10 hidden sm:inline'
-                    color='gray'
-                    pill
-                >
-                    {theme === 'light' ? (
-                        <FaSun className='text-yellow-400' />
-                    ) : (
-                        <FaMoon className='text-blue-400' />
-                    )}
-                </Button>
-                {tokenUser ? (
-                    <Dropdown
-                        className='mt-[2px]'
-                        inline
-                        arrowIcon={false}
-                        label={<Avatar alt='Avatar_User' img={avatarUser} rounded />}
+            {!showMobileSearch && (
+                <div className='flex gap-2 md:order-2'>
+                    <Button
+                        onClick={() => dispatch(toggleTheme())}
+                        className='w-12 h-10 hidden sm:inline'
+                        color='gray'
+                        pill
                     >
-                        <Dropdown.Header className='cursor-pointer'>
-                            <span
-                                className={`block text-center text-sm font-medium truncate ${
-                                    currentUser.admin ? 'text-orange-500' : 'text-blue-500'
-                                }`}
-                            >
-                                {currentUser?.username}
-                            </span>
-                        </Dropdown.Header>
-                        <Dropdown.Item className='flex justify-center items-center'>
-                            <Link to={'/dashboard?tab=dashboard'} className='font-medium'>
-                                Trang cá nhân
-                            </Link>
-                        </Dropdown.Item>
-                        <Dropdown.Item className='flex justify-center items-center'>
-                            <Link to={'/dashboard?tab=orders'} className='font-medium'>
-                                Giỏ hàng
-                            </Link>
-                        </Dropdown.Item>
-                        <Dropdown.Divider />
-                        <Dropdown.Item
-                            className='flex justify-center items-center font-semibold text-red-500'
-                            onClick={handleSignOutAccount}
+                        {theme === 'light' ? (
+                            <FaSun className='text-yellow-400' />
+                        ) : (
+                            <FaMoon className='text-blue-400' />
+                        )}
+                    </Button>
+                    {tokenUser ? (
+                        <Dropdown
+                            className='mt-[2px]'
+                            inline
+                            arrowIcon={false}
+                            label={<Avatar alt='Avatar_User' img={avatarUser} rounded />}
                         >
-                            Đăng xuất
-                        </Dropdown.Item>
-                    </Dropdown>
-                ) : (
-                    <Link to='/login' className='ml-2'>
-                        <Button pill outline>
-                            Đăng nhập
-                        </Button>
-                    </Link>
-                )}
-                <Navbar.Toggle />
-            </div>
+                            <Dropdown.Header className='cursor-pointer'>
+                                <span
+                                    className={`block text-center text-sm font-medium truncate ${
+                                        currentUser.admin ? 'text-orange-500' : 'text-blue-500'
+                                    }`}
+                                >
+                                    {currentUser?.username}
+                                </span>
+                            </Dropdown.Header>
+                            <Dropdown.Item className='flex justify-center items-center'>
+                                <Link to={'/dashboard?tab=dashboard'} className='font-medium'>
+                                    Trang cá nhân
+                                </Link>
+                            </Dropdown.Item>
+                            <Dropdown.Item className='flex justify-center items-center'>
+                                <Link to={'/dashboard?tab=orders'} className='font-medium'>
+                                    Giỏ hàng
+                                </Link>
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item
+                                className='flex justify-center items-center font-semibold text-red-500'
+                                onClick={handleSignOutAccount}
+                            >
+                                Đăng xuất
+                            </Dropdown.Item>
+                        </Dropdown>
+                    ) : (
+                        <Link to='/login' className='ml-2'>
+                            <Button pill outline>
+                                Đăng nhập
+                            </Button>
+                        </Link>
+                    )}
+                    <Navbar.Toggle />
+                </div>
+            )}
 
-            <Navbar.Collapse>
+            <Navbar.Collapse className='md:inline-block '>
                 <Navbar.Link active={pathURL === '/'} as={'div'}>
-                    <Link to='/' className='flex justify-center items-center gap-x-2 md:gap-x-1'>
+                    <Link to='/' className='flex justify-start items-center gap-x-2 md:gap-x-1'>
                         <IoIosHome size={'20px'} />
                         Trang chủ
                     </Link>
@@ -167,17 +197,14 @@ export default function Header_Component() {
                 <Navbar.Link active={pathURL === '/products'} as={'div'}>
                     <Link
                         to='/products'
-                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
+                        className='flex justify-start items-center gap-x-2 md:gap-x-1'
                     >
                         <MdWatch size={'20px'} />
                         Sản phẩm
                     </Link>
                 </Navbar.Link>
                 <Navbar.Link className='group' active={pathURL === '/cart'} as={'div'}>
-                    <Link
-                        to='/cart'
-                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
-                    >
+                    <Link to='/cart' className='flex justify-start items-center gap-x-2 md:gap-x-1'>
                         <Badge count={tokenUser ? cartTotalQuantity : 0}>
                             <IoIosCart
                                 className={`dark:text-gray-400 dark:group-hover:!text-gray-200 group-hover:!text-[#0E7490] ${
@@ -192,26 +219,13 @@ export default function Header_Component() {
                 <Navbar.Link active={pathURL === '/services'} as={'div'}>
                     <Link
                         to='/services'
-                        className='flex justify-center items-center gap-x-2 md:gap-x-1'
+                        className='flex justify-start items-center gap-x-2 md:gap-x-1'
                     >
                         <MdHomeRepairService size={'20px'} />
                         Dịch vụ
                     </Link>
                 </Navbar.Link>
             </Navbar.Collapse>
-
-            {showMobileSearch && (
-                <form ref={searchRef} onSubmit={handleSearch} className='w-full mt-2'>
-                    <TextInput
-                        type='text'
-                        placeholder='Tìm kiếm...'
-                        rightIcon={AiOutlineSearch}
-                        className='w-full'
-                        value={searchTerm ?? ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </form>
-            )}
         </Navbar>
     );
 }

@@ -1,7 +1,7 @@
 import { Button, Modal } from 'flowbite-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CiWarning } from 'react-icons/ci';
-import { FaMinus, FaPlus } from 'react-icons/fa';
+import { FaClock, FaMinus, FaPlus } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -141,37 +141,59 @@ export default function DashboardCart() {
     return (
         <div className='mx-auto px-4 py-4'>
             {totalQuantity === 0 ? (
-                <div className='h-[42rem] flex flex-col items-center justify-center gap-y-6'>
-                    <span className='text-4xl font-bold text-[#0E7490] dark:text-gray-200'>
-                        Đẳng Cấp Thời Gian, Giá Trị Vượt Trội
-                    </span>
-                    <img
-                        src={'../assets/cartEmpty.jpg'}
-                        alt='High-quality watch'
-                        className='w-auto h-80 object-contain rounded-lg shadow-sm'
-                    />
-                    {tokenUser ? (
-                        <>
-                            <span className='text-2xl font-bold'>Giỏ hàng trống</span>
-                            <span className='text-xl'>
-                                Không có sản phẩm nào trong giỏ hàng của bạn
-                            </span>
-                            <div className='flex items-center justify-center gap-x-5'>
-                                <Link to='/products'>
-                                    <Button className='w-96'>Tiếp tục mua hàng</Button>
-                                </Link>
+                <div className='min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 bg-gray-50 dark:bg-gray-900'>
+                    <div className='w-full max-w-4xl mb-8'>
+                        <div className='flex flex-col sm:flex-row justify-between sm:justify-center items-center space-y-4 sm:space-y-0 sm:space-x-1'>
+                            <div className='w-full sm:w-auto text-center sm:text-left'>
+                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200'>
+                                    Đẳng Cấp Thời Gian
+                                </span>
                             </div>
-                        </>
-                    ) : (
-                        <>
-                            <span className='font-semibold text-gray-600 text-lg'>
-                                Vui lòng đăng nhập để xem giỏ hàng của bạn
-                            </span>
-                            <div onClick={handleNavigateToLoginPage}>
-                                <Button className='w-96'>Đăng nhập</Button>
+                            <div className='hidden sm:flex items-center justify-center'>
+                                <FaClock className='text-3xl text-[#0E7490] dark:text-gray-200 mx-4' />
                             </div>
-                        </>
-                    )}
+                            <div className='w-full sm:w-auto text-center sm:text-right'>
+                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200'>
+                                    Giá Trị Vượt Trội
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='flex flex-col items-center justify-center gap-y-6 max-w-md w-full'>
+                        <img
+                            src={'../assets/cartEmpty.jpg'}
+                            alt='High-quality watch'
+                            className='w-auto h-60 sm:h-80 object-contain rounded-lg'
+                        />
+
+                        {tokenUser ? (
+                            <>
+                                <h2 className='text-xl sm:text-2xl font-bold text-center'>
+                                    Giỏ hàng trống
+                                </h2>
+                                <p className='text-lg sm:text-xl text-center'>
+                                    Không có sản phẩm nào trong giỏ hàng của bạn
+                                </p>
+                                <div className='w-full'>
+                                    <Link to='/products'>
+                                        <Button className='w-full'>Tiếp tục mua hàng</Button>
+                                    </Link>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <p className='font-semibold text-gray-600 dark:text-gray-400 text-lg text-center'>
+                                    Đăng nhập để xem giỏ hàng của bạn
+                                </p>
+                                <div className='w-full'>
+                                    <Button onClick={handleNavigateToLoginPage} className='w-full'>
+                                        Đăng nhập
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             ) : (
                 <div className='w-full flex flex-col lg:flex-row gap-x-4'>

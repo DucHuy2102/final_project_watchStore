@@ -1,4 +1,4 @@
-import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
+import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { CiLogin, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
@@ -11,6 +11,8 @@ import { TfiHandPointRight } from 'react-icons/tfi';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { LoginSocialFacebook } from 'reactjs-social-login';
+import { IoIosCart, IoIosHome } from 'react-icons/io';
+import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 
 export default function Login() {
     // state
@@ -20,6 +22,7 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { state } = useLocation();
+    const theme = 'light';
 
     // handle change input value in form
     const handleChange = (e) => {
@@ -30,10 +33,7 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.username || !formData.password) {
-            setErrorMessage('Vui lòng nhập đầy đủ thông tin!');
-            setTimeout(() => {
-                setErrorMessage('');
-            }, 3000);
+            toast.error('Vui lòng nhập đầy đủ thông tin!');
             return;
         }
 
@@ -65,9 +65,7 @@ export default function Login() {
                 setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
             setFormData({ username: '', password: '' });
-            setTimeout(() => {
-                setErrorMessage('');
-            }, 3000);
+            toast.error(errorMessage);
             console.log(error);
         } finally {
             setLoadingState(false);
@@ -91,7 +89,6 @@ export default function Login() {
             const res = await axios.post(`${import.meta.env.VITE_API_URL}/google?token=${token}`);
             if (res.status === 200) {
                 const { data } = res;
-                console.log('Login --> ', data);
                 dispatch(user_SignIn({ access_token: data.access_token, user: data }));
                 toast.success('Đăng nhập thành công!');
                 setTimeout(() => {
@@ -131,128 +128,153 @@ export default function Login() {
     };
 
     return (
-        <div
-            className='w-full p-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-center
-    bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-800 dark:to-gray-900
-    sm:h-auto min-h-[93vh] items-center justify-center'
-        >
-            {/* Form Section */}
-            <div className='w-full sm:w-[50%] p-8 bg-white dark:bg-gray-800 shadow-lg rounded-lg'>
-                <span className='text-xl font-bold sm:text-2xl sm:font-semibold text-gray-800 dark:text-white text-center block'>
-                    Đăng nhập
-                </span>
-                <form className='flex flex-col gap-6 mt-6' onSubmit={handleSubmit}>
-                    <div>
-                        <Label
-                            value='Tên người dùng'
-                            className='text-gray-700 dark:text-gray-300'
-                        />
-                        <TextInput
-                            icon={CiUser}
-                            type='text'
-                            placeholder='Tên người dùng'
-                            id='username'
-                            value={formData.username}
-                            onChange={handleChange}
-                            className='mt-1'
-                        />
-                    </div>
-                    <div>
-                        <Label value='Mật khẩu' className='text-gray-700 dark:text-gray-300' />
-                        <TextInput
-                            icon={GoLock}
-                            type='password'
-                            placeholder='Mật khẩu'
-                            id='password'
-                            value={formData.password}
-                            onChange={handleChange}
-                            className='mt-1'
-                        />
-                    </div>
-                    {errorMessage && (
-                        <Alert
-                            className='mt-5 flex justify-center items-center font-bold text-red-600 dark:text-red-400'
-                            color='failure'
+        <div className='w-full h-screen'>
+            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5 relative'>
+                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
+                    <div className='flex justify-center items-center gap-x-3 md:gap-x-16 absolute top-10 lg:top-5 lg:gap-x-24'>
+                        <Link
+                            to={'/'}
+                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
                         >
-                            {errorMessage}
-                        </Alert>
-                    )}
-                    <Link
-                        className='text-sm sm:text-black text-gray-500 dark:text-gray-300 font-semibold hover:underline hover:text-blue-500'
-                        to='/forgot-password'
-                    >
-                        Quên mật khẩu?
-                    </Link>
+                            <IoIosHome />
+                            <span>Trang chủ</span>
+                        </Link>
+                        <Link
+                            to={'/products'}
+                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
+                        >
+                            <MdWatch />
+                            <span>Sản phẩm</span>
+                        </Link>
+                        <Link
+                            to={'/cart'}
+                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
+                        >
+                            <IoIosCart />
+                            <span>Giỏ hàng</span>
+                        </Link>
+                        <Link
+                            to={'/services'}
+                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
+                        >
+                            <MdHomeRepairService />
+                            <span>Dịch vụ</span>
+                        </Link>
+                    </div>
+                    <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
+                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>
+                            Đăng nhập
+                        </h2>
+                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 text-center'>
+                            Sử dụng tên người dùng và mật khẩu để đăng nhập
+                        </p>
+                        <form className='w-full space-y-6' onSubmit={handleSubmit}>
+                            <div>
+                                <Label
+                                    htmlFor='username'
+                                    className='text-gray-700 dark:text-gray-300 mb-1'
+                                >
+                                    Tên người dùng
+                                </Label>
+                                <TextInput
+                                    icon={CiUser}
+                                    type='text'
+                                    placeholder='Tên người dùng'
+                                    id='username'
+                                    value={formData.username}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div>
+                                <Label
+                                    htmlFor='password'
+                                    className='text-gray-700 dark:text-gray-300 mb-1'
+                                >
+                                    Mật khẩu
+                                </Label>
+                                <TextInput
+                                    icon={GoLock}
+                                    type='password'
+                                    placeholder='Mật khẩu'
+                                    id='password'
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                />
+                            </div>
 
-                    <Button
-                        disabled={loadingState}
-                        type='submit'
-                        outline
-                        className='w-full bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500
-                        dark:from-slate-700 dark:via-slate-700 dark:to-zinc-700
-                        text-gray-800 dark:text-gray-200 font-medium'
-                    >
-                        {loadingState ? (
-                            <>
-                                <Spinner size='sm' />
-                                <span className='pl-3'>Đang xử lý...</span>
-                            </>
-                        ) : (
-                            <span className='flex justify-center items-center gap-x-2 text-sm sm:text-lg'>
-                                <CiLogin className='transition-transform duration-300 transform group-hover:-translate-x-2' />{' '}
-                                Đăng nhập
-                            </span>
-                        )}
-                    </Button>
-                </form>
-                <div className='w-full flex flex-col sm:flex-row justify-between items-center gap-y-3 sm:gap-y-0 mt-6'>
-                    <div className='flex gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400'>
-                        <span className='md:hidden lg:inline'>Bạn chưa có tài khoản?</span>
-                        <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
-                            <TfiHandPointRight />
-                            <Link to='/register' className='dark:text-blue-400 hover:underline'>
-                                Đăng ký ngay
-                            </Link>
+                            <div className='flex items-center justify-end'>
+                                <Link
+                                    className='text-sm text-gray-500 hover:text-blue-600 hover:underline dark:text-blue-400'
+                                    to='/forgot-password'
+                                >
+                                    Quên mật khẩu?
+                                </Link>
+                            </div>
+                            <Button
+                                disabled={loadingState}
+                                type='submit'
+                                color='blue'
+                                className='w-full'
+                            >
+                                {loadingState ? (
+                                    <>
+                                        <Spinner size='sm' />
+                                        <span className='ml-2'>Đang xử lý...</span>
+                                    </>
+                                ) : (
+                                    <div className='flex items-center justify-center gap-x-2'>
+                                        <CiLogin
+                                            size={'20px'}
+                                            className='transition-transform duration-300 transform group-hover:-translate-x-2'
+                                        />
+                                        <span>Đăng nhập</span>
+                                    </div>
+                                )}
+                            </Button>
+                        </form>
+                        <div className='w-full mt-6'>
+                            <div className='flex items-center justify-center gap-x-2 mb-4'>
+                                <span className='text-sm text-gray-600 dark:text-gray-400'>
+                                    Bạn chưa có tài khoản?
+                                </span>
+                                <Link
+                                    to='/register'
+                                    className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'
+                                >
+                                    <TfiHandPointRight className='mr-1' /> Đăng ký ngay
+                                </Link>
+                            </div>
+                            <div className='relative'>
+                                <div className='absolute inset-0 flex items-center'>
+                                    <div className='w-full border-t border-gray-300'></div>
+                                </div>
+                                <div className='relative flex justify-center text-sm'>
+                                    <span className='px-2 bg-gray-50 dark:bg-gray-900 text-gray-500'>
+                                        Hoặc
+                                    </span>
+                                </div>
+                            </div>
+                            <Button
+                                color={'gray'}
+                                className='w-full mt-3'
+                                onClick={() => loginGoogle()}
+                            >
+                                <div className='flex items-center justify-center gap-x-2'>
+                                    <FcGoogle />
+                                    <span>Đăng nhập bằng Google</span>
+                                </div>
+                            </Button>
                         </div>
                     </div>
-                    <div className='flex justify-center items-center gap-x-2'>
-                        <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
-                            Tiếp tục với
-                        </span>
-                        <button
-                            className='rounded-full dark:bg-white'
-                            onClick={() => loginGoogle()}
-                        >
-                            <FcGoogle size={'35px'} />
-                        </button>
-                        <span className='text-sm font-semibold text-gray-600 dark:text-gray-400'>
-                            hoặc
-                        </span>
-
-                        <LoginSocialFacebook
-                            appId={import.meta.env.VITE_FACEBOOK_APP_ID}
-                            onResolve={responseFacebook}
-                            onReject={(error) => {
-                                console.error(error);
-                            }}
-                        >
-                            <img
-                                src={'../assets/fb.png'}
-                                alt='Button_Login_Facebook'
-                                className='w-8 h-8 rounded-full cursor-pointer'
-                            />
-                        </LoginSocialFacebook>
-                    </div>
                 </div>
-            </div>
 
-            {/* Image Section */}
-            <div className='sm:w-[50%] w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg'>
-                <img
-                    src='https://timex.com/cdn/shop/files/02617_WB23_July_alt_lifestyle_featured_image_TW2V49700_5bdba602-5733-4fb1-83ad-8297308ef20b.jpg?v=1689775668&width=990'
-                    alt='Product Image'
-                    className='w-full h-80 sm:w-[90vw] sm:h-[90vh] object-cover rounded-lg shadow-lg'
-                />
+                <div className='hidden lg:block lg:w-1/2'>
+                    <img
+                        src={'../assets/login.webp'}
+                        alt='Login'
+                        className='w-full h-screen object-cover rounded-lg lg:rounded-none'
+                    />
+                </div>
             </div>
         </div>
     );
