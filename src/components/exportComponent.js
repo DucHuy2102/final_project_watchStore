@@ -13,6 +13,7 @@ export { default as SayThanks_Component } from './component_Utils/SayThanks';
 export { default as Review_Component } from './component_Utils/Review_Component';
 export { default as PasswordStrengthMeter } from './component_Utils/PasswordStrengthMeter';
 export { default as FloatingShape } from './component_Utils/FloatingShape';
+export { default as Mini_Navbar_Component } from './component_Pages/Mini_Navbar';
 
 // Products components
 export { default as ProductCard_Component } from './components_Product/ProductCard';

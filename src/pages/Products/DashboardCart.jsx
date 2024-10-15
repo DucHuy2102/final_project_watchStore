@@ -141,7 +141,7 @@ export default function DashboardCart() {
     return (
         <div className='mx-auto px-4 py-4'>
             {totalQuantity === 0 ? (
-                <div className='min-h-[85vh] flex flex-col items-center justify-center px-4 py-8 bg-gray-50 dark:bg-gray-900'>
+                <div className='min-h-[85vh] flex flex-col items-center justify-center px-4 py-8'>
                     <div className='w-full max-w-4xl mb-8'>
                         <div className='flex flex-col sm:flex-row justify-between sm:justify-center items-center space-y-4 sm:space-y-0 sm:space-x-1'>
                             <div className='w-full sm:w-auto text-center sm:text-left'>

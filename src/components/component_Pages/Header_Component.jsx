@@ -147,7 +147,15 @@ export default function Header_Component() {
                             className='mt-[2px]'
                             inline
                             arrowIcon={false}
-                            label={<Avatar alt='Avatar_User' img={avatarUser} rounded />}
+                            label={
+                                <div className='w-10 h-10'>
+                                    <img
+                                        src={avatarUser}
+                                        alt='Avatar_User'
+                                        className='object-cover w-full h-full rounded-full'
+                                    />
+                                </div>
+                            }
                         >
                             <Dropdown.Header className='cursor-pointer'>
                                 <span

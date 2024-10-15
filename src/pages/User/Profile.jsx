@@ -384,7 +384,7 @@ export default function Profile_Component() {
     };
 
     return (
-        <div className='w-full my-auto max-w-5xl mx-auto'>
+        <div className='w-full mt-10 my-auto max-w-5xl mx-auto'>
             {/* <div className='p-10 border border-gray-100 dark:border-gray-700 shadow-lg rounded-2xl'> */}
             <Card className='p-6 border border-gray-200 dark:border-gray-700 shadow-lg rounded-2xl'>
                 <h1 className='text-center font-semibold text-3xl my-7'>Trang cá nhân</h1>

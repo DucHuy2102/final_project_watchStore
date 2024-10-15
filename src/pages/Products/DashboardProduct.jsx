@@ -72,18 +72,20 @@ export default function DashboardProduct() {
     return (
         <div className='min-h-screen p-5 w-full'>
             <div
-                className='text-white w-full border-b border-gray-200 dark:border-gray-600 pb-4
+                className='text-white w-full 
         flex flex-col items-center justify-between gap-y-2 sm:flex-row sm:px-5'
             >
-                <Breadcrumb_Component displayName={'Sản phẩm'} />
+                <div className='flex justify-start w-full sm:w-auto'>
+                    <Breadcrumb_Component displayName={'Sản phẩm'} />
+                </div>
 
                 {searchParams.size !== 0 && totalProducts > 0 ? (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg'>
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
                         Tìm được <span className='text-teal-500 font-bold'>{totalProducts}</span>{' '}
                         sản phẩm khớp với bộ lọc
                     </span>
                 ) : (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg'>
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
                         Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản
                         phẩm
                     </span>
@@ -109,8 +111,11 @@ export default function DashboardProduct() {
                         alt=''
                         className='h-96 w-auto object-cover'
                     />
-                    <p className='text-gray-400 text-lg font-semibold'>
-                        Không có sản phẩm nào phù hợp với yêu cầu của bạn
+                    <p className='text-gray-400 text-lg text-center font-semibold'>
+                        Hiện tại không có sản phẩm nào
+                    </p>
+                    <p className='text-gray-400 text-lg text-center font-semibold'>
+                        Vui lòng thử lại sau hoặc thay đổi bộ lọc
                     </p>
                 </div>
             )}

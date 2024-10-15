@@ -1,17 +1,15 @@
-import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react';
+import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
-import { CiLogin, CiMail, CiPhone, CiUser } from 'react-icons/ci';
+import { CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { IoIosCart, IoIosHome, IoIosSend } from 'react-icons/io';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PasswordStrengthMeter } from '../../components/exportComponent';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { FcGoogle } from 'react-icons/fc';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 
 // handle change phone input
@@ -21,7 +19,6 @@ const handlePhoneChange = (phone) => {
 
 export default function Register() {
     // state
-    const { pathname } = useLocation();
     const [formData, setFormData] = useState({
         username: '',
         email: '',
@@ -30,8 +27,6 @@ export default function Register() {
     });
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [loadingState, setLoadingState] = useState(false);
-    const [errorMessage, setErrorMessage] = useState();
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     // get strength of password
@@ -56,18 +51,12 @@ export default function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.username || !formData.email || !formData.phone || !formData.password) {
-            setErrorMessage('Vui lòng nhập đầy đủ thông tin!');
-            setTimeout(() => {
-                setErrorMessage('');
-            }, 3000);
+            toast.error('Vui lòng nhập đầy đủ thông tin!');
             return;
         }
 
         if (passwordStrength < 3) {
-            setErrorMessage('Mật khẩu quá yếu, vui lòng chọn mật khẩu khác!');
-            setTimeout(() => {
-                setErrorMessage('');
-            }, 3000);
+            toast.error('Mật khẩu quá yếu, vui lòng chọn mật khẩu khác!');
             return;
         }
 
@@ -86,13 +75,10 @@ export default function Register() {
         } catch (error) {
             const { response } = error;
             if (response?.status === 400) {
-                setErrorMessage('Email đã tồn tại! Vui lòng chọn email khác!');
+                toast.error('Email đã tồn tại! Vui lòng chọn email khác!');
             } else {
-                setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
+                toast.error('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
-            setTimeout(() => {
-                setErrorMessage('');
-            }, 3000);
             console.log(error);
         } finally {
             setLoadingState(false);
