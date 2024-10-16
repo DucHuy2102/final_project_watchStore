@@ -28,7 +28,7 @@ export default function Dashboard_DefaultPage() {
 
             <div className='flex-1 flex flex-col w-full overflow-hidden'>
                 <Mini_Navbar_Component />
-                <main className='flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4'>
+                <main className='flex-1 overflow-x-hidden overflow-y-auto p-4'>
                     {tab === 'dashboard' && <Dashboard_Page />}
                     {tab === 'profile' && <Profile_Page />}
                     {tab === 'order' && <Order_Page />}

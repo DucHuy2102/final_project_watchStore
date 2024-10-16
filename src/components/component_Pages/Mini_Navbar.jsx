@@ -18,16 +18,14 @@ export default function Mini_Navbar() {
     const [tab, setTab] = useState('');
 
     const NavButton = ({ to, icon: Icon, children }) => (
-        <Button outline color={theme === 'light' ? 'light' : 'dark'}>
             <Link
                 to={to}
-                className='flex items-center justify-start gap-x-1
+                className='flex items-center justify-start gap-x-1 hover:text-[#0e7490]
                      text-sm lg:text-md lg:font-bold font-medium cursor-pointer'
             >
                 <Icon size={16} />
                 <span>{children}</span>
             </Link>
-        </Button>
     );
 
     // get tab from url
@@ -52,7 +50,8 @@ export default function Mini_Navbar() {
     };
 
     return (
-        <nav className='flex flex-wrap items-center justify-between gap-4 px-4 py-2'>
+        <nav className='flex flex-wrap items-center justify-between gap-4 px-4 py-2 
+        border-b border-gray-200 dark:border-gray-500'>
             <form onSubmit={handleSearch} className='flex-grow max-w-md'>
                 <div className='relative'>
                     <input

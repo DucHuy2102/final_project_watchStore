@@ -8,7 +8,7 @@ import {
 
 export default function Home() {
     return (
-        <div className='min-h-screen p-5'>
+        <div className='min-h-screene p-5'>
             <Carousel_Component />
             <ShopNow_Component />
             <Policy_Component />

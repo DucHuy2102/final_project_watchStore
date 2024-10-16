@@ -67,7 +67,7 @@ export default function Sidebar_Component() {
 
     return (
         <div
-            className={`relative transition-all duration-300 ease-in-out ${
+            className={`relative transition-all duration-300 ease-in-out border-r border-gray-200 dark:border-r dark:border-gray-500 ${
                 showSidebar ? 'w-64' : 'w-16'
             }`}
         >
