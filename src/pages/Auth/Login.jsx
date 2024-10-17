@@ -22,7 +22,6 @@ export default function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { state } = useLocation();
-    const theme = 'light';
 
     // handle change input value in form
     const handleChange = (e) => {
@@ -162,18 +161,13 @@ export default function Login() {
                         </Link>
                     </div>
                     <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
-                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>
-                            Đăng nhập
-                        </h2>
+                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>Đăng nhập</h2>
                         <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 text-center'>
                             Sử dụng tên người dùng và mật khẩu để đăng nhập
                         </p>
                         <form className='w-full space-y-6' onSubmit={handleSubmit}>
                             <div>
-                                <Label
-                                    htmlFor='username'
-                                    className='text-gray-700 dark:text-gray-300 mb-1'
-                                >
+                                <Label htmlFor='username' className='text-gray-700 dark:text-gray-300 mb-1'>
                                     Tên người dùng
                                 </Label>
                                 <TextInput
@@ -186,10 +180,7 @@ export default function Login() {
                                 />
                             </div>
                             <div>
-                                <Label
-                                    htmlFor='password'
-                                    className='text-gray-700 dark:text-gray-300 mb-1'
-                                >
+                                <Label htmlFor='password' className='text-gray-700 dark:text-gray-300 mb-1'>
                                     Mật khẩu
                                 </Label>
                                 <TextInput
@@ -210,12 +201,7 @@ export default function Login() {
                                     Quên mật khẩu?
                                 </Link>
                             </div>
-                            <Button
-                                disabled={loadingState}
-                                type='submit'
-                                color='blue'
-                                className='w-full'
-                            >
+                            <Button disabled={loadingState} type='submit' color='blue' className='w-full'>
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />
@@ -234,9 +220,7 @@ export default function Login() {
                         </form>
                         <div className='w-full mt-6'>
                             <div className='flex items-center justify-center gap-x-2 mb-4'>
-                                <span className='text-sm text-gray-600 dark:text-gray-400'>
-                                    Bạn chưa có tài khoản?
-                                </span>
+                                <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn chưa có tài khoản?</span>
                                 <Link
                                     to='/register'
                                     className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'
@@ -249,16 +233,10 @@ export default function Login() {
                                     <div className='w-full border-t border-gray-300'></div>
                                 </div>
                                 <div className='relative flex justify-center text-sm'>
-                                    <span className='px-2 bg-gray-50 dark:bg-gray-900 text-gray-500'>
-                                        Hoặc
-                                    </span>
+                                    <span className='px-2 bg-gray-50 dark:bg-gray-900 text-gray-500'>Hoặc</span>
                                 </div>
                             </div>
-                            <Button
-                                color={'gray'}
-                                className='w-full mt-3'
-                                onClick={() => loginGoogle()}
-                            >
+                            <Button color={'gray'} className='w-full mt-3' onClick={() => loginGoogle()}>
                                 <div className='flex items-center justify-center gap-x-2'>
                                     <FcGoogle />
                                     <span>Đăng nhập bằng Google</span>

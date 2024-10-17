@@ -8,13 +8,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
-import { DeliveryTo_Component, Vouchers_Component } from '../../components/exportComponent';
+import { DeliveryTo_Component } from '../../components/exportComponent';
 import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
 import { FiMinus } from 'react-icons/fi';
 
 // format price to VND
-const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 export default function DashboardCart() {
     // ================================================ Get data from redux store ================================================
@@ -31,9 +30,7 @@ export default function DashboardCart() {
     // calculate total discount price of all product in cart
     const totalDiscountPrice = useMemo(() => {
         return infoProduct.reduce((total, item) => {
-            const qualityProduct = productCartItem.find(
-                (product) => product.idProduct === item.id
-            ).quantity;
+            const qualityProduct = productCartItem.find((product) => product.idProduct === item.id).quantity;
             return total + item.discount * qualityProduct;
         }, 0);
     }, [infoProduct, productCartItem]);
@@ -58,16 +55,12 @@ export default function DashboardCart() {
             return;
         }
         try {
-            const res = await axios.put(
-                `${import.meta.env.VITE_API_URL}/api/cart/update-cart`,
-                updateCartItem,
-                {
-                    headers: {
-                        Authorization: `Bearer ${tokenUser}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
+            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/cart/update-cart`, updateCartItem, {
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                    'Content-Type': 'application/json',
+                },
+            });
         } catch (error) {
             console.log(error);
         }
@@ -77,7 +70,7 @@ export default function DashboardCart() {
     const debouncedUpdateCart = useRef(
         debounce((updatedCartItem) => {
             updateCartApiCall(updatedCartItem);
-        }, 500)
+        }, 500),
     ).current;
 
     // get product cart item to update cart
@@ -106,7 +99,7 @@ export default function DashboardCart() {
                 dispatch(changeProductQuantity({ type, productId }));
             }
         },
-        [dispatch, tokenUser]
+        [dispatch, tokenUser],
     );
 
     // handle delete product from cart
@@ -133,7 +126,7 @@ export default function DashboardCart() {
                 totalAmountToPay: totalAmountToPay,
                 totalQuantity: totalQuantity,
                 isBuyNow: false,
-            })
+            }),
         );
         navigate('/checkout');
     };
@@ -169,9 +162,7 @@ export default function DashboardCart() {
 
                         {tokenUser ? (
                             <>
-                                <h2 className='text-xl sm:text-2xl font-bold text-center'>
-                                    Giỏ hàng trống
-                                </h2>
+                                <h2 className='text-xl sm:text-2xl font-bold text-center'>Giỏ hàng trống</h2>
                                 <p className='text-lg sm:text-xl text-center'>
                                     Không có sản phẩm nào trong giỏ hàng của bạn
                                 </p>
@@ -208,22 +199,14 @@ export default function DashboardCart() {
                                     <tr className='border-b border-gray-200 dark:border-gray-700'>
                                         <th className='text-left font-semibold pb-5'>
                                             Tất cả{' '}
-                                            <span className='text-blue-600 font-bold'>
-                                                {productCartItem?.length}
-                                            </span>{' '}
+                                            <span className='text-blue-600 font-bold'>{productCartItem?.length}</span>{' '}
                                             sản phẩm
                                         </th>
-                                        <th className='font-semibold text-center pb-5'>
-                                            Trạng thái
-                                        </th>
+                                        <th className='font-semibold text-center pb-5'>Trạng thái</th>
                                         <th className='font-semibold text-center pb-5'>Màu sắc</th>
-                                        <th className='font-semibold text-center pb-5'>
-                                            Đơn giá (VNĐ)
-                                        </th>
+                                        <th className='font-semibold text-center pb-5'>Đơn giá (VNĐ)</th>
                                         <th className='font-semibold text-center pb-5'>Số lượng</th>
-                                        <th className='font-semibold text-center pb-5'>
-                                            Thành tiền (VNĐ)
-                                        </th>
+                                        <th className='font-semibold text-center pb-5'>Thành tiền (VNĐ)</th>
                                         <th className='text-center flex justify-center items-center pt-1'>
                                             <MdDeleteOutline size={20} />
                                         </th>
@@ -233,25 +216,20 @@ export default function DashboardCart() {
                                     {infoProduct?.map((item, index) => {
                                         const currentSellPrice = item.price - item.discount;
                                         const qualityProduct = productCartItem.find(
-                                            (product) => product.idProduct === item.id
+                                            (product) => product.idProduct === item.id,
                                         ).quantity;
-                                        const totalPrice =
-                                            (item.price - item.discount) * qualityProduct;
+                                        const totalPrice = (item.price - item.discount) * qualityProduct;
                                         return (
                                             <tr
                                                 key={index}
                                                 className={`${
-                                                    index % 2 === 0
-                                                        ? 'bg-gray-50 dark:bg-gray-800'
-                                                        : ''
+                                                    index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : ''
                                                 } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer`}
                                             >
                                                 <td className='py-5 w-1/3'>
                                                     <div
                                                         className='flex items-center cursor-pointer'
-                                                        onClick={() =>
-                                                            navigate(`/product-detail/${item.id}`)
-                                                        }
+                                                        onClick={() => navigate(`/product-detail/${item.id}`)}
                                                     >
                                                         <img
                                                             className='h-20 w-20 object-cover ml-4 mr-4 rounded-lg'
@@ -263,9 +241,7 @@ export default function DashboardCart() {
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td className='py-5 text-center'>
-                                                    {item.condition}
-                                                </td>
+                                                <td className='py-5 text-center'>{item.condition}</td>
                                                 <td className='py-5 text-center'>{item.color}</td>
                                                 <td className='py-5 text-center'>
                                                     <div className='flex flex-col items-center justify-center gap-y-1'>
@@ -280,12 +256,7 @@ export default function DashboardCart() {
                                                 <td className='py-5'>
                                                     <div className='flex items-center justify-center'>
                                                         <button
-                                                            onClick={() =>
-                                                                handleChangeQuantity(
-                                                                    'decrease',
-                                                                    item.id
-                                                                )
-                                                            }
+                                                            onClick={() => handleChangeQuantity('decrease', item.id)}
                                                             className='hover:bg-blue-100 hover:text-blue-600 border rounded-l-lg 
                                                         text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
                                                         >
@@ -297,12 +268,7 @@ export default function DashboardCart() {
                                                         </span>
 
                                                         <button
-                                                            onClick={() =>
-                                                                handleChangeQuantity(
-                                                                    'increase',
-                                                                    item.id
-                                                                )
-                                                            }
+                                                            onClick={() => handleChangeQuantity('increase', item.id)}
                                                             className='hover:bg-blue-100 hover:text-blue-600 border rounded-r-lg 
                                                         text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
                                                         >
@@ -341,10 +307,7 @@ export default function DashboardCart() {
                                             >
                                                 Hủy
                                             </Button>
-                                            <Button
-                                                className='w-full'
-                                                onClick={handleDeleteProductFromCart}
-                                            >
+                                            <Button className='w-full' onClick={handleDeleteProductFromCart}>
                                                 Xóa
                                             </Button>
                                         </div>
@@ -361,9 +324,7 @@ export default function DashboardCart() {
                         <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
                             <div className='flex justify-between mb-2 text-md font-medium'>
                                 <span>Tạm tính</span>
-                                <span className='text-red-500 font-semibold'>
-                                    {formatPrice(totalPrice)}
-                                </span>
+                                <span className='text-red-500 font-semibold'>{formatPrice(totalPrice)}</span>
                             </div>
 
                             <div className='flex justify-between mb-2 text-md'>
@@ -378,16 +339,14 @@ export default function DashboardCart() {
 
                             <div className='flex justify-between mb-3 text-xl font-semibold'>
                                 <span>Tổng tiền</span>
-                                <span className='text-blue-500 font-semibold'>
-                                    {formatPrice(totalAmountToPay)}
-                                </span>
+                                <span className='text-blue-500 font-semibold'>{formatPrice(totalAmountToPay)}</span>
                             </div>
 
                             <button
                                 onClick={handleNavigateToCheckoutPage}
                                 type='button'
                                 className='group inline-flex w-full items-center justify-center rounded-md 
-                            bg-gray-700 dark:bg-gray-700 hover:bg-blue-500 dark:hover:bg-blue-500
+                            bg-gray-700 dark:bg-gray-700 hover:bg-[#0E7490] dark:hover:bg-[#0E7490]
                             px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow'
                             >
                                 Mua hàng
@@ -399,11 +358,7 @@ export default function DashboardCart() {
                                     stroke='currentColor'
                                     strokeWidth='2'
                                 >
-                                    <path
-                                        strokeLinecap='round'
-                                        strokeLinejoin='round'
-                                        d='M13 7l5 5m0 0l-5 5m5-5H6'
-                                    />
+                                    <path strokeLinecap='round' strokeLinejoin='round' d='M13 7l5 5m0 0l-5 5m5-5H6' />
                                 </svg>
                             </button>
 

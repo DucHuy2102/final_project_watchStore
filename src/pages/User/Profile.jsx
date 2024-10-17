@@ -31,16 +31,31 @@ export default function Profile_Component() {
     const [imgURL, setImgURL] = useState(null);
     const [imgUploadProgress, setImgUploadProgress] = useState(null);
     const [formData, setFormData] = useState({
-        fullName: currentUser.fullName !== 'unknow' ? currentUser.fullName : '',
-        email: currentUser.email !== 'unknow' ? currentUser.email : '',
-        phone: currentUser.phone !== 'unknow' ? currentUser.phone : '',
-        address: currentUser.address !== 'unknow' ? currentUser.address : '',
-        avatarImg: currentUser.avatarImg ? currentUser.avatarImg : '',
+        fullName: currentUser?.fullName ?? '',
+        email: currentUser?.email ?? '',
+        phone: currentUser?.phone ?? '',
+        avatarImg: currentUser?.avatarImg ?? '/assets/default_Avatar.jpg',
+        address: {
+            province: {
+                label: currentUser?.address?.province.label ?? '',
+                value: currentUser?.address?.province.value ?? null,
+            },
+            district: {
+                label: currentUser?.address?.district.label ?? '',
+                value: currentUser?.address?.district.value ?? null,
+            },
+            ward: {
+                label: currentUser?.address?.ward?.label ?? '',
+                value: currentUser?.address?.ward?.value ?? null,
+            },
+            street: currentUser?.address?.street ?? '',
+            fullAddress: currentUser?.address?.fullAddress ?? '',
+        },
     });
     const [loading, setLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);
+    const modalRef = useRef();
     const [initialFormData, setInitialFormData] = useState(formData);
-    console.log('--> ', formData.avatarImg, imgURL);
 
     // change password states
     const [modalVerifyResetPassword, setModalVerifyResetPassword] = useState(false);
@@ -60,21 +75,6 @@ export default function Profile_Component() {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const [formAddress, setFormAddress] = useState({
-        province: {
-            label: '',
-            value: null,
-        },
-        district: {
-            label: '',
-            value: null,
-        },
-        ward: {
-            label: '',
-            value: null,
-        },
-        street: '',
-    });
 
     // loading screen effect
     useEffect(() => {
@@ -111,7 +111,7 @@ export default function Profile_Component() {
                             setImgURL(downloadURL);
                             setFormData({ ...formData, avatarImg: downloadURL });
                         });
-                    }
+                    },
                 );
             };
 
@@ -124,14 +124,11 @@ export default function Profile_Component() {
     useEffect(() => {
         const getProvince = async () => {
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/province',
-                    {
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setProvinces(res.data.data);
                 }
@@ -146,54 +143,46 @@ export default function Profile_Component() {
     // get district from api
     useEffect(() => {
         const getDistrict = async () => {
-            if (!formAddress.province?.value) return;
+            if (!formData?.address.province?.value) return;
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
-                    {
-                        params: { province_id: formAddress.province.value },
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
+                    params: { province_id: formData.address.province.value },
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setDistricts(res.data.data);
                 }
             } catch (error) {
                 console.log('Error get api district', error);
-                console.log('district', formAddress.province.value);
             }
         };
 
         getDistrict();
-    }, [formAddress.province?.value]);
+    }, [formData?.address.province?.value]);
 
     // get ward from api
     useEffect(() => {
         const getWard = async () => {
-            if (!formAddress.district?.value) return;
+            if (!formData?.address.district?.value) return;
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
-                    {
-                        params: { district_id: formAddress.district.value },
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
+                    params: { district_id: formData.address.district.value },
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setWards(res.data.data);
                 }
             } catch (error) {
                 console.log('Error get api ward', error);
-                console.log('ward', formAddress.district.value);
             }
         };
 
         getWard();
-    }, [formAddress.district?.value]);
+    }, [formData?.address.district?.value]);
 
     // ======================================== Update user ========================================
     // handle change avatar function
@@ -212,26 +201,33 @@ export default function Profile_Component() {
             toast.error('Xin chờ hệ thống đang tải ảnh !!!');
             return;
         }
-        const isFormChanged = Object.keys(formData).some(
-            (key) => formData[key] !== initialFormData[key]
-        );
+        const isFormChanged = Object.keys(formData).some((key) => formData[key] !== initialFormData[key]);
 
         if (!isFormChanged) {
             toast.info('Không có gì thay đổi để cập nhật!');
             return;
         }
         try {
+            const { street, ...updatedFormData } = formData.address;
+            const dataUpdate = {
+                fullName: formData.fullName.trim(),
+                email: formData.email.trim(),
+                phone: formData.phone.trim(),
+                avatarImg: imgURL ?? formData.avatarImg,
+                address: {
+                    ...updatedFormData,
+                },
+            };
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/profile/update`,
                 {
-                    ...formData,
-                    fullName: formData.fullName.trim(),
+                    dataUpdate,
                 },
                 {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
                     },
-                }
+                },
             );
             if (res?.status === 200) {
                 const { data } = res;
@@ -239,43 +235,12 @@ export default function Profile_Component() {
                 dispatch(
                     user_UpdateProfile({
                         user: data,
-                        address: {
-                            province: {
-                                label: formAddress.province.label,
-                                value: formAddress.province.value,
-                            },
-                            district: {
-                                label: formAddress.district.label,
-                                value: formAddress.district.value,
-                            },
-                            ward: {
-                                label: formAddress.ward.label,
-                                value: formAddress.ward.value,
-                            },
-                            street: formAddress.street,
-                        },
-                    })
+                    }),
                 );
             }
         } catch (error) {
             toast.error('Hệ thống đang bận, vui lòng thử lại sau');
             console.log(error);
-        } finally {
-            setFormAddress({
-                province: {
-                    label: '',
-                    value: null,
-                },
-                district: {
-                    label: '',
-                    value: null,
-                },
-                ward: {
-                    label: '',
-                    value: null,
-                },
-                street: '',
-            });
         }
     };
 
@@ -290,9 +255,7 @@ export default function Profile_Component() {
             <div className='w-full min-h-screen flex justify-center items-center '>
                 <div className='flex flex-col items-center'>
                     <Spinner size='xl' color='info' />
-                    <p className='mt-4 text-gray-400 text-lg font-semibold'>
-                        Vui lòng chờ trong giây lát...
-                    </p>
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
                 </div>
             </div>
         );
@@ -326,7 +289,7 @@ export default function Profile_Component() {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
                     },
-                }
+                },
             );
             if (res?.status === 200) {
                 setCodeVerifyPassword(res.data.code);
@@ -375,12 +338,25 @@ export default function Profile_Component() {
     // ======================================== Update address user ========================================
     // update address function
     const handleUpdateAddress = async () => {
-        const newAddress = `${formAddress.street}, ${formAddress.ward.label}, ${formAddress.district.label}, ${formAddress.province.label}`;
-        setFormData({
-            ...formData,
-            address: newAddress,
-        });
-        setModalChangeAddress(false);
+        if (
+            !formData?.address.street ||
+            !formData?.address.ward.label ||
+            !formData?.address.district.label ||
+            !formData?.address.province.label
+        ) {
+            toast.error('Vui lòng nhập đầy đủ thông tin địa chỉ!');
+        } else {
+            const newAddress = `${formData?.address.street}, ${formData?.address.ward.label}, ${formData?.address.district.label}, ${formData?.address.province.label}`;
+            setFormData({
+                ...formData,
+                address: {
+                    ...formData.address,
+                    fullAddress: newAddress,
+                },
+            });
+            console.log('Update address:', formData.address);
+            setModalChangeAddress(false);
+        }
     };
 
     return (
@@ -392,23 +368,12 @@ export default function Profile_Component() {
                 {/* form */}
                 <form className='grid grid-cols-1 md:grid-cols-2 gap-6' onSubmit={handleSubmitForm}>
                     {/* avatar */}
-                    <input
-                        type='file'
-                        accept='image/*'
-                        onChange={handleChangeAvatar}
-                        ref={fileRef}
-                        hidden
-                    />
-                    <div
-                        className='relative w-40 h-40 mx-auto cursor-pointer'
-                        onClick={() => fileRef.current.click()}
-                    >
+                    <input type='file' accept='image/*' onChange={handleChangeAvatar} ref={fileRef} hidden />
+                    <div className='relative w-40 h-40 mx-auto cursor-pointer' onClick={() => fileRef.current.click()}>
                         {imgUploadProgress && imgUploadProgress < 100 && (
                             <CircularProgressbar
                                 value={imgUploadProgress || 0}
-                                text={`${
-                                    imgUploadProgress === null ? '' : imgUploadProgress + '%'
-                                }`}
+                                text={`${imgUploadProgress === null ? '' : imgUploadProgress + '%'}`}
                                 strokeWidth={5}
                                 styles={{
                                     root: {
@@ -447,9 +412,7 @@ export default function Profile_Component() {
                             className='w-full'
                             placeholder='Email'
                             value={formData.email}
-                            onChange={(e) =>
-                                setFormData({ ...formData, email: e.target.value.trim() })
-                            }
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
                         />
                         <TextInput
                             type='text'
@@ -465,15 +428,17 @@ export default function Profile_Component() {
                                 }
                             }}
                         />
-                        <TextInput
-                            disabled
-                            type='text'
-                            id='address'
-                            icon={CiHome}
-                            className='w-full'
-                            value={formData.address}
-                            placeholder='Địa chỉ'
-                        />
+                        <div
+                            ref={modalRef}
+                            onClick={() => setModalChangeAddress(true)}
+                            className='flex items-center gap-x-2 rounded-lg bg-[#F9FAFB] dark:bg-[#374151]
+                        border border-gray-300 dark:border-gray-700 py-[7px] px-3 cursor-pointer'
+                        >
+                            <CiHome className='text-gray-500 dark:text-gray-400' size={20} />
+                            <span className='text-gray-800 dark:text-gray-200 text-sm'>
+                                {formData.address.fullAddress ? formData.address.fullAddress : 'Địa chỉ của bạn'}
+                            </span>
+                        </div>
                     </div>
 
                     {/* buttons: reset password, update address and update profile */}
@@ -537,12 +502,7 @@ export default function Profile_Component() {
             </Card>
 
             {/* confirm change password */}
-            <Modal
-                show={modalVerifyResetPassword}
-                onClose={() => setModalVerifyResetPassword(false)}
-                size='md'
-                popup
-            >
+            <Modal show={modalVerifyResetPassword} onClose={() => setModalVerifyResetPassword(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='w-full flex flex-col justify-center items-center gap-y-3'>
@@ -578,12 +538,7 @@ export default function Profile_Component() {
 
             {/* modal loading confirm password */}
             {loadingPassword && (
-                <Modal
-                    show={loadingPassword}
-                    size='md'
-                    popup
-                    onClose={() => setLoadingPassword(false)}
-                >
+                <Modal show={loadingPassword} size='md' popup onClose={() => setLoadingPassword(false)}>
                     <Modal.Header />
                     <Modal.Body>
                         <div className='w-full flex flex-col justify-center items-center gap-y-3'>
@@ -598,18 +553,11 @@ export default function Profile_Component() {
 
             {/* modal check password fail */}
             {checkPasswordFail && (
-                <Modal
-                    show={checkPasswordFail}
-                    size='md'
-                    popup
-                    onClose={() => setCheckPasswordFail(false)}
-                >
+                <Modal show={checkPasswordFail} size='md' popup onClose={() => setCheckPasswordFail(false)}>
                     <Modal.Body>
                         <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                             <FaBan size='50px' color='red' />
-                            <span className='text-lg font-medium text-black'>
-                                Xác thực mật khẩu thất bại !!!
-                            </span>
+                            <span className='text-lg font-medium text-black'>Xác thực mật khẩu thất bại !!!</span>
                             <Button className='w-full' onClick={handleNavigateUser}>
                                 Đăng nhập
                             </Button>
@@ -619,12 +567,7 @@ export default function Profile_Component() {
             )}
 
             {/* change password modal */}
-            <Modal
-                show={modalChangePassword}
-                onClose={() => setModalChangePassword(false)}
-                size='md'
-                popup
-            >
+            <Modal show={modalChangePassword} onClose={() => setModalChangePassword(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='w-full flex flex-col justify-center items-center gap-y-3'>
@@ -668,10 +611,7 @@ export default function Profile_Component() {
                             }
                         />
                         {formPassword.newPassword !== formPassword.verifyPassword && (
-                            <Alert
-                                color='failure'
-                                className='w-full flex justify-center items-center'
-                            >
+                            <Alert color='failure' className='w-full flex justify-center items-center'>
                                 Mật khẩu không khớp
                             </Alert>
                         )}
@@ -689,19 +629,12 @@ export default function Profile_Component() {
             </Modal>
 
             {/* change address modal */}
-            <Modal
-                show={modalChangeAddress}
-                onClose={() => setModalChangeAddress(false)}
-                size='md'
-                popup
-            >
+            <Modal show={modalChangeAddress} onClose={() => setModalChangeAddress(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='w-full flex flex-col justify-center items-center gap-y-3'>
                         <PiHouseLineLight className='text-blue-500 text-5xl mx-auto' />
-                        <span className='text-lg font-medium text-black'>
-                            Cập nhật địa chỉ của bạn
-                        </span>
+                        <span className='text-lg font-medium text-black'>Cập nhật địa chỉ của bạn</span>
                         <Select
                             placeholder='Chọn Thành Phố'
                             className='w-full h-10'
@@ -712,13 +645,15 @@ export default function Profile_Component() {
                                 })) ?? []
                             }
                             onChange={(value) => {
-                                setFormAddress({
-                                    ...formAddress,
-                                    province: {
-                                        label: provinces.find(
-                                            (province) => province.ProvinceID === value
-                                        ).NameExtension[1],
-                                        value: value,
+                                const selectedProvince = provinces.find((province) => province.ProvinceID === value);
+                                setFormData({
+                                    ...formData,
+                                    address: {
+                                        ...formData.address,
+                                        province: {
+                                            label: selectedProvince.NameExtension[1],
+                                            value: value,
+                                        },
                                     },
                                 });
                             }}
@@ -733,13 +668,15 @@ export default function Profile_Component() {
                                 })) ?? []
                             }
                             onChange={(value) => {
-                                setFormAddress({
-                                    ...formAddress,
-                                    district: {
-                                        label: districts.find(
-                                            (district) => district.DistrictID === value
-                                        ).NameExtension[0],
-                                        value: value,
+                                const selectedDistrict = districts.find((district) => district.DistrictID === value);
+                                setFormData({
+                                    ...formData,
+                                    address: {
+                                        ...formData.address,
+                                        district: {
+                                            label: selectedDistrict.NameExtension[0],
+                                            value: value,
+                                        },
                                     },
                                 });
                             }}
@@ -754,12 +691,15 @@ export default function Profile_Component() {
                                 })) ?? []
                             }
                             onChange={(value) => {
-                                setFormAddress({
-                                    ...formAddress,
-                                    ward: {
-                                        label: wards.find((ward) => ward.WardCode === value)
-                                            .NameExtension[0],
-                                        value: value,
+                                const selectedWard = wards.find((ward) => ward.WardCode === value);
+                                setFormData({
+                                    ...formData,
+                                    address: {
+                                        ...formData.address,
+                                        ward: {
+                                            label: selectedWard.NameExtension[0],
+                                            value: value,
+                                        },
                                     },
                                 });
                             }}
@@ -769,28 +709,27 @@ export default function Profile_Component() {
                             type='text'
                             className='w-full'
                             placeholder='Số nhà, tên đường'
-                            value={formAddress.street}
                             onChange={(e) =>
-                                setFormAddress({
-                                    ...formAddress,
-                                    street: e.target.value,
+                                setFormData({
+                                    ...formData,
+                                    address: {
+                                        ...formData.address,
+                                        street: e.target.value,
+                                    },
                                 })
                             }
                         />
 
-                        {/* Display the formatted address */}
-                        {formAddress.street &&
-                            formAddress.ward &&
-                            formAddress.district &&
-                            formAddress.province && (
+                        {formData?.address.street &&
+                            formData?.address.ward.label &&
+                            formData?.address.district.label &&
+                            formData?.address.province.label && (
                                 <div className='w-full p-2 border rounded-lg text-center'>
-                                    <h4 className='font-semibold text-gray-800'>
-                                        Địa chỉ của bạn:
-                                    </h4>
+                                    <h4 className='font-semibold text-gray-800'>Địa chỉ của bạn:</h4>
                                     <p className='text-gray-600 break-words text-ellipsis overflow-hidden'>
-                                        {`${formAddress.street}, ${formAddress.ward.label},
-                                            ${formAddress.district.label},
-                                            ${formAddress.province.label}`}
+                                        {`${formData.address.street}, ${formData.address.ward.label},
+                                            ${formData.address.district.label},
+                                            ${formData.address.province.label}`}
                                     </p>
                                 </div>
                             )}
@@ -813,9 +752,7 @@ export default function Profile_Component() {
                 <Modal.Body>
                     <div className='text-center'>
                         <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
-                        <span className='text-lg font-medium text-black'>
-                            Bạn có chắc chắn muốn đăng xuất?
-                        </span>
+                        <span className='text-lg font-medium text-black'>Bạn có chắc chắn muốn đăng xuất?</span>
                         <div className='flex justify-between items-center mt-5'>
                             <Button color='gray' onClick={() => setShowModal(false)}>
                                 Hủy
