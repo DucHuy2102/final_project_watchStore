@@ -23,14 +23,13 @@ export const userSlice = createSlice({
             state.user = user;
         },
         update_Address: (state, action) => {
-            const { province, district, ward, street, fullAddress } = action.payload;
+            const { province, district, ward, fullAddress } = action.payload;
             state.user = {
                 ...state.user,
                 address: {
                     province,
                     district,
                     ward,
-                    street,
                     fullAddress,
                 },
             };
