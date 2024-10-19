@@ -3,25 +3,33 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaTimes, FaUserEdit } from 'react-icons/fa';
+import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
 import { RiSave3Fill } from 'react-icons/ri';
 import { Button, Checkbox, Label, Modal, Radio, TextInput } from 'flowbite-react';
 import { ProductInfo_CheckoutPage_Component } from '../../components/exportComponent';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { Select } from 'antd';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { SlNote } from 'react-icons/sl';
 import { toast } from 'react-toastify';
 import { update_Address, user_UpdateProfile } from '../../redux/slices/userSlice';
 
-const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-const PaymentMethod = ({ id, label, imageSrc, name }) => (
-    <div className='cursor-pointer flex items-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300'>
-        <Radio id={id} name={name} />
-        <Label htmlFor={id} className='flex items-center gap-x-3 text-lg cursor-pointer'>
-            <img src={imageSrc} alt={label} className='w-10 h-10 object-contain' />
-            <span className='font-medium text-gray-800 dark:text-gray-200'>{label}</span>
+const PaymentMethod = ({ id, label, imageSrc, name, selectedPayment, onSelect }) => (
+    <div
+        onClick={() => onSelect(id)}
+        className={`cursor-pointer flex items-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ${
+            selectedPayment === id ? 'ring-2 ring-blue-500' : ''
+        }`}
+    >
+        <Radio id={id} name={name} checked={selectedPayment === id} onChange={() => onSelect(id)} />
+        <Label htmlFor={id} className='flex items-center gap-x-3 text-lg cursor-pointer w-full'>
+            <div className='flex items-center gap-x-3 w-full'>
+                <img src={imageSrc} alt={label} className='w-10 h-10 object-contain' />
+                <span className='font-medium text-gray-800 dark:text-gray-200'>{label}</span>
+            </div>
         </Label>
     </div>
 );
@@ -39,35 +47,78 @@ const InfoItem = ({ icon: Icon, label, value }) => (
         </div>
     </div>
 );
+const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className='bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl p-6 mb-1 w-full shadow-lg'
+    >
+        <div className='flex items-center space-x-4 mb-4'>
+            <div className='bg-white rounded-full p-3 shadow-md'>
+                <FiTruck className='text-indigo-500 text-2xl' />
+            </div>
+            <h3 className='text-xl font-bold text-white'>Thông tin giao hàng</h3>
+        </div>
+        <div className='bg-white bg-opacity-20 rounded-lg p-4'>
+            <div className='flex items-center space-x-3 mb-2'>
+                <FiCalendar className='text-white text-xl' />
+                <p className='text-white font-medium'>{dayOfWeek}</p>
+            </div>
+            <div className='flex items-center space-x-3'>
+                <FiClock className='text-white text-xl' />
+                <p className='text-white font-medium'>{formattedDate}</p>
+            </div>
+        </div>
+    </motion.div>
+);
 
 export default function DashCheckout() {
     // ==================================== Redux ====================================
-    const { totalPrice, totalDiscountPrice, totalAmountToPay, productItems } = useSelector(
-        (state) => state.checkout
-    );
+    const { totalPrice, totalDiscountPrice, totalAmountToPay, productItems } = useSelector((state) => state.checkout);
     const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
+    const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
-    const addressUser = useSelector((state) => state.user.address);
 
     // ==================================== State ====================================
     const dispatch = useDispatch();
+    const [paymentMethod, setPaymentMethod] = useState('');
     const [shippingFee, setShippingFee] = useState(0);
     const [expectedDeliveryTime, setExpectedDeliveryTime] = useState(null);
     const date = new Date(expectedDeliveryTime * 1000);
     const daysOfWeek = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
     const dayOfWeek = daysOfWeek[date.getDay()];
     const hours = date.getHours() + 1;
-    const formattedDate = `trước ${hours}h ngày ${date.getDate()}/${
-        date.getMonth() + 1
-    }/${date.getFullYear()}`;
+    const formattedDate = `trước ${hours}h ngày ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     const navigate = useNavigate();
     const [showModalEditAddress, setShowModalEditAddress] = useState(false);
     const [selectedOption, setSelectedOption] = useState('thisUser');
     const [formData, setFormData] = useState({
-        fullName: currentUser.fullName || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
-        address: currentUser.address || '',
+        fullName: currentUser?.fullName ?? '',
+        email: currentUser?.email ?? '',
+        phone: currentUser?.phone ?? '',
+        address: {
+            province: {
+                label: currentUser?.address?.province.label ?? '',
+                value: currentUser?.address?.province.value ?? null,
+            },
+            district: {
+                label: currentUser?.address?.district.label ?? '',
+                value: currentUser?.address?.district.value ?? null,
+            },
+            ward: {
+                label: currentUser?.address?.ward?.label ?? '',
+                value: currentUser?.address?.ward?.value ?? null,
+            },
+            street: currentUser?.address?.street ?? '',
+            fullAddress: currentUser?.address?.fullAddress ?? '',
+        },
+    });
+    const [infoItemData, setInfoItemData] = useState({
+        fullName: currentUser?.fullName ?? 'Chưa cập nhật',
+        email: currentUser?.email ?? 'Chưa cập nhật',
+        phone: currentUser?.phone ?? 'Chưa cập nhật',
+        address: currentUser?.address?.fullAddress ?? 'Chưa cập nhật',
     });
 
     useEffect(() => {
@@ -76,24 +127,38 @@ export default function DashCheckout() {
                 fullName: '',
                 email: '',
                 phone: '',
-                address: '',
-                province: { label: '', value: '' },
-                district: { label: '', value: '' },
-                ward: { label: '', value: '' },
-                street: '',
+                address: {
+                    province: { label: '', value: null },
+                    district: { label: '', value: null },
+                    ward: { label: '', value: null },
+                    street: '',
+                    fullAddress: '',
+                },
             });
         } else {
             setFormData({
-                fullName: currentUser.fullName || '',
-                email: currentUser.email || '',
-                phone: currentUser.phone || '',
-                address: currentUser.address || '',
-                province: addressUser?.province?.label || { label: '', value: '' },
-                district: addressUser?.district?.label || { label: '', value: '' },
-                ward: addressUser?.ward?.label || { label: '', value: '' },
-                street: addressUser?.street || '',
+                fullName: currentUser?.fullName ?? '',
+                email: currentUser?.email ?? '',
+                phone: currentUser?.phone ?? '',
+                address: {
+                    province: {
+                        label: currentUser?.address?.province.label ?? '',
+                        value: currentUser?.address?.province.value ?? null,
+                    },
+                    district: {
+                        label: currentUser?.address?.district.label ?? '',
+                        value: currentUser?.address?.district.value ?? null,
+                    },
+                    ward: {
+                        label: currentUser?.address?.ward?.label ?? '',
+                        value: currentUser?.address?.ward?.value ?? null,
+                    },
+                    street: currentUser?.address?.street ?? '',
+                    fullAddress: currentUser?.address?.fullAddress ?? '',
+                },
             });
         }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedOption]);
 
@@ -107,34 +172,16 @@ export default function DashCheckout() {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
-    const [formAddress, setFormAddress] = useState({
-        province: {
-            label: addressUser.province?.label || '',
-            value: addressUser.province?.value || null,
-        },
-        district: {
-            label: addressUser.district?.label || '',
-            value: addressUser.district?.value || null,
-        },
-        ward: {
-            label: addressUser.ward?.label || '',
-            value: addressUser.ward?.value || null,
-        },
-        street: addressUser.street || '',
-    });
 
     // get province from api
     useEffect(() => {
         const getProvince = async () => {
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/province',
-                    {
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setProvinces(res.data.data);
                 }
@@ -149,54 +196,46 @@ export default function DashCheckout() {
     // get district from api
     useEffect(() => {
         const getDistrict = async () => {
-            if (!formAddress.province?.value) return;
+            if (!formData?.address.province?.value) return;
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/district',
-                    {
-                        params: { province_id: formAddress.province.value },
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
+                    params: { province_id: formData.address.province.value },
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setDistricts(res.data.data);
                 }
             } catch (error) {
                 console.log('Error get api district', error);
-                console.log('district', formAddress.province.value);
             }
         };
 
         getDistrict();
-    }, [formAddress.province?.value]);
+    }, [formData?.address.province?.value]);
 
     // get ward from api
     useEffect(() => {
         const getWard = async () => {
-            if (!formAddress.district?.value) return;
+            if (!formData?.address.district?.value) return;
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/master-data/ward',
-                    {
-                        params: { district_id: formAddress.district.value },
-                        headers: {
-                            Token: import.meta.env.VITE_TOKEN_GHN,
-                        },
-                    }
-                );
+                const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
+                    params: { district_id: formData.address.district.value },
+                    headers: {
+                        Token: import.meta.env.VITE_TOKEN_GHN,
+                    },
+                });
                 if (res?.status === 200) {
                     setWards(res.data.data);
                 }
             } catch (error) {
                 console.log('Error get api ward', error);
-                console.log('ward', formAddress.district.value);
             }
         };
 
         getWard();
-    }, [formAddress.district?.value]);
+    }, [formData?.address.district?.value]);
 
     // handle confirm info
     const handleConfirmInfo = () => {
@@ -204,108 +243,135 @@ export default function DashCheckout() {
             !formData.fullName ||
             !formData.email ||
             !formData.phone ||
-            !formAddress.ward ||
-            !formAddress.district ||
-            !formAddress.province
+            !formData.address.ward ||
+            !formData.address.district ||
+            !formData.address.province
         ) {
             toast.error('Vui lòng điền đầy đủ thông tin');
             return;
         }
-        const fullAddress = `${formAddress.street}, ${formAddress.ward.label}, ${formAddress.district.label}, ${formAddress.province.label}`;
-        setFormData({
+        const newAddress = `${formData.address.street}, ${formData.address.ward.label}, ${formData.address.district.label}, ${formData.address.province.label}`;
+        setInfoItemData({
             fullName: formData.fullName,
             email: formData.email,
             phone: formData.phone,
-            address: fullAddress,
+            address: newAddress,
         });
-        dispatch(
-            update_Address({
-                province: formAddress.province,
-                district: formAddress.district,
-                ward: formAddress.ward,
-                street: formAddress.street,
-                fullAddress: fullAddress,
-            })
-        );
         setShowModalEditAddress(false);
     };
 
     // ==================================== Call API GNH ====================================
     const totalWeight = useMemo(
-        () => productItems.reduce((total, item) => total + item.productItem.weight, 0),
-        [productItems]
+        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.weight, 0)),
+        [productItems],
     );
+    const totalHeight = useMemo(
+        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.height, 0) / 10),
+        [productItems],
+    );
+    const totalLength = useMemo(
+        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.length, 0) / 10),
+        [productItems],
+    );
+    const totalWidth = useMemo(
+        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.width, 0) / 10),
+        [productItems],
+    );
+
     // calculate fee ship
     useEffect(() => {
+        const token = import.meta.env.VITE_TOKEN_GHN;
+        console.log(
+            token,
+            currentUser?.address.district?.value,
+            currentUser?.address.ward?.value,
+            totalHeight,
+            totalLength,
+            totalWeight,
+        );
         const calculateFeeShip = async () => {
-            console.log(
-                '-->',
-                totalAmountToPay,
-                addressUser.district?.value,
-                addressUser.ward?.value,
-                totalWeight
-            );
-            // try {
-            //     const res = await axios.get(
-            //         'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
-            //         {
-            //             params: {
-            //                 service_id: 100039,
-            //                 insurance_value: totalAmountToPay,
-            //                 coupon: null,
-            //                 from_district_id: 3695,
-            //                 to_district_id: addressUser.district?.value,
-            //                 to_ward_code: addressUser.ward?.value,
-            //                 height: 15,
-            //                 length: 15,
-            //                 weight: 800,
-            //                 width: 15,
-            //             },
-            //             headers: {
-            //                 Token: import.meta.env.VITE_TOKEN_GHN,
-            //             },
-            //         }
-            //     );
-            //     if (res?.status === 200) {
-            //         const { data } = res;
-            //         setShippingFee(data.data.service_fee);
-            //     }
-            // } catch (error) {
-            //     console.log('Error calculate fee ship', error);
-            // }
-        };
-        calculateFeeShip();
-    }, [addressUser.district?.value, addressUser.ward?.value]);
-
-    // calculate the expected delivery time
-    useEffect(() => {
-        const calculateExpectedDeliveryTime = async () => {
             try {
-                const res = await axios.get(
-                    'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime',
+                const res = await axios.post(
+                    'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
                     {
-                        params: {
-                            from_district_id: 3695,
-                            from_ward_code: '90742',
-                            to_district_id: 1560,
-                            to_ward_code: '580107',
-                            service_id: 53321,
-                        },
+                        service_type_id: 2,
+                        to_district_id: currentUser?.address.district?.value,
+                        to_ward_code: currentUser?.address.ward?.value,
+                        height: totalHeight,
+                        length: totalLength,
+                        weight: totalWeight,
+                        width: totalWidth,
+                    },
+                    {
                         headers: {
+                            ShopId: '5194683',
+                            'Content-Type': 'application/json',
                             Token: import.meta.env.VITE_TOKEN_GHN,
                         },
-                    }
+                    },
                 );
                 if (res?.status === 200) {
-                    const { data } = res;
-                    setExpectedDeliveryTime(data.data.leadtime);
+                    const { data } = res.data;
+                    console.log('data fee', data);
+                    setShippingFee(data.service_fee);
                 }
             } catch (error) {
-                console.log('Error calculate expected delivery time', error);
+                console.log('Error calculate fee ship', error);
             }
         };
-        calculateExpectedDeliveryTime();
-    }, [addressUser.district?.value]);
+        calculateFeeShip();
+    }, [
+        currentUser?.address.district?.value,
+        currentUser?.address.ward?.value,
+        totalHeight,
+        totalLength,
+        totalWeight,
+        totalWidth,
+    ]);
+
+    // calculate the expected delivery time
+    // useEffect(() => {
+    //     const calculateExpectedDeliveryTime = async () => {
+    //         try {
+    //             const res = await axios.get(
+    //                 'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime',
+    //                 {
+    //                     params: {
+    //                         from_district_id: 3695,
+    //                         from_ward_code: '90742',
+    //                         to_district_id: 1560,
+    //                         to_ward_code: '580107',
+    //                         service_id: 53321,
+    //                     },
+    //                     headers: {
+    //                         Token: import.meta.env.VITE_TOKEN_GHN,
+    //                     },
+    //                 },
+    //             );
+    //             if (res?.status === 200) {
+    //                 const { data } = res;
+    //                 setExpectedDeliveryTime(data.data.leadtime);
+    //             }
+    //         } catch (error) {
+    //             console.log('Error calculate expected delivery time', error);
+    //         }
+    //     };
+    //     calculateExpectedDeliveryTime();
+    // }, []);
+
+    // ==================================== Call API to create order ====================================
+    // handle choose payment method
+    const handleChoosePaymentMethod = (idMethod) => {
+        setPaymentMethod(idMethod);
+    };
+
+    const handleCreateOrder = async () => {
+        if (paymentMethod === '') {
+            toast.error('Vui lòng chọn phương thức thanh toán');
+            return;
+        }
+        console.log('create order');
+    };
 
     return (
         <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>
@@ -319,57 +385,50 @@ export default function DashCheckout() {
                                     <h3 className='font-semibold text-xl text-gray-700 dark:text-gray-300 mb-4'>
                                         Thông tin người nhận
                                     </h3>
-                                    <Button
-                                        onClick={() => setShowModalEditAddress(true)}
-                                        size='sm'
-                                        outline
-                                    >
+                                    <Button onClick={() => setShowModalEditAddress(true)} size='sm' outline>
                                         <CiEdit className='mr-2 mt-1' />
                                         Chỉnh sửa thông tin
                                     </Button>
                                 </div>
-                                <InfoItem
-                                    icon={CiUser}
-                                    label='Họ và Tên'
-                                    value={formData.fullName}
-                                />
-                                <InfoItem icon={CiMail} label='Email' value={formData.email} />
-                                <InfoItem
-                                    icon={CiPhone}
-                                    label='Số điện thoại'
-                                    value={formData.phone}
-                                />
-                                <InfoItem
-                                    icon={CiHome}
-                                    label='Địa chỉ nhận hàng'
-                                    value={formData.address}
-                                />
+                                <InfoItem icon={CiUser} label='Họ và Tên' value={infoItemData.fullName} />
+                                <InfoItem icon={CiMail} label='Email' value={infoItemData.email} />
+                                <InfoItem icon={CiPhone} label='Số điện thoại' value={infoItemData.phone} />
+                                <InfoItem icon={CiHome} label='Địa chỉ nhận hàng' value={infoItemData.address} />
                             </div>
                         </div>
+
                         <div className='mb-8'>
                             <h3 className='font-semibold text-xl text-gray-800 dark:text-gray-200 mb-6'>
                                 Phương thức thanh toán
                             </h3>
                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <PaymentMethod
+                                    selectedPayment={paymentMethod}
+                                    onSelect={handleChoosePaymentMethod}
                                     id='cash'
                                     name='paymentMethod'
                                     label='Tiền mặt'
                                     imageSrc='../assets/payCash.png'
                                 />
                                 <PaymentMethod
+                                    selectedPayment={paymentMethod}
+                                    onSelect={handleChoosePaymentMethod}
                                     id='vnpay'
                                     name='paymentMethod'
                                     label='VNPAY'
                                     imageSrc='../assets/vnpayPayment.jpg'
                                 />
                                 <PaymentMethod
+                                    selectedPayment={paymentMethod}
+                                    onSelect={handleChoosePaymentMethod}
                                     id='momo'
                                     name='paymentMethod'
                                     label='Ví Momo'
                                     imageSrc='../assets/momoPayment.png'
                                 />
                                 <PaymentMethod
+                                    selectedPayment={paymentMethod}
+                                    onSelect={handleChoosePaymentMethod}
                                     id='credit'
                                     name='paymentMethod'
                                     label='Thẻ tín dụng/Ghi nợ'
@@ -378,11 +437,7 @@ export default function DashCheckout() {
                             </div>
                         </div>
 
-                        <Modal
-                            show={showModalEditAddress}
-                            onClose={() => setShowModalEditAddress(false)}
-                            size='md'
-                        >
+                        <Modal show={showModalEditAddress} onClose={() => setShowModalEditAddress(false)} size='md'>
                             <Modal.Header className='flex items-center space-x-4'>
                                 <div className='flex items-center space-x-4'>
                                     <FaUserEdit className='text-blue-500 text-3xl' />
@@ -399,10 +454,7 @@ export default function DashCheckout() {
                                             checked={selectedOption === 'thisUser'}
                                             onChange={() => setSelectedOption('thisUser')}
                                         />
-                                        <Label
-                                            htmlFor='thisUser'
-                                            className='text-gray-700 dark:text-gray-300'
-                                        >
+                                        <Label htmlFor='thisUser' className='text-gray-700 dark:text-gray-300'>
                                             Thông tin của tôi
                                         </Label>
                                     </div>
@@ -412,10 +464,7 @@ export default function DashCheckout() {
                                             checked={selectedOption === 'anotherUser'}
                                             onChange={() => setSelectedOption('anotherUser')}
                                         />
-                                        <Label
-                                            htmlFor='anotherUser'
-                                            className='text-gray-700 dark:text-gray-300'
-                                        >
+                                        <Label htmlFor='anotherUser' className='text-gray-700 dark:text-gray-300'>
                                             Gửi hàng cho người khác
                                         </Label>
                                     </div>
@@ -454,14 +503,19 @@ export default function DashCheckout() {
                                                 value: province.ProvinceID,
                                             })) ?? []
                                         }
+                                        value={formData.address.province.label || null}
                                         onChange={(value) => {
-                                            setFormAddress({
-                                                ...formAddress,
-                                                province: {
-                                                    label: provinces.find(
-                                                        (province) => province.ProvinceID === value
-                                                    ).NameExtension[1],
-                                                    value: value,
+                                            const selectedProvince = provinces.find(
+                                                (province) => province.ProvinceID === value,
+                                            );
+                                            setFormData({
+                                                ...formData,
+                                                address: {
+                                                    ...formData.address,
+                                                    province: {
+                                                        label: selectedProvince.NameExtension[1],
+                                                        value: value,
+                                                    },
                                                 },
                                             });
                                         }}
@@ -475,14 +529,19 @@ export default function DashCheckout() {
                                                 value: district.DistrictID,
                                             })) ?? []
                                         }
+                                        value={formData.address.district.label || null}
                                         onChange={(value) => {
-                                            setFormAddress({
-                                                ...formAddress,
-                                                district: {
-                                                    label: districts.find(
-                                                        (district) => district.DistrictID === value
-                                                    ).NameExtension[0],
-                                                    value: value,
+                                            const selectedDistrict = districts.find(
+                                                (district) => district.DistrictID === value,
+                                            );
+                                            setFormData({
+                                                ...formData,
+                                                address: {
+                                                    ...formData.address,
+                                                    district: {
+                                                        label: selectedDistrict.NameExtension[0],
+                                                        value: value,
+                                                    },
                                                 },
                                             });
                                         }}
@@ -496,14 +555,17 @@ export default function DashCheckout() {
                                                 value: ward.WardCode,
                                             })) ?? []
                                         }
+                                        value={formData.address.ward.label || null}
                                         onChange={(value) => {
-                                            setFormAddress({
-                                                ...formAddress,
-                                                ward: {
-                                                    label: wards.find(
-                                                        (ward) => ward.WardCode === value
-                                                    ).NameExtension[0],
-                                                    value: value,
+                                            const selectedWard = wards.find((ward) => ward.WardCode === value);
+                                            setFormData({
+                                                ...formData,
+                                                address: {
+                                                    ...formData.address,
+                                                    ward: {
+                                                        label: selectedWard.NameExtension[0],
+                                                        value: value,
+                                                    },
                                                 },
                                             });
                                         }}
@@ -513,11 +575,13 @@ export default function DashCheckout() {
                                         type='text'
                                         className='w-full'
                                         placeholder='Số nhà, tên đường'
-                                        value={formAddress.street}
                                         onChange={(e) =>
-                                            setFormAddress({
-                                                ...formAddress,
-                                                street: e.target.value,
+                                            setFormData({
+                                                ...formData,
+                                                address: {
+                                                    ...formData.address,
+                                                    street: e.target.value,
+                                                },
                                             })
                                         }
                                     />
@@ -537,31 +601,21 @@ export default function DashCheckout() {
                     {/* Right Column */}
                     <div className='w-full lg:w-2/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
                         <div className='flex flex-col justify-start items-start mb-1'>
-                            <span className='text-2xl font-semibold text-gray-800 dark:text-gray-200'>
+                            <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4'>
                                 Thông tin đơn hàng
-                            </span>
-                            <span>
-                                Dự kiến hàng sẽ đến vào{' '}
-                                <span className='text-blue-500'>{`${dayOfWeek}, ${formattedDate}`}</span>
-                            </span>
+                            </h2>
+                            <ExpectedDeliveryTime dayOfWeek={dayOfWeek} formattedDate={formattedDate} />
                         </div>
                         <div className='space-y-4 mb-6'>
                             {infoProduct.map((_, index) => {
                                 return (
-                                    <ProductInfo_CheckoutPage_Component
-                                        key={index}
-                                        dataProduct={productItems[index]}
-                                    />
+                                    <ProductInfo_CheckoutPage_Component key={index} dataProduct={productItems[index]} />
                                 );
                             })}
                         </div>
                         <div className='mb-6'>
                             <div className='flex items-center mb-4'>
-                                <TextInput
-                                    type='text'
-                                    placeholder='Mã khuyến mãi'
-                                    className='flex-grow mr-2'
-                                />
+                                <TextInput type='text' placeholder='Mã khuyến mãi' className='flex-grow mr-2' />
                                 <Button color='blue'>Áp dụng</Button>
                             </div>
                         </div>
@@ -573,16 +627,14 @@ export default function DashCheckout() {
                                 </span>
                             </div>
                             <div className='flex justify-between'>
-                                <span className='text-gray-600 dark:text-gray-400'>
-                                    Phí vận chuyển
-                                </span>
+                                <span className='text-gray-600 dark:text-gray-400'>Phí vận chuyển</span>
                                 <span className='font-semibold text-gray-800 dark:text-gray-200'>
                                     {formatPrice(shippingFee)}
                                 </span>
                             </div>
                             <div className='flex justify-between'>
                                 <span className='text-gray-600 dark:text-gray-400'>Giảm giá</span>
-                                <span className='font-semibold text-green-600'>
+                                <span className='font-semibold text-green-500'>
                                     - {formatPrice(totalDiscountPrice)}
                                 </span>
                             </div>
@@ -596,15 +648,8 @@ export default function DashCheckout() {
                                     {formatPrice(totalAmountToPay - shippingFee)}
                                 </span>
                             </div>
-                            <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>
-                                (Đã bao gồm thuế VAT)
-                            </p>
-                            <Button
-                                color='blue'
-                                size='lg'
-                                className='w-full'
-                                onClick={() => navigate('/checkout')}
-                            >
+                            <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>(Đã bao gồm thuế VAT)</p>
+                            <Button onClick={handleCreateOrder} color='blue' size='lg' className='w-full'>
                                 Đặt hàng
                             </Button>
                         </div>

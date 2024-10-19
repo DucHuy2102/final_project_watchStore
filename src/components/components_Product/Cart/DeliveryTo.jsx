@@ -27,11 +27,8 @@ const AddressItem = ({ icon, text, placeholder, bgColor }) => (
 );
 
 export default function DeliveryTo() {
-    const { tokenUser, currentUser } = useSelector((state) => ({
-        tokenUser: state.user.access_token,
-        currentUser: state.user.user,
-    }));
-
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const currentUser = useSelector((state) => state.user.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [showModalChangeAddress, setShowModalChangeAddress] = useState(false);
