@@ -320,7 +320,6 @@ export default function DashboardCart() {
                     {/* Summary & Vouchers Section */}
                     <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-5'>
                         <DeliveryTo_Component />
-                        {/* <Vouchers_Component onSelectVoucher={setSelectedVoucher} /> */}
                         <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
                             <div className='flex justify-between mb-2 text-md font-medium'>
                                 <span>Tạm tính</span>

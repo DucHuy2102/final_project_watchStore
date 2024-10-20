@@ -1,19 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
-import { FaTimes, FaUserEdit } from 'react-icons/fa';
+import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
-import { RiSave3Fill } from 'react-icons/ri';
-import { Button, Checkbox, Label, Modal, Radio, TextInput } from 'flowbite-react';
-import { ProductInfo_CheckoutPage_Component } from '../../components/exportComponent';
-import { PiHouseLineLight } from 'react-icons/pi';
+import { Button, Label, Modal, Radio, TextInput } from 'flowbite-react';
+import { ProductInfo_CheckoutPage_Component, VoucherModal_Component } from '../../components/exportComponent';
 import { Select } from 'antd';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { SlNote } from 'react-icons/sl';
 import { toast } from 'react-toastify';
-import { update_Address, user_UpdateProfile } from '../../redux/slices/userSlice';
+import { RiCoupon3Fill } from 'react-icons/ri';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
@@ -54,20 +51,44 @@ const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
         transition={{ duration: 0.5 }}
         className='bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl p-6 mb-1 w-full shadow-lg'
     >
-        <div className='flex items-center space-x-4 mb-4'>
-            <div className='bg-white rounded-full p-3 shadow-md'>
-                <FiTruck className='text-indigo-500 text-2xl' />
+        <div className='flex items-center justify-between mb-4'>
+            <div className='flex items-center space-x-4'>
+                <div className='bg-white rounded-full p-2'>
+                    <FiTruck className='text-indigo-500 text-lg' />
+                </div>
+                <h3 className='text-xl font-bold text-white'>Đơn vị vận chuyển</h3>
             </div>
-            <h3 className='text-xl font-bold text-white'>Thông tin giao hàng</h3>
+            <a
+                href='https://ghn.vn/'
+                target='_blank'
+                rel='noreferrer'
+                className='flex items-center space-x-2 cursor-pointer'
+            >
+                <img
+                    src={'../assets/ghn_logo.webp'}
+                    alt='GiaoHangNhanh Logo'
+                    width={30}
+                    height={30}
+                    className='rounded-full'
+                />
+                <span className='text-white font-medium'>GiaoHangNhanh</span>
+            </a>
         </div>
         <div className='bg-white bg-opacity-20 rounded-lg p-4'>
             <div className='flex items-center space-x-3 mb-2'>
                 <FiCalendar className='text-white text-xl' />
-                <p className='text-white font-medium'>{dayOfWeek}</p>
+                <p className='text-white font-medium'>Ngày giao dự kiến: {dayOfWeek}</p>
             </div>
-            <div className='flex items-center space-x-3'>
+            <div className='flex items-center space-x-3 mb-2'>
                 <FiClock className='text-white text-xl' />
-                <p className='text-white font-medium'>{formattedDate}</p>
+                <p className='text-white font-medium'>Thời gian: {formattedDate}</p>
+            </div>
+            <div className='mt-3 text-white text-sm'>
+                <p>Ước tính thời gian giao hàng: 2-3 ngày làm việc</p>
+                <p className='mt-1'>
+                    <span className='font-bold'>Lưu ý</span>: Thời gian giao hàng có thể thay đổi tùy theo địa chỉ nhận
+                    hàng và tình hình giao thông thực tế.
+                </p>
             </div>
         </div>
     </motion.div>
@@ -82,15 +103,12 @@ export default function DashCheckout() {
 
     // ==================================== State ====================================
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [openModalVoucher, setOpenModalVoucher] = useState(false);
+    const [appliedVoucher, setAppliedVoucher] = useState(null);
     const [paymentMethod, setPaymentMethod] = useState('');
     const [shippingFee, setShippingFee] = useState(0);
     const [expectedDeliveryTime, setExpectedDeliveryTime] = useState(null);
-    const date = new Date(expectedDeliveryTime * 1000);
-    const daysOfWeek = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
-    const dayOfWeek = daysOfWeek[date.getDay()];
-    const hours = date.getHours() + 1;
-    const formattedDate = `trước ${hours}h ngày ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-    const navigate = useNavigate();
     const [showModalEditAddress, setShowModalEditAddress] = useState(false);
     const [selectedOption, setSelectedOption] = useState('thisUser');
     const [formData, setFormData] = useState({
@@ -280,15 +298,6 @@ export default function DashCheckout() {
 
     // calculate fee ship
     useEffect(() => {
-        const token = import.meta.env.VITE_TOKEN_GHN;
-        console.log(
-            token,
-            currentUser?.address.district?.value,
-            currentUser?.address.ward?.value,
-            totalHeight,
-            totalLength,
-            totalWeight,
-        );
         const calculateFeeShip = async () => {
             try {
                 const res = await axios.post(
@@ -312,7 +321,6 @@ export default function DashCheckout() {
                 );
                 if (res?.status === 200) {
                     const { data } = res.data;
-                    console.log('data fee', data);
                     setShippingFee(data.service_fee);
                 }
             } catch (error) {
@@ -330,34 +338,42 @@ export default function DashCheckout() {
     ]);
 
     // calculate the expected delivery time
-    // useEffect(() => {
-    //     const calculateExpectedDeliveryTime = async () => {
-    //         try {
-    //             const res = await axios.get(
-    //                 'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime',
-    //                 {
-    //                     params: {
-    //                         from_district_id: 3695,
-    //                         from_ward_code: '90742',
-    //                         to_district_id: 1560,
-    //                         to_ward_code: '580107',
-    //                         service_id: 53321,
-    //                     },
-    //                     headers: {
-    //                         Token: import.meta.env.VITE_TOKEN_GHN,
-    //                     },
-    //                 },
-    //             );
-    //             if (res?.status === 200) {
-    //                 const { data } = res;
-    //                 setExpectedDeliveryTime(data.data.leadtime);
-    //             }
-    //         } catch (error) {
-    //             console.log('Error calculate expected delivery time', error);
-    //         }
-    //     };
-    //     calculateExpectedDeliveryTime();
-    // }, []);
+    useEffect(() => {
+        const calculateExpectedDeliveryTime = async () => {
+            try {
+                const res = await axios.get(
+                    'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/leadtime',
+                    {
+                        params: {
+                            from_district_id: 3695,
+                            from_ward_code: '90742',
+                            to_district_id: 1560,
+                            to_ward_code: '580107',
+                            service_id: 53321,
+                        },
+                        headers: {
+                            Token: import.meta.env.VITE_TOKEN_GHN,
+                        },
+                    },
+                );
+                if (res?.status === 200) {
+                    const { data } = res.data;
+                    setExpectedDeliveryTime(data.leadtime);
+                }
+            } catch (error) {
+                console.log('Error calculate expected delivery time', error);
+            }
+        };
+        calculateExpectedDeliveryTime();
+    }, []);
+
+    const date = new Date(expectedDeliveryTime * 1000);
+    const daysOfWeek = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    const dayOfWeek = `${daysOfWeek[date.getDay()]}, ${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    const hours = date.getHours();
+    const formattedDate = `
+        Trong khoảng ${hours} giờ - ${hours + 4} giờ (${hours < 12 ? 'Sáng' : hours < 18 ? 'Chiều' : 'Tối'})
+    `;
 
     // ==================================== Call API to create order ====================================
     // handle choose payment method
@@ -365,6 +381,13 @@ export default function DashCheckout() {
         setPaymentMethod(idMethod);
     };
 
+    // handle apply voucher
+    const handleApplyVoucher = useCallback((voucher) => {
+        setAppliedVoucher(voucher?.couponCode);
+        console.log('voucher', voucher);
+    }, []);
+
+    // handle create order
     const handleCreateOrder = async () => {
         if (paymentMethod === '') {
             toast.error('Vui lòng chọn phương thức thanh toán');
@@ -613,12 +636,35 @@ export default function DashCheckout() {
                                 );
                             })}
                         </div>
-                        <div className='mb-6'>
-                            <div className='flex items-center mb-4'>
-                                <TextInput type='text' placeholder='Mã khuyến mãi' className='flex-grow mr-2' />
+                        <div className='mb-5'>
+                            <div className='flex items-center mb-2'>
+                                <TextInput
+                                    type='text'
+                                    placeholder='Nhập mã khuyến mãi'
+                                    className='flex-grow mr-2'
+                                    value={appliedVoucher ? appliedVoucher.couponCode : ''}
+                                    readOnly
+                                />
                                 <Button color='blue'>Áp dụng</Button>
                             </div>
+                            <div
+                                onClick={() => setOpenModalVoucher(true)}
+                                className='flex items-center gap-x-1 cursor-pointer'
+                            >
+                                <RiCoupon3Fill className='text-blue-600 text-sm' />
+                                <button
+                                    className='text-blue-600 hover:text-blue-800 
+                        dark:text-blue-400 dark:hover:text-blue-300 text-sm'
+                                >
+                                    Chọn mã khuyến mãi khác
+                                </button>
+                            </div>
                         </div>
+                        <VoucherModal_Component
+                            isOpen={openModalVoucher}
+                            onClose={() => setOpenModalVoucher(false)}
+                            onApplyVoucher={handleApplyVoucher}
+                        />
                         <div className='space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4'>
                             <div className='flex justify-between'>
                                 <span className='text-gray-600 dark:text-gray-400'>Tạm tính</span>
@@ -633,14 +679,22 @@ export default function DashCheckout() {
                                 </span>
                             </div>
                             <div className='flex justify-between'>
-                                <span className='text-gray-600 dark:text-gray-400'>Giảm giá</span>
+                                <span className='text-gray-600 dark:text-gray-400'>Giảm giá từ Deal</span>
                                 <span className='font-semibold text-green-500'>
                                     - {formatPrice(totalDiscountPrice)}
                                 </span>
                             </div>
+                            {appliedVoucher && (
+                                <div className='flex justify-between'>
+                                    <span className='text-gray-600 dark:text-gray-400'>Giảm giá khuyến mãi</span>
+                                    <span className='font-semibold text-gray-800 dark:text-gray-200'>
+                                        {formatPrice(shippingFee)}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                         <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
-                            <div className='flex justify-between items-center mb-4'>
+                            <div className='flex justify-between items-center'>
                                 <span className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
                                     Tổng cộng
                                 </span>
@@ -648,7 +702,9 @@ export default function DashCheckout() {
                                     {formatPrice(totalAmountToPay - shippingFee)}
                                 </span>
                             </div>
-                            <p className='text-sm text-gray-500 dark:text-gray-400 mb-6'>(Đã bao gồm thuế VAT)</p>
+                            <p className='text-sm text-gray-500 dark:text-gray-400 mb-3 text-end mt-1'>
+                                (Đã bao gồm thuế VAT)
+                            </p>
                             <Button onClick={handleCreateOrder} color='blue' size='lg' className='w-full'>
                                 Đặt hàng
                             </Button>

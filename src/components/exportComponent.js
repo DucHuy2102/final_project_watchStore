@@ -22,7 +22,7 @@ export { default as Breadcrumb_Component } from './components_Product/Breadcrumb
 export { default as FilterSortPanel_Component } from './components_Product/FilterSortPanel';
 export { default as Chip_Filter_Component } from './components_Product/Chip_Filter';
 export { default as DeliveryTo_Component } from './components_Product/Cart/DeliveryTo';
-export { default as Vouchers_Component } from './components_Product/Cart/Vouchers';
 export { default as ProductInfo_CheckoutPage_Component } from './components_Product/ProductInfo_CheckoutPage';
+export { default as VoucherModal_Component } from './components_Product/Cart/VoucherModal';
 
 // Admin components
