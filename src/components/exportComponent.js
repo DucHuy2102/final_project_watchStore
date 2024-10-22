@@ -24,5 +24,6 @@ export { default as Chip_Filter_Component } from './components_Product/Chip_Filt
 export { default as DeliveryTo_Component } from './components_Product/Cart/DeliveryTo';
 export { default as ProductInfo_CheckoutPage_Component } from './components_Product/ProductInfo_CheckoutPage';
 export { default as VoucherModal_Component } from './components_Product/Cart/VoucherModal';
+export { default as SelectedVoucher_Component } from './components_Product/Cart/SelectedVoucher';
 
 // Admin components

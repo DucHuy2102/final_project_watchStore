@@ -5,7 +5,11 @@ import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
 import { Button, Label, Modal, Radio, TextInput } from 'flowbite-react';
-import { ProductInfo_CheckoutPage_Component, VoucherModal_Component } from '../../components/exportComponent';
+import {
+    ProductInfo_CheckoutPage_Component,
+    SelectedVoucher_Component,
+    VoucherModal_Component,
+} from '../../components/exportComponent';
 import { Select } from 'antd';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -100,15 +104,26 @@ export default function DashCheckout() {
     const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
     const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
+    const cartRedux = useSelector((state) => state.cart.cartItem);
 
     // ==================================== State ====================================
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [paymentMethod, setPaymentMethod] = useState('');
+
+    // voucher state
+    const [allVouchers, setAllVouchers] = useState([]);
     const [openModalVoucher, setOpenModalVoucher] = useState(false);
     const [appliedVoucher, setAppliedVoucher] = useState(null);
-    const [paymentMethod, setPaymentMethod] = useState('');
+    const [selectedVoucher, setSelectedVoucher] = useState(null);
+    const [voucherPrice, setVoucherPrice] = useState(0);
+    const [voucherCode, setVoucherCode] = useState('');
+
+    // shipping fee state and expected delivery time
     const [shippingFee, setShippingFee] = useState(0);
     const [expectedDeliveryTime, setExpectedDeliveryTime] = useState(null);
+
+    // modal edit address
     const [showModalEditAddress, setShowModalEditAddress] = useState(false);
     const [selectedOption, setSelectedOption] = useState('thisUser');
     const [formData, setFormData] = useState({
@@ -139,6 +154,7 @@ export default function DashCheckout() {
         address: currentUser?.address?.fullAddress ?? 'Chưa cập nhật',
     });
 
+    // handle selected option
     useEffect(() => {
         if (selectedOption === 'anotherUser') {
             setFormData({
@@ -179,6 +195,21 @@ export default function DashCheckout() {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedOption]);
+
+    // get all vouchers from API
+    useEffect(() => {
+        const getAllVouchers = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-all-coupon`);
+                if (res?.status === 200) {
+                    setAllVouchers(res.data);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getAllVouchers();
+    }, []);
 
     // handle input change
     const handleInputChange = (e) => {
@@ -381,11 +412,73 @@ export default function DashCheckout() {
         setPaymentMethod(idMethod);
     };
 
-    // handle apply voucher
-    const handleApplyVoucher = useCallback((voucher) => {
-        setAppliedVoucher(voucher?.couponCode);
-        console.log('voucher', voucher);
-    }, []);
+    // handle select voucher in modal vouchers
+    const handleApplyVoucher = useCallback(
+        (voucher) => {
+            if (voucher) {
+                setSelectedVoucher(voucher);
+                setAppliedVoucher(voucher.couponCode);
+                const discountPrice = totalPrice * (voucher.discount / 100);
+                setVoucherPrice(discountPrice);
+            } else {
+                setSelectedVoucher(null);
+                setAppliedVoucher(null);
+                setVoucherPrice(0);
+            }
+        },
+        [totalPrice],
+    );
+
+    // handle apply voucher code
+    const handleApplyVoucherCode = () => {
+        if (!voucherCode) {
+            toast.error('Vui lòng nhập mã khuyến mãi để áp dụng');
+            return;
+        }
+
+        const isValidVoucher = allVouchers.find((voucher) => voucher.couponCode === voucherCode);
+        if (!isValidVoucher) {
+            toast.error('Mã khuyến mãi không hợp lệ');
+            return;
+        }
+
+        const now = new Date();
+        const createdDate = new Date(isValidVoucher.createdDate);
+        const expiryDate = new Date(isValidVoucher.expiryDate);
+
+        const isValidDate = now >= createdDate && now <= expiryDate;
+        const hasRemainingTimes = isValidVoucher.times > 0;
+        const isMinPriceReached = totalPrice >= isValidVoucher.minPrice;
+
+        if (!isValidDate) {
+            toast.error('Mã khuyến mãi đã hết hạn');
+            setTimeout(() => setVoucherCode(''), 3000);
+            return;
+        }
+
+        if (!hasRemainingTimes) {
+            toast.error('Mã khuyến mãi đã hết lượt sử dụng');
+            setTimeout(() => setVoucherCode(''), 3000);
+            return;
+        }
+
+        if (!isMinPriceReached) {
+            const remaining = isValidVoucher.minPrice - totalPrice;
+            toast.error(`Đơn hàng cần thêm ${remaining.toLocaleString('vi-VN')}₫ để áp dụng mã này`);
+            setTimeout(() => setVoucherCode(''), 3000);
+            return;
+        }
+
+        handleApplyVoucher(isValidVoucher);
+        setVoucherCode('');
+        toast.success('Áp dụng mã khuyến mãi thành công');
+    };
+
+    // calculate total amount
+    const totalAmount = useMemo(
+        () => totalPrice + shippingFee - totalDiscountPrice - (appliedVoucher ? voucherPrice : 0),
+        [totalPrice, shippingFee, totalDiscountPrice, appliedVoucher, voucherPrice],
+    );
 
     // handle create order
     const handleCreateOrder = async () => {
@@ -393,7 +486,71 @@ export default function DashCheckout() {
             toast.error('Vui lòng chọn phương thức thanh toán');
             return;
         }
-        console.log('create order');
+        try {
+            console.log(cartRedux);
+            console.log({
+                productItem: cartRedux.map((item) => ({
+                    productID: item.idCart,
+                })),
+                paymentMethod: paymentMethod,
+                shippingPrice: shippingFee,
+                couponCode: appliedVoucher,
+                profile: {
+                    name: formData.fullName,
+                    phone: formData.phone,
+                    email: formData.email,
+                    address: {
+                        province: {
+                            label: formData.address.province.label,
+                            value: formData.address.province.value,
+                        },
+                        district: {
+                            label: formData.address.district.label,
+                            value: formData.address.district.value,
+                        },
+                        ward: {
+                            label: formData.address.ward.label,
+                            value: formData.address.ward.value,
+                        },
+                        fullAddress: formData.address.fullAddress,
+                    },
+                },
+            });
+            // const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/order/create`, {
+            //     productItem: [],
+            //     paymentMethod: paymentMethod,
+            //     shippingPrice: shippingFee,
+            //     couponCode: appliedVoucher,
+            //     profile: {
+            //         name: formData.fullName,
+            //         phone: formData.phone,
+            //         email: formData.email,
+            //         address: {
+            //             province: {
+            //                 label: formData.address.province.label,
+            //                 value: formData.address.province.value,
+            //             },
+            //             district: {
+            //                 label: formData.address.district.label,
+            //                 value: formData.address.district.value,
+            //             },
+            //             ward: {
+            //                 label: formData.address.ward.label,
+            //                 value: formData.address.ward.value,
+            //             },
+            //             fullAddress: fullAddress,
+            //         },
+            //     },
+            // });
+            // if (res.status === 200) {
+            //     toast.success('Đặt hàng thành công');
+            // navigate('/order-history');
+            // }
+        } catch (error) {
+            console.log('Error create order', error);
+            toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
+            setTimeout(() => window.location.reload(), 3000);
+        }
     };
 
     return (
@@ -637,33 +794,46 @@ export default function DashCheckout() {
                             })}
                         </div>
                         <div className='mb-5'>
-                            <div className='flex items-center mb-2'>
-                                <TextInput
-                                    type='text'
-                                    placeholder='Nhập mã khuyến mãi'
-                                    className='flex-grow mr-2'
-                                    value={appliedVoucher ? appliedVoucher.couponCode : ''}
-                                    readOnly
+                            {selectedVoucher ? (
+                                <SelectedVoucher_Component
+                                    voucher={selectedVoucher}
+                                    onRemove={() => setSelectedVoucher(null)}
                                 />
-                                <Button color='blue'>Áp dụng</Button>
-                            </div>
-                            <div
-                                onClick={() => setOpenModalVoucher(true)}
-                                className='flex items-center gap-x-1 cursor-pointer'
-                            >
-                                <RiCoupon3Fill className='text-blue-600 text-sm' />
-                                <button
-                                    className='text-blue-600 hover:text-blue-800 
-                        dark:text-blue-400 dark:hover:text-blue-300 text-sm'
-                                >
-                                    Chọn mã khuyến mãi khác
-                                </button>
-                            </div>
+                            ) : (
+                                <>
+                                    <div className='flex items-center mb-2'>
+                                        <TextInput
+                                            type='text'
+                                            placeholder='Nhập mã khuyến mãi'
+                                            className='flex-grow mr-2'
+                                            value={voucherCode}
+                                            onChange={(e) => setVoucherCode(e.target.value)}
+                                        />
+                                        <Button onClick={handleApplyVoucherCode} color='blue'>
+                                            Áp dụng
+                                        </Button>
+                                    </div>
+                                    <div
+                                        onClick={() => setOpenModalVoucher(true)}
+                                        className='flex items-center gap-x-1 cursor-pointer'
+                                    >
+                                        <RiCoupon3Fill className='text-blue-600 text-sm' />
+                                        <button
+                                            className='text-blue-600 hover:text-blue-800 
+                            dark:text-blue-400 dark:hover:text-blue-300 text-sm'
+                                        >
+                                            Chọn mã khuyến mãi khác
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                         <VoucherModal_Component
                             isOpen={openModalVoucher}
                             onClose={() => setOpenModalVoucher(false)}
                             onApplyVoucher={handleApplyVoucher}
+                            totalAmount={totalAmount}
+                            vouchers={allVouchers}
                         />
                         <div className='space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4'>
                             <div className='flex justify-between'>
@@ -678,20 +848,18 @@ export default function DashCheckout() {
                                     {formatPrice(shippingFee)}
                                 </span>
                             </div>
+                            {appliedVoucher && voucherPrice !== 0 && (
+                                <div className='flex justify-between'>
+                                    <span className='text-gray-600 dark:text-gray-400'>Giảm giá phí vận chuyển</span>
+                                    <span className='font-semibold text-green-500'>- {formatPrice(voucherPrice)}</span>
+                                </div>
+                            )}
                             <div className='flex justify-between'>
                                 <span className='text-gray-600 dark:text-gray-400'>Giảm giá từ Deal</span>
                                 <span className='font-semibold text-green-500'>
                                     - {formatPrice(totalDiscountPrice)}
                                 </span>
                             </div>
-                            {appliedVoucher && (
-                                <div className='flex justify-between'>
-                                    <span className='text-gray-600 dark:text-gray-400'>Giảm giá khuyến mãi</span>
-                                    <span className='font-semibold text-gray-800 dark:text-gray-200'>
-                                        {formatPrice(shippingFee)}
-                                    </span>
-                                </div>
-                            )}
                         </div>
                         <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
                             <div className='flex justify-between items-center'>
@@ -699,7 +867,7 @@ export default function DashCheckout() {
                                     Tổng cộng
                                 </span>
                                 <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
-                                    {formatPrice(totalAmountToPay - shippingFee)}
+                                    {formatPrice(totalAmount)}
                                 </span>
                             </div>
                             <p className='text-sm text-gray-500 dark:text-gray-400 mb-3 text-end mt-1'>
