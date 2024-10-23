@@ -165,8 +165,8 @@ export default function Header_Component() {
                                 </Link>
                             </Dropdown.Item>
                             <Dropdown.Item className='flex justify-center items-center'>
-                                <Link to={'/dashboard?tab=orders'} className='font-medium'>
-                                    Giỏ hàng
+                                <Link to={'/dashboard?tab=order'} className='font-medium'>
+                                    Đơn hàng của tôi
                                 </Link>
                             </Dropdown.Item>
                             <Dropdown.Divider />

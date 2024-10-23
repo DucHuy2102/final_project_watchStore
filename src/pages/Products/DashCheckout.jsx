@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
-import { Button, Label, Modal, Radio, TextInput } from 'flowbite-react';
+import { Button, Label, Modal, Radio, Spinner, TextInput } from 'flowbite-react';
 import {
+    FormOrderInfo_Component,
     ProductInfo_CheckoutPage_Component,
     SelectedVoucher_Component,
     VoucherModal_Component,
@@ -15,6 +16,8 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { RiCoupon3Fill } from 'react-icons/ri';
+import { user_UpdateProfile } from '../../redux/slices/userSlice';
+import { resetCart } from '../../redux/slices/cartSlice';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
@@ -110,6 +113,8 @@ export default function DashCheckout() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [paymentMethod, setPaymentMethod] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [formOrderResponse, setFormOrderResponse] = useState(null);
 
     // voucher state
     const [allVouchers, setAllVouchers] = useState([]);
@@ -307,6 +312,60 @@ export default function DashCheckout() {
             address: newAddress,
         });
         setShowModalEditAddress(false);
+
+        // save info user if user choose 'thisUser' option in modal edit address
+        if (selectedOption === 'thisUser') {
+            const handleSaveInfoUser = async () => {
+                const dataUpdate = {
+                    avatarImg: currentUser.avatarImg,
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    address: {
+                        province: {
+                            label: formData.address.province.label,
+                            value: formData.address.province.value,
+                        },
+                        district: {
+                            label: formData.address.district.label,
+                            value: formData.address.district.value,
+                        },
+                        ward: {
+                            label: formData.address.ward.label,
+                            value: formData.address.ward.value,
+                        },
+                        street: formData.address.street,
+                        fullAddress: newAddress,
+                    },
+                };
+                try {
+                    const res = await axios.put(
+                        `${import.meta.env.VITE_API_URL}/api/profile/update`,
+                        {
+                            ...dataUpdate,
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${tokenUser}`,
+                            },
+                        },
+                    );
+                    if (res?.status === 200) {
+                        const { data } = res;
+                        toast.success('Cập nhật thông tin thành công!');
+                        dispatch(
+                            user_UpdateProfile({
+                                user: data,
+                            }),
+                        );
+                    }
+                } catch (error) {
+                    console.log('Error save info user', error);
+                    toast.error('Lỗi hệ thống. Vui lòng thử lại sau');
+                }
+            };
+            handleSaveInfoUser();
+        }
     };
 
     // ==================================== Call API GNH ====================================
@@ -359,14 +418,8 @@ export default function DashCheckout() {
             }
         };
         calculateFeeShip();
-    }, [
-        currentUser?.address.district?.value,
-        currentUser?.address.ward?.value,
-        totalHeight,
-        totalLength,
-        totalWeight,
-        totalWidth,
-    ]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser?.address.province?.value, currentUser?.address.district?.value, currentUser?.address.ward?.value]);
 
     // calculate the expected delivery time
     useEffect(() => {
@@ -480,78 +533,78 @@ export default function DashCheckout() {
         [totalPrice, shippingFee, totalDiscountPrice, appliedVoucher, voucherPrice],
     );
 
-    // handle create order
+    // handle create order function
     const handleCreateOrder = async () => {
         if (paymentMethod === '') {
             toast.error('Vui lòng chọn phương thức thanh toán');
             return;
         }
         try {
-            console.log(cartRedux);
-            console.log({
-                productItem: cartRedux.map((item) => ({
-                    productID: item.idCart,
-                })),
-                paymentMethod: paymentMethod,
-                shippingPrice: shippingFee,
-                couponCode: appliedVoucher,
-                profile: {
-                    name: formData.fullName,
-                    phone: formData.phone,
-                    email: formData.email,
-                    address: {
-                        province: {
-                            label: formData.address.province.label,
-                            value: formData.address.province.value,
+            setIsLoading(true);
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/order/create`,
+                {
+                    productItem: cartRedux.map((item) => item.idCart),
+                    paymentMethod: paymentMethod,
+                    shippingPrice: shippingFee,
+                    couponCode: appliedVoucher,
+                    profile: {
+                        name: formData.fullName,
+                        phone: formData.phone,
+                        email: formData.email,
+                        address: {
+                            province: {
+                                label: formData.address.province.label,
+                                value: formData.address.province.value,
+                            },
+                            district: {
+                                label: formData.address.district.label,
+                                value: formData.address.district.value,
+                            },
+                            ward: {
+                                label: formData.address.ward.label,
+                                value: formData.address.ward.value,
+                            },
+                            fullAddress: formData.address.fullAddress,
                         },
-                        district: {
-                            label: formData.address.district.label,
-                            value: formData.address.district.value,
-                        },
-                        ward: {
-                            label: formData.address.ward.label,
-                            value: formData.address.ward.value,
-                        },
-                        fullAddress: formData.address.fullAddress,
                     },
                 },
-            });
-            // const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/order/create`, {
-            //     productItem: [],
-            //     paymentMethod: paymentMethod,
-            //     shippingPrice: shippingFee,
-            //     couponCode: appliedVoucher,
-            //     profile: {
-            //         name: formData.fullName,
-            //         phone: formData.phone,
-            //         email: formData.email,
-            //         address: {
-            //             province: {
-            //                 label: formData.address.province.label,
-            //                 value: formData.address.province.value,
-            //             },
-            //             district: {
-            //                 label: formData.address.district.label,
-            //                 value: formData.address.district.value,
-            //             },
-            //             ward: {
-            //                 label: formData.address.ward.label,
-            //                 value: formData.address.ward.value,
-            //             },
-            //             fullAddress: fullAddress,
-            //         },
-            //     },
-            // });
-            // if (res.status === 200) {
-            //     toast.success('Đặt hàng thành công');
-            // navigate('/order-history');
-            // }
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
+            if (res.status === 201) {
+                toast.success('Đặt hàng thành công');
+                const { data } = res;
+                setFormOrderResponse(data);
+                dispatch(resetCart());
+            }
         } catch (error) {
             console.log('Error create order', error);
             toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
             setTimeout(() => window.location.reload(), 3000);
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div
+                className='fixed inset-0 flex flex-col items-center justify-center gap-y-5
+            bg-opacity-50 backdrop-blur-md z-50'
+            >
+                <Spinner className='w-20 h-20' />
+                <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>Đang xử lý đơn hàng...</p>
+            </div>
+        );
+    }
+
+    if (formOrderResponse) {
+        return <FormOrderInfo_Component orderData={formOrderResponse} />;
+    }
 
     return (
         <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>

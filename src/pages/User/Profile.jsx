@@ -218,7 +218,6 @@ export default function Profile_Component() {
                     ...updatedFormData,
                 },
             };
-            console.log('Data update:', dataUpdate);
             const res = await axios.put(
                 `${import.meta.env.VITE_API_URL}/api/profile/update`,
                 {
