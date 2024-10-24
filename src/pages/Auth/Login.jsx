@@ -130,38 +130,20 @@ export default function Login() {
         <div className='w-full h-screen'>
             <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5 relative'>
                 <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
-                    <div className='flex justify-center items-center gap-x-3 md:gap-x-16 absolute top-10 lg:top-5 lg:gap-x-24'>
+                    <div className='absolute top-6 left-6'>
                         <Link
                             to={'/'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
+                            className='flex items-center gap-2 px-4 py-2 hover:text-blue-500 text-gray-700 
+                        dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 group'
                         >
-                            <IoIosHome />
-                            <span>Trang chủ</span>
-                        </Link>
-                        <Link
-                            to={'/products'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <MdWatch />
-                            <span>Sản phẩm</span>
-                        </Link>
-                        <Link
-                            to={'/cart'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <IoIosCart />
-                            <span>Giỏ hàng</span>
-                        </Link>
-                        <Link
-                            to={'/services'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <MdHomeRepairService />
-                            <span>Dịch vụ</span>
+                            <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
+                            <span className='font-medium'>Trang chủ</span>
                         </Link>
                     </div>
                     <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
-                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>Đăng nhập</h2>
+                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>
+                            Chào mừng bạn trở lại
+                        </h2>
                         <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 text-center'>
                             Sử dụng tên người dùng và mật khẩu để đăng nhập
                         </p>

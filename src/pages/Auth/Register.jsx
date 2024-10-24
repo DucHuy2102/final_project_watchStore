@@ -1,13 +1,12 @@
 import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
-import { CiMail, CiPhone, CiUser } from 'react-icons/ci';
+import { CiMail, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
 import { IoIosCart, IoIosHome, IoIosSend } from 'react-icons/io';
 import { Link, useNavigate } from 'react-router-dom';
 import { PasswordStrengthMeter } from '../../components/exportComponent';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { TfiHandPointRight } from 'react-icons/tfi';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
@@ -23,7 +22,6 @@ export default function Register() {
         username: '',
         email: '',
         password: '',
-        phone: '',
     });
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [loadingState, setLoadingState] = useState(false);
@@ -87,7 +85,7 @@ export default function Register() {
 
     return (
         <div className='w-full h-screen'>
-            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5 relative'>
+            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5'>
                 <div className='hidden lg:block lg:w-1/2'>
                     <img
                         src={'../assets/register.webp'}
@@ -96,48 +94,23 @@ export default function Register() {
                     />
                 </div>
 
-                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
-                    <div className='flex justify-center items-center gap-x-3 md:gap-x-16 absolute top-10 lg:top-5 lg:gap-x-24'>
+                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center relative'>
+                    <div className='absolute -top-2 left-6'>
                         <Link
                             to={'/'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
+                            className='flex items-center gap-2 px-4 py-2 hover:text-blue-500 text-gray-700 
+                        dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 group'
                         >
-                            <IoIosHome />
-                            <span>Trang chủ</span>
-                        </Link>
-                        <Link
-                            to={'/products'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <MdWatch />
-                            <span>Sản phẩm</span>
-                        </Link>
-                        <Link
-                            to={'/cart'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <IoIosCart />
-                            <span>Giỏ hàng</span>
-                        </Link>
-                        <Link
-                            to={'/services'}
-                            className='flex items-center justify-start gap-x-1 text-sm lg:text-md lg:font-bold font-medium cursor-pointer hover:underline hover:text-blue-500'
-                        >
-                            <MdHomeRepairService />
-                            <span>Dịch vụ</span>
+                            <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
+                            <span className='font-medium'>Quay lại trang chủ</span>
                         </Link>
                     </div>
                     <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
-                        <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-2'>
-                            Tạo tài khoản mới
-                        </h2>
+                        <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-2'>Tạo tài khoản mới</h2>
 
                         <form className='w-full space-y-4' onSubmit={handleSubmit}>
                             <div>
-                                <Label
-                                    value='Tên người dùng'
-                                    className='text-gray-700 dark:text-gray-300'
-                                />
+                                <Label value='Tên người dùng' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
                                     icon={CiUser}
                                     type='text'
@@ -148,30 +121,6 @@ export default function Register() {
                                     className='mt-1'
                                 />
                             </div>
-                            {/* <div>
-                                <Label
-                                    value='Số điện thoại'
-                                    className='text-gray-700 dark:text-gray-300'
-                                />
-                                <PhoneInput
-                                    country={'vn'}
-                                    value={formData.phone}
-                                    onChange={(phone) => setFormData({ ...formData, phone })}
-                                    className='mt-1 custom-phone-input'
-                                    inputProps={{
-                                        required: true,
-                                    }}
-                                    inputStyle={{
-                                        width: '100%',
-                                        height: '42px',
-                                        fontSize: '0.9rem',
-                                        border: '1px solid #d1d5db',
-                                        borderRadius: '0.375rem',
-                                        color: '#1f2937',
-                                        backgroundColor: '#f9fafb',
-                                    }}
-                                />
-                            </div> */}
                             <div>
                                 <Label value='Email' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
@@ -185,10 +134,7 @@ export default function Register() {
                                 />
                             </div>
                             <div>
-                                <Label
-                                    value='Mật khẩu'
-                                    className='text-gray-700 dark:text-gray-300'
-                                />
+                                <Label value='Mật khẩu' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
                                     icon={GoLock}
                                     type='password'
@@ -199,17 +145,9 @@ export default function Register() {
                                     className='mt-1'
                                 />
                             </div>
-                            <PasswordStrengthMeter
-                                password={formData.password}
-                                strength={passwordStrength}
-                            />
+                            <PasswordStrengthMeter password={formData.password} strength={passwordStrength} />
 
-                            <Button
-                                disabled={loadingState}
-                                type='submit'
-                                color='blue'
-                                className='w-full'
-                            >
+                            <Button disabled={loadingState} type='submit' color='blue' className='w-full'>
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />
@@ -225,9 +163,7 @@ export default function Register() {
                         </form>
                         <div className='w-full mt-6'>
                             <div className='flex items-center justify-center gap-x-2 mb-4'>
-                                <span className='text-sm text-gray-600 dark:text-gray-400'>
-                                    Bạn muốn đăng nhập?
-                                </span>
+                                <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn muốn đăng nhập?</span>
                                 <Link
                                     to='/login'
                                     className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'

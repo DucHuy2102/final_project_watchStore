@@ -21,14 +21,16 @@ export default function Dashboard_DefaultPage() {
     }, [location.search]);
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row">
-            <div className="md:w-auto h-full">
+        <div className='min-h-screen flex flex-col md:flex-row'>
+            <div className='md:w-auto sticky top-0 h-screen'>
                 <Sidebar_Component />
             </div>
 
-            <div className="flex-1 flex flex-col w-full overflow-hidden">
-                <Mini_Navbar_Component />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto p-4">
+            <div className='flex-1 flex flex-col w-full'>
+                <div className='sticky top-0 z-50'>
+                    <Mini_Navbar_Component />
+                </div>
+                <main className='flex-1 p-4'>
                     {tab === 'dashboard' && <Dashboard_Page />}
                     {tab === 'profile' && <Profile_Page />}
                     {tab === 'order' && <Order_Page />}

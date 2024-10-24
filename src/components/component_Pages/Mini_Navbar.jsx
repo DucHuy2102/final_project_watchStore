@@ -133,7 +133,7 @@ export default function Mini_Navbar() {
                         </Dropdown.Item>
                         <Dropdown.Item className='flex justify-center items-center'>
                             <Link to={'/dashboard?tab=orders'} className='font-medium'>
-                                Giỏ hàng
+                                Đơn hàng của tôi
                             </Link>
                         </Dropdown.Item>
                         <Dropdown.Divider />

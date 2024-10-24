@@ -130,9 +130,9 @@ export default function Header_Component() {
                 <div className='flex gap-2 md:order-2'>
                     <Button onClick={() => dispatch(toggleTheme())} color={theme === 'light' ? 'light' : 'dark'} pill>
                         {theme === 'light' ? (
-                            <FaSun size={14} className='text-yellow-400 mt-[2px]' />
+                            <FaSun size={14} className='text-yellow-400 mt-[3px]' />
                         ) : (
-                            <FaMoon size={14} className='text-blue-400 mt-[2px]' />
+                            <FaMoon size={14} className='text-blue-400 mt-[3px]' />
                         )}
                     </Button>
                     {tokenUser ? (

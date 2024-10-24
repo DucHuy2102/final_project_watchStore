@@ -14,14 +14,8 @@ export const checkoutSlice = createSlice({
     initialState,
     reducers: {
         setProductToCheckout: (state, action) => {
-            const {
-                productItems,
-                totalPrice,
-                totalQuantity,
-                totalDiscountPrice,
-                totalAmountToPay,
-                isBuyNow,
-            } = action.payload;
+            const { productItems, totalPrice, totalQuantity, totalDiscountPrice, totalAmountToPay, isBuyNow } =
+                action.payload;
             state.productItems = productItems;
             state.totalPrice = totalPrice;
             state.totalQuantity = totalQuantity;
@@ -29,7 +23,7 @@ export const checkoutSlice = createSlice({
             state.totalAmountToPay = totalAmountToPay;
             state.isBuyNow = isBuyNow;
         },
-        setResetCheckout: (state) => {
+        resetCheckout: (state) => {
             state.productItems = [];
             state.totalPrice = 0;
             state.totalQuantity = 0;
@@ -40,6 +34,6 @@ export const checkoutSlice = createSlice({
     },
 });
 
-export const { setProductToCheckout, setResetCheckout } = checkoutSlice.actions;
+export const { setProductToCheckout, resetCheckout } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

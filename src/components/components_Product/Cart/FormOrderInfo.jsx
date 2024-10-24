@@ -1,5 +1,6 @@
+import { useMemo } from 'react';
 import { FaHome, FaShoppingCart } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const OrderDetails = ({ orderData }) => {
     const navigate = useNavigate();
@@ -23,6 +24,12 @@ const OrderDetails = ({ orderData }) => {
         });
     };
 
+    const priceProduct = useMemo(() => {
+        return orderData.products.reduce((total, product) => {
+            return total + (product.product.price - product.product.discount) * product.quantity;
+        }, 0);
+    }, [orderData.products]);
+
     return (
         <div className='min-h-screen bg-gray-50 py-8 px-4'>
             <div className='max-w-7xl mx-auto'>
@@ -36,13 +43,6 @@ const OrderDetails = ({ orderData }) => {
                                 <p className='text-gray-300 text-sm'>Mã đơn: {orderData.id}</p>
                             </div>
                             <div className='flex gap-4'>
-                                <button
-                                    onClick={() => navigate('/')}
-                                    className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition'
-                                >
-                                    <FaHome size={20} />
-                                    <span>Trang chủ</span>
-                                </button>
                                 <button
                                     onClick={() => navigate('/dashboard?tab=order')}
                                     className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition'
@@ -60,22 +60,22 @@ const OrderDetails = ({ orderData }) => {
                         <div className='space-y-6'>
                             <h2 className='text-lg font-semibold'>Sản phẩm đã đặt</h2>
                             <div className='bg-gray-50 rounded-lg p-4 space-y-4'>
-                                {orderData.products.map((product, index) => (
+                                {orderData?.products?.map((product, index) => (
                                     <div
                                         key={index}
                                         className='flex items-center space-x-4 p-4 bg-white rounded-lg shadow-sm'
                                     >
                                         <div className='w-20 h-20 bg-gray-200 rounded-lg'>
                                             <img
-                                                src={product.img[0]}
-                                                alt={product.productName}
+                                                src={product.product.img[0]}
+                                                alt={product.product.productName}
                                                 className='w-full h-full object-cover rounded-lg'
                                             />
                                         </div>
                                         <div className='flex-1'>
-                                            <h3 className='font-medium'>{product.productName}</h3>
+                                            <h3 className='font-medium'>{product.product.productName}</h3>
                                             <p className='text-gray-500'>Số lượng: {product.quantity}</p>
-                                            <p className='font-medium text-gray-800'>{formatPrice(product.price)}</p>
+                                            <p className='font-medium text-gray-800'>{formatPrice(priceProduct)}</p>
                                         </div>
                                     </div>
                                 ))}

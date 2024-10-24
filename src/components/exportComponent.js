@@ -26,5 +26,6 @@ export { default as ProductInfo_CheckoutPage_Component } from './components_Prod
 export { default as VoucherModal_Component } from './components_Product/Cart/VoucherModal';
 export { default as SelectedVoucher_Component } from './components_Product/Cart/SelectedVoucher';
 export { default as FormOrderInfo_Component } from './components_Product/Cart/FormOrderInfo';
+export { default as OrderDetail_Component } from './components_Product/Cart/OrderDetail';
 
 // Admin components
