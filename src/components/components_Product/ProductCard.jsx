@@ -1,20 +1,22 @@
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
+import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
 
 export default function ProductCard({ product }) {
-    const { id, productName, price, img, genderUser, shape, length, width } = product;
+    const { id, productName, price, img, genderUser, length, width } = product;
     const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
     const handleRenderGenderUser = genderUser === 'Male' ? 'Nam' : 'Nữ';
 
     // state
-    const tokenUser = useSelector((state) => state.user.access_token);
-    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
     // format price to VND
@@ -25,7 +27,25 @@ export default function ProductCard({ product }) {
 
     // function buy now
     const handleBuyNow = () => {
-        console.log('Buy now');
+        const totalAmountToPay = quantity * (price - product.discount);
+        // dispatch(
+        //     setProductToCheckout({
+        //         productItems: product,
+        //         totalPrice: price,
+        //         totalDiscountPrice: product.discount,
+        //         totalAmountToPay: totalAmountToPay,
+        //         totalQuantity: quantity,
+        //         isBuyNow: true,
+        //     }),
+        // );
+        console.log('Buy now', {
+            productItems: product,
+            totalPrice: price,
+            totalDiscountPrice: product.discount,
+            totalAmountToPay: totalAmountToPay,
+            totalQuantity: quantity,
+            isBuyNow: true,
+        });
     };
 
     // function navigate to login page
@@ -92,9 +112,7 @@ export default function ProductCard({ product }) {
                 <Button
                     onClick={() => setShowModalBuyNow(true)}
                     className={`w-full rounded-t-none font-medium py-1 ${
-                        tokenUser
-                            ? ''
-                            : 'bg-black text-white dark:bg-gray-800 dark:text-white hover:!bg-gray-700'
+                        tokenUser ? '' : 'bg-black text-white dark:bg-gray-800 dark:text-white hover:!bg-gray-700'
                     }`}
                 >
                     Mua hàng ngay
@@ -102,17 +120,13 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Modal Buy Now */}
-            <Modal size='md' popup show={showModalBuyNow} onClick={() => setShowModalBuyNow(false)}>
+            <Modal size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
                 {tokenUser ? (
                     <>
                         <Modal.Header />
                         <Modal.Body>
                             <div className='flex flex-col justify-center items-center'>
-                                <Swiper
-                                    className='h-full w-full rounded-lg'
-                                    loop={true}
-                                    spaceBetween={0}
-                                >
+                                <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>
                                     {img.map((item, index) => (
                                         <SwiperSlide key={index}>
                                             <img
@@ -123,23 +137,31 @@ export default function ProductCard({ product }) {
                                         </SwiperSlide>
                                     ))}
                                 </Swiper>
-                                <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>
-                                    {productName}
-                                </h4>
+                                <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>{productName}</h4>
                                 <p className='text-sm sm:text-base text-gray-500'>
                                     {sizeProduct} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
                                 </p>
-                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>
-                                    {priceFormat}
-                                </p>
+                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>{priceFormat}</p>
                                 <div className='flex items-center mt-4'>
-                                    <Button pill color={'gray'}>
+                                    <Button
+                                        pill
+                                        color={'gray'}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setQuantity((prev) => Math.max(1, prev - 1));
+                                        }}
+                                    >
                                         -
                                     </Button>
-                                    <span className='text-center font-semibold text-lg w-10 sm:w-12'>
-                                        1
-                                    </span>
-                                    <Button pill color={'gray'}>
+                                    <span className='text-center font-semibold text-lg w-10 sm:w-12'>{quantity}</span>
+                                    <Button
+                                        pill
+                                        color={'gray'}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setQuantity((prev) => prev + 1);
+                                        }}
+                                    >
                                         +
                                     </Button>
                                 </div>
@@ -153,15 +175,9 @@ export default function ProductCard({ product }) {
                     <Modal show={showModalBuyNow} size='md' popup>
                         <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                             <CiWarning size='70px' color={'red'} />
-                            <span className='text-lg font-medium text-black'>
-                                Bạn cần đăng nhập để mua hàng
-                            </span>
+                            <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
                             <div className='w-full flex justify-between items-center gap-x-5'>
-                                <Button
-                                    outline
-                                    className='w-full'
-                                    onClick={() => setShowModalBuyNow(false)}
-                                >
+                                <Button outline className='w-full' onClick={() => setShowModalBuyNow(false)}>
                                     Hủy
                                 </Button>
                                 <Button className='w-full' onClick={handleNavigateToLoginPage}>

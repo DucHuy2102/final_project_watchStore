@@ -74,7 +74,8 @@ export default function Header_Component() {
                 pathname === '/register' ||
                 pathname === '/forgot-password' ||
                 pathname === '/verify-email' ||
-                pathname === '/dashboard'
+                pathname === '/dashboard' ||
+                pathname.startsWith('/admin')
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
             } border-b border-gray-200 dark:border-gray-700`}

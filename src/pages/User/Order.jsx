@@ -2,13 +2,14 @@ import axios from 'axios';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Table, Badge, TextInput, Select, Button } from 'flowbite-react';
-import { HiSearch } from 'react-icons/hi';
+import { Table, Badge, TextInput, Select, Button, Spinner, Modal } from 'flowbite-react';
+import { HiCheck, HiSearch } from 'react-icons/hi';
 import { BsArrowUp, BsArrowDown } from 'react-icons/bs';
 import { OrderDetail_Component } from '../../components/exportComponent';
 
 export default function Order() {
     const tokenUser = useSelector((state) => state.user.access_token);
+    const [isLoading, setIsLoading] = useState(false);
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState('');
     const [filterState, setFilterState] = useState('all');
@@ -17,12 +18,14 @@ export default function Order() {
         direction: 'desc',
     });
     const [orderDetail, setOrderDetail] = useState(null);
-    console.log(orderDetail);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmingOrder, setConfirmingOrder] = useState(null);
 
     // get all orders from api
     useEffect(() => {
         const getAllOrders = async () => {
             try {
+                setIsLoading(true);
                 const res = await axios.get(
                     `${import.meta.env.VITE_API_URL}/api/order`,
 
@@ -37,25 +40,39 @@ export default function Order() {
                 }
             } catch (error) {
                 console.log(error);
+            } finally {
+                setIsLoading(false);
             }
         };
         getAllOrders();
     }, [tokenUser]);
 
+    // loading
+    if (isLoading) {
+        return (
+            <div className='w-full min-h-screen flex justify-center items-center '>
+                <div className='flex flex-col items-center'>
+                    <Spinner size='xl' color='info' />
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
+                </div>
+            </div>
+        );
+    }
+
     const getStatusColor = (state) => {
         const colors = {
             processing: 'warning',
             delivered: 'success',
-            cancelled: 'failure',
+            cancel: 'failure',
         };
         return colors[state] || 'default';
     };
 
     const getStatusText = (state) => {
         const text = {
-            processing: 'Đang xử lý',
+            processing: 'Đang chờ giao',
             delivered: 'Đã giao',
-            cancelled: 'Đã hủy',
+            cancel: 'Hủy đơn',
         };
         return text[state] || state;
     };
@@ -98,6 +115,56 @@ export default function Order() {
         return 0;
     });
 
+    const handleConfirmDelivery = async (orderId) => {
+        try {
+            const res = await axios.put(
+                `${import.meta.env.VITE_API_URL}/api/order/${orderId}/confirm`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
+            if (res.status === 200) {
+                setOrders(orders.map((order) => (order.id === orderId ? { ...order, state: 'delivered' } : order)));
+                setShowConfirmModal(false);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const renderActionButton = (order) => {
+        if (order.state === 'delivered') {
+            return (
+                <div className='flex gap-2'>
+                    <Button
+                        size='sm'
+                        color='blue'
+                        onClick={() => {
+                            setConfirmingOrder(order);
+                            setShowConfirmModal(true);
+                        }}
+                    >
+                        <div className='flex justify-center items-center gap-x-2'>
+                            <HiCheck className='h-4 w-4' />
+                            <span>Nhận hàng</span>
+                        </div>
+                    </Button>
+                    <Button onClick={() => setOrderDetail(order)} size='sm' color='gray'>
+                        Chi tiết
+                    </Button>
+                </div>
+            );
+        }
+        return (
+            <Button onClick={() => setOrderDetail(order)} size='sm' color='gray'>
+                Chi tiết
+            </Button>
+        );
+    };
+
     return (
         <div className='px-6 py-2 space-y-6'>
             <h1 className='text-2xl font-bold'>Đơn hàng của tôi</h1>
@@ -121,10 +188,10 @@ export default function Order() {
                             value={filterState}
                             onChange={(e) => setFilterState(e.target.value)}
                         >
-                            <option value='all'>Tất cả</option>
-                            <option value='processing'>Đang xử lý</option>
-                            <option value='delivered'>Đã giao</option>
-                            <option value='cancelled'>Đã hủy</option>
+                            <option value='all'>Tất cả đơn hàng</option>
+                            <option value='processing'>Đơn đang chờ giao</option>
+                            <option value='delivered'>Đơn hàng đã nhận</option>
+                            <option value='cancel'>Đơn hàng đã hủy</option>
                         </Select>
                     </div>
 
@@ -178,15 +245,29 @@ export default function Order() {
                                             {getStatusText(order.state)}
                                         </Badge>
                                     </Table.Cell>
-                                    <Table.Cell align='center'>
-                                        <Button onClick={() => setOrderDetail(order)} size='sm' color='gray'>
-                                            Chi tiết
-                                        </Button>
-                                    </Table.Cell>
+                                    <Table.Cell align='center'>{renderActionButton(order)}</Table.Cell>
                                 </Table.Row>
                             ))}
                         </Table.Body>
                     </Table>
+                    <Modal show={showConfirmModal} onClose={() => setShowConfirmModal(false)} size='md' popup>
+                        <Modal.Header />
+                        <Modal.Body>
+                            <div className='text-center'>
+                                <h3 className='mb-5 text-lg font-normal text-gray-500 dark:text-gray-400'>
+                                    Bạn xác nhận đã nhận được đơn hàng?
+                                </h3>
+                                <div className='flex justify-center gap-4'>
+                                    <Button color='success' onClick={() => handleConfirmDelivery(confirmingOrder?.id)}>
+                                        Xác nhận
+                                    </Button>
+                                    <Button color='gray' onClick={() => setShowConfirmModal(false)}>
+                                        Hủy
+                                    </Button>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
                 </>
             )}
         </div>

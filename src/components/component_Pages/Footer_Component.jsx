@@ -40,7 +40,8 @@ export default function Footer_Component() {
                 pathname === '/login' ||
                 pathname === '/forgot-password' ||
                 pathname === '/verify-email' ||
-                pathname === '/dashboard'
+                pathname === '/dashboard' ||
+                pathname.startsWith('/admin')
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
             } border border-t-8 border-gray-500`}
@@ -52,11 +53,7 @@ export default function Footer_Component() {
                             <Footer.Title title={title} />
                             <Footer.LinkGroup col={true}>
                                 {links.map((link, index) => (
-                                    <Footer.Link
-                                        key={index}
-                                        href='#'
-                                        className='hover:text-gray-500'
-                                    >
+                                    <Footer.Link key={index} href='#' className='hover:text-gray-500'>
                                         {link}
                                     </Footer.Link>
                                 ))}
@@ -68,25 +65,15 @@ export default function Footer_Component() {
                 <Footer.Divider />
                 <div className='w-full flex flex-col items-center justify-center sm:flex-row sm:justify-between py-4 px-6 text-center'>
                     <div className='flex flex-col justify-center items-center mb-2 sm:mb-0'>
-                        <span className='text-sm text-gray-500 font-medium'>
-                            Trường Đại học Sư phạm Kỹ thuật
-                        </span>
-                        <span className='text-sm text-gray-500 font-medium'>
-                            Thành phố Hồ Chí Minh
-                        </span>
+                        <span className='text-sm text-gray-500 font-medium'>Trường Đại học Sư phạm Kỹ thuật</span>
+                        <span className='text-sm text-gray-500 font-medium'>Thành phố Hồ Chí Minh</span>
                     </div>
                     <span className='text-sm text-gray-500 font-medium'>
-                        &copy; {currentYear}{' '}
-                        <a href='https://material-tailwind.com/'>Nguyễn Đức Huy</a> -{' '}
-                        <a href='https://www.facebook.com/profile.php?id=100011281114118'>
-                            Huỳnh Lê Huy
-                        </a>
+                        &copy; {currentYear} <a href='https://material-tailwind.com/'>Nguyễn Đức Huy</a> -{' '}
+                        <a href='https://www.facebook.com/profile.php?id=100011281114118'>Huỳnh Lê Huy</a>
                     </span>
                     <div className='mt-4 flex space-x-6 sm:mt-0'>
-                        <Footer.Icon
-                            href='https://www.facebook.com/Duc.Huy2102'
-                            icon={FaFacebook}
-                        />
+                        <Footer.Icon href='https://www.facebook.com/Duc.Huy2102' icon={FaFacebook} />
                         <Footer.Icon
                             href='https://github.com/DucHuy2102/final_project_watchStore.git'
                             icon={FaGithub}

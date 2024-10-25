@@ -45,7 +45,6 @@ export default function DashboardCart() {
     const navigate = useNavigate();
     const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
     const [idProductToDelete, setIdProductToDelete] = useState(null);
-    const [selectedVoucher, setSelectedVoucher] = useState('');
     const { pathname } = useLocation();
 
     // call API update cart when change quantity
