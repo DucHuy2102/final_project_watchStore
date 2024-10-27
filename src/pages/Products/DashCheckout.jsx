@@ -18,7 +18,7 @@ import { toast } from 'react-toastify';
 import { RiCoupon3Fill } from 'react-icons/ri';
 import { user_UpdateProfile } from '../../redux/slices/userSlice';
 import { resetCart } from '../../redux/slices/cartSlice';
-import { resetCheckout } from '../../redux/slices/checkoutSlice';
+import { resetCheckout, setOrderDetail } from '../../redux/slices/checkoutSlice';
 import { IoCartOutline } from 'react-icons/io5';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -105,8 +105,26 @@ const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
 
 export default function DashCheckout() {
     // ==================================== Redux ====================================
-    const { totalPrice, totalDiscountPrice, productItems } = useSelector((state) => state.checkout);
-    const infoProduct = useMemo(() => productItems.map((item) => item.productItem), [productItems]);
+    const selectCheckoutData = (state) => {
+        const { isBuyNow, cartItems, buyNowItem } = state.checkout;
+        return isBuyNow ? buyNowItem : cartItems;
+    };
+    const isBuyNow = useSelector((state) => state.checkout.isBuyNow);
+    const { productItems, totalPrice, totalDiscountPrice, totalQuantity } = useSelector(selectCheckoutData);
+    const productInfo = useMemo(() => {
+        if (Array.isArray(productItems) && totalPrice > 0) {
+            return productItems.map((item) => ({
+                ...item.productItem,
+            }));
+        } else {
+            const producBuyNow = {
+                productItem: productItems,
+                quantity: totalQuantity,
+            };
+            return { ...producBuyNow };
+        }
+    }, [productItems, totalPrice, totalQuantity]);
+
     const tokenUser = useSelector((state) => state.user.access_token);
     const currentUser = useSelector((state) => state.user.user);
     const cartRedux = useSelector((state) => state.cart.cartItem);
@@ -162,9 +180,9 @@ export default function DashCheckout() {
         address: currentUser?.address?.fullAddress ?? 'Chưa cập nhật',
     });
 
+    // countdown to redirect to products page if no product
     useEffect(() => {
-        const productChecked = infoProduct?.length;
-        if (productChecked === 0) {
+        if (totalPrice === 0) {
             const countdownInterval = setInterval(() => {
                 setCountdown((prev) => {
                     if (prev <= 1) {
@@ -178,7 +196,15 @@ export default function DashCheckout() {
 
             return () => clearInterval(countdownInterval);
         }
-    }, [infoProduct?.length, navigate]);
+    }, [totalPrice, navigate]);
+
+    // redirect to order detail page after create order success
+    useEffect(() => {
+        if (formOrderResponse) {
+            dispatch(setOrderDetail(formOrderResponse));
+            navigate('/order/order-detail');
+        }
+    }, [dispatch, formOrderResponse, navigate]);
 
     // handle selected option
     useEffect(() => {
@@ -224,6 +250,7 @@ export default function DashCheckout() {
 
     // get all vouchers from API
     useEffect(() => {
+        if (totalPrice === 0) return;
         const getAllVouchers = async () => {
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-all-coupon`);
@@ -235,7 +262,7 @@ export default function DashCheckout() {
             }
         };
         getAllVouchers();
-    }, []);
+    }, [totalPrice]);
 
     // handle input change
     const handleInputChange = (e) => {
@@ -250,6 +277,7 @@ export default function DashCheckout() {
 
     // get province from api
     useEffect(() => {
+        if (totalPrice === 0) return;
         const getProvince = async () => {
             try {
                 const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
@@ -390,60 +418,76 @@ export default function DashCheckout() {
     };
 
     // ==================================== Call API GNH ====================================
-    const totalWeight = useMemo(
-        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.weight, 0)),
-        [productItems],
-    );
-    const totalHeight = useMemo(
-        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.height, 0) / 10),
-        [productItems],
-    );
-    const totalLength = useMemo(
-        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.length, 0) / 10),
-        [productItems],
-    );
-    const totalWidth = useMemo(
-        () => Math.ceil(productItems.reduce((total, item) => total + item.productItem.width, 0) / 10),
-        [productItems],
-    );
+    const totalWeight = useMemo(() => {
+        if (Array.isArray(productItems) && totalPrice > 0) {
+            return Math.ceil(productItems.reduce((total, item) => total + item.productItem.weight, 0));
+        } else {
+            return Math.ceil(productItems.weight);
+        }
+    }, [productItems, totalPrice]);
+    const totalHeight = useMemo(() => {
+        if (Array.isArray(productItems) && totalPrice > 0) {
+            return Math.ceil(productItems.reduce((total, item) => total + item.productItem.height, 0) / 10);
+        } else {
+            return Math.ceil(productItems.height);
+        }
+    }, [productItems, totalPrice]);
+    const totalLength = useMemo(() => {
+        if (Array.isArray(productItems) && totalPrice > 0) {
+            return Math.ceil(productItems.reduce((total, item) => total + item.productItem.length, 0) / 10);
+        } else {
+            return Math.ceil(productItems.length);
+        }
+    }, [productItems, totalPrice]);
+    const totalWidth = useMemo(() => {
+        if (Array.isArray(productItems) && totalPrice > 0) {
+            return Math.ceil(productItems.reduce((total, item) => total + item.productItem.width, 0) / 10);
+        } else {
+            return Math.ceil(productItems.width);
+        }
+    }, [productItems, totalPrice]);
 
     // calculate fee ship
     useEffect(() => {
-        const calculateFeeShip = async () => {
-            try {
-                const res = await axios.post(
-                    'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
-                    {
-                        service_type_id: 2,
-                        to_district_id: currentUser?.address.district?.value,
-                        to_ward_code: currentUser?.address.ward?.value,
-                        height: totalHeight,
-                        length: totalLength,
-                        weight: totalWeight,
-                        width: totalWidth,
-                    },
-                    {
-                        headers: {
-                            ShopId: '5194683',
-                            'Content-Type': 'application/json',
-                            Token: import.meta.env.VITE_TOKEN_GHN,
+        if (totalPrice === 0) return;
+        else {
+            const calculateFeeShip = async () => {
+                try {
+                    const res = await axios.post(
+                        'https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee',
+                        {
+                            service_type_id: 2,
+                            to_district_id: currentUser?.address.district?.value,
+                            to_ward_code: currentUser?.address.ward?.value,
+                            height: totalHeight,
+                            length: totalLength,
+                            weight: totalWeight,
+                            width: totalWidth,
                         },
-                    },
-                );
-                if (res?.status === 200) {
-                    const { data } = res.data;
-                    setShippingFee(data.service_fee);
+                        {
+                            headers: {
+                                ShopId: '5194683',
+                                Token: import.meta.env.VITE_TOKEN_GHN,
+                            },
+                        },
+                    );
+                    if (res?.status === 200) {
+                        const { data } = res.data;
+                        setShippingFee(data.service_fee);
+                    }
+                } catch (error) {
+                    console.log('Error calculate fee ship', error);
                 }
-            } catch (error) {
-                console.log('Error calculate fee ship', error);
-            }
-        };
-        calculateFeeShip();
+            };
+            calculateFeeShip();
+        }
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentUser?.address.province?.value, currentUser?.address.district?.value, currentUser?.address.ward?.value]);
 
     // calculate the expected delivery time
     useEffect(() => {
+        if (totalPrice === 0) return;
         const calculateExpectedDeliveryTime = async () => {
             try {
                 const res = await axios.get(
@@ -560,55 +604,108 @@ export default function DashCheckout() {
             toast.error('Vui lòng chọn phương thức thanh toán');
             return;
         }
-        try {
-            setIsLoading(true);
-            const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/order/create`,
-                {
-                    productItem: cartRedux.map((item) => item.idCart),
-                    paymentMethod: paymentMethod,
-                    shippingPrice: shippingFee,
-                    couponCode: appliedVoucher,
-                    profile: {
-                        name: formData.fullName,
-                        phone: formData.phone,
-                        email: formData.email,
-                        address: {
-                            province: {
-                                label: formData.address.province.label,
-                                value: formData.address.province.value,
+        if (!isBuyNow) {
+            try {
+                setIsLoading(true);
+                const res = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/api/order/create`,
+                    {
+                        productItem: cartRedux.map((item) => item.idCart),
+                        paymentMethod: paymentMethod,
+                        shippingPrice: shippingFee,
+                        couponCode: appliedVoucher,
+                        profile: {
+                            name: formData.fullName,
+                            phone: formData.phone,
+                            email: formData.email,
+                            address: {
+                                province: {
+                                    label: formData.address.province.label,
+                                    value: formData.address.province.value,
+                                },
+                                district: {
+                                    label: formData.address.district.label,
+                                    value: formData.address.district.value,
+                                },
+                                ward: {
+                                    label: formData.address.ward.label,
+                                    value: formData.address.ward.value,
+                                },
+                                fullAddress: formData.address.fullAddress,
                             },
-                            district: {
-                                label: formData.address.district.label,
-                                value: formData.address.district.value,
-                            },
-                            ward: {
-                                label: formData.address.ward.label,
-                                value: formData.address.ward.value,
-                            },
-                            fullAddress: formData.address.fullAddress,
                         },
                     },
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${tokenUser}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                        },
                     },
-                },
-            );
-            if (res.status === 201) {
-                toast.success('Đặt hàng thành công');
-                const { data } = res;
-                setFormOrderResponse(data);
-                dispatch(resetCart());
-                dispatch(resetCheckout());
+                );
+                if (res.status === 201) {
+                    toast.success('Đặt hàng thành công');
+                    const { data } = res;
+                    setFormOrderResponse(data);
+                    dispatch(resetCart());
+                    dispatch(resetCheckout());
+                }
+            } catch (error) {
+                console.log('Error create order', error);
+                toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
+                setTimeout(() => window.location.reload(), 3000);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.log('Error create order', error);
-            toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
-            setTimeout(() => window.location.reload(), 3000);
-        } finally {
-            setIsLoading(false);
+        } else {
+            try {
+                setIsLoading(true);
+                const res = await axios.post(
+                    `${import.meta.env.VITE_API_URL}/api/order/buy-now`,
+                    {
+                        productId: productItems.id,
+                        paymentMethod: paymentMethod,
+                        shippingPrice: shippingFee,
+                        couponCode: appliedVoucher,
+                        profile: {
+                            name: formData.fullName,
+                            phone: formData.phone,
+                            email: formData.email,
+                            address: {
+                                province: {
+                                    label: formData.address.province.label,
+                                    value: formData.address.province.value,
+                                },
+                                district: {
+                                    label: formData.address.district.label,
+                                    value: formData.address.district.value,
+                                },
+                                ward: {
+                                    label: formData.address.ward.label,
+                                    value: formData.address.ward.value,
+                                },
+                                fullAddress: formData.address.fullAddress,
+                            },
+                        },
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                        },
+                    },
+                );
+                if (res.status === 200) {
+                    toast.success('Đặt hàng thành công');
+                    const { data } = res;
+                    setFormOrderResponse(data);
+                    dispatch(resetCart());
+                    dispatch(resetCheckout());
+                }
+            } catch (error) {
+                console.log('Error create order', error);
+                toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
+                setTimeout(() => window.location.reload(), 3000);
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -624,14 +721,10 @@ export default function DashCheckout() {
         );
     }
 
-    if (formOrderResponse) {
-        return <FormOrderInfo_Component orderData={formOrderResponse} />;
-    }
-
     return (
         <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>
             <div className='max-w-7xl mx-auto'>
-                {infoProduct?.length > 0 ? (
+                {totalPrice > 0 ? (
                     <div className='flex flex-col lg:flex-row gap-8'>
                         {/* Left Column */}
                         <div className='w-full lg:w-3/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
@@ -857,20 +950,24 @@ export default function DashCheckout() {
                         {/* Right Column */}
                         <div className='w-full lg:w-2/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
                             <div className='flex flex-col justify-start items-start mb-1'>
-                                <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4'>
+                                <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-5'>
                                     Thông tin đơn hàng
                                 </h2>
                                 <ExpectedDeliveryTime dayOfWeek={dayOfWeek} formattedDate={formattedDate} />
                             </div>
-                            <div className='space-y-4 mb-6'>
-                                {infoProduct.map((_, index) => {
-                                    return (
-                                        <ProductInfo_CheckoutPage_Component
-                                            key={index}
-                                            dataProduct={productItems[index]}
-                                        />
-                                    );
-                                })}
+                            <div className='space-y-4 rounded-lg my-5'>
+                                {Array.isArray(productItems) ? (
+                                    productInfo.map((_, index) => {
+                                        return (
+                                            <ProductInfo_CheckoutPage_Component
+                                                key={index}
+                                                dataProduct={productItems[index]}
+                                            />
+                                        );
+                                    })
+                                ) : (
+                                    <ProductInfo_CheckoutPage_Component dataProduct={productInfo} />
+                                )}
                             </div>
                             <div className='mb-5'>
                                 {selectedVoucher ? (
@@ -937,12 +1034,14 @@ export default function DashCheckout() {
                                         </span>
                                     </div>
                                 )}
-                                <div className='flex justify-between'>
-                                    <span className='text-gray-600 dark:text-gray-400'>Giảm giá từ Deal</span>
-                                    <span className='font-semibold text-green-500'>
-                                        - {formatPrice(totalDiscountPrice)}
-                                    </span>
-                                </div>
+                                {totalDiscountPrice > 0 && (
+                                    <div className='flex justify-between'>
+                                        <span className='text-gray-600 dark:text-gray-400'>Giảm giá từ Deal</span>
+                                        <span className='font-semibold text-green-500'>
+                                            - {formatPrice(totalDiscountPrice)}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
                                 <div className='flex justify-between items-center'>

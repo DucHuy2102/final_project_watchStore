@@ -1,8 +1,11 @@
 import { useMemo } from 'react';
-import { FaHome, FaShoppingCart } from 'react-icons/fa';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { FaShoppingCart } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
-const OrderDetails = ({ orderData }) => {
+const OrderDetails = () => {
+    const orderData = useSelector((state) => state.checkout.orderDetail);
+    console.log(orderData);
     const navigate = useNavigate();
 
     const formatPrice = (price) => {

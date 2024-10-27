@@ -23,16 +23,24 @@ const PriceDisplay = ({ originalPrice, discountedPrice }) => (
 );
 
 export default function ProductInfo_CheckoutPage({ dataProduct }) {
-    const { productItem, quantity } = dataProduct;
-    const discountedPrice = productItem.price - productItem.discount * quantity;
-    const discountPercentage = Math.round((productItem.discount / productItem.price) * 100);
-
     const navigate = useNavigate();
+
+    const { productItem, quantity } = dataProduct;
+    const discountedPrice = productItem.price - productItem.discount;
+    const discountPercentage = Math.round((productItem.discount / productItem.price) * 100);
+    const sizeProduct =
+        productItem.height === productItem.width
+            ? ` ${productItem.height} mm`
+            : `${productItem.height} x ${productItem.width} mm`;
 
     return (
         <div className='cursor-pointer relative flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg transition-all hover:shadow-md'>
             {discountPercentage > 0 && <DiscountBadge discount={discountPercentage} />}
-            <img src={productItem.img[0]} alt={productItem.productName} className='w-20 h-20 object-cover rounded-md' />
+            <img
+                src={productItem.img[0]}
+                alt={productItem.productName}
+                className='w-20 h-auto object-cover rounded-md'
+            />
 
             <div className='flex-grow'>
                 <h3
@@ -46,13 +54,15 @@ export default function ProductInfo_CheckoutPage({ dataProduct }) {
                         {productItem.color}
                     </span>
                     <span className='text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full'>
-                        Size: {productItem.size}
+                        Size: {sizeProduct}
                     </span>
                 </div>
-                <div className='text-sm font-medium text-gray-600 dark:text-gray-400'>Số lượng: {quantity}</div>
+                <div className='text-sm font-medium text-gray-600 dark:text-gray-400'>
+                    Số lượng: <span className='text-red-500 font-bold'>{quantity}</span>
+                </div>
             </div>
 
-            <PriceDisplay originalPrice={productItem.price * quantity} discountedPrice={discountedPrice} />
+            <PriceDisplay originalPrice={productItem.price} discountedPrice={discountedPrice} />
         </div>
     );
 }

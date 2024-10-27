@@ -9,6 +9,7 @@ import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
 import { MdDiscount } from 'react-icons/md';
 import { SlArrowLeft, SlArrowRight } from 'react-icons/sl';
+import { resetCheckout } from '../../redux/slices/checkoutSlice';
 
 const SidebarItem = ({ to, icon: Icon, active, showSidebar, children }) => {
     return (
@@ -53,6 +54,7 @@ export default function Sidebar_Component() {
     // sign out function
     const handleSignOutAccount = useCallback(async () => {
         dispatch(user_SignOut());
+        dispatch(resetCheckout());
     }, [dispatch]);
 
     const toggleSidebar = useCallback(() => {

@@ -1,12 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    productItems: [],
-    totalPrice: 0,
-    totalQuantity: 0,
-    totalDiscountPrice: 0,
-    totalAmountToPay: 0,
     isBuyNow: false,
+
+    cartItems: {
+        productItems: [],
+        totalPrice: 0,
+        totalQuantity: 0,
+        totalDiscountPrice: 0,
+        totalAmountToPay: 0,
+    },
+
+    buyNowItem: {
+        productItems: null,
+        totalPrice: 0,
+        totalQuantity: 0,
+        totalDiscountPrice: 0,
+        totalAmountToPay: 0,
+    },
+
+    orderDetail: null,
 };
 
 export const checkoutSlice = createSlice({
@@ -16,24 +29,53 @@ export const checkoutSlice = createSlice({
         setProductToCheckout: (state, action) => {
             const { productItems, totalPrice, totalQuantity, totalDiscountPrice, totalAmountToPay, isBuyNow } =
                 action.payload;
-            state.productItems = productItems;
-            state.totalPrice = totalPrice;
-            state.totalQuantity = totalQuantity;
-            state.totalDiscountPrice = totalDiscountPrice;
-            state.totalAmountToPay = totalAmountToPay;
+            if (isBuyNow) {
+                state.buyNowItem = {
+                    productItems,
+                    totalPrice,
+                    totalQuantity,
+                    totalDiscountPrice,
+                    totalAmountToPay,
+                };
+            } else {
+                state.cartItems = {
+                    productItems,
+                    totalPrice,
+                    totalQuantity,
+                    totalDiscountPrice,
+                    totalAmountToPay,
+                };
+            }
             state.isBuyNow = isBuyNow;
         },
         resetCheckout: (state) => {
-            state.productItems = [];
-            state.totalPrice = 0;
-            state.totalQuantity = 0;
+            state.cartItems = {
+                productItems: [],
+                totalPrice: 0,
+                totalQuantity: 0,
+                totalDiscountPrice: 0,
+                totalAmountToPay: 0,
+            };
+            state.buyNowItem = {
+                pproductItems: null,
+                totalPrice: 0,
+                totalQuantity: 0,
+                totalDiscountPrice: 0,
+                totalAmountToPay: 0,
+            };
             state.isBuyNow = false;
-            state.totalDiscountPrice = 0;
-            state.totalAmountToPay = 0;
+        },
+
+        setOrderDetail: (state, action) => {
+            state.orderDetail = action.payload;
+        },
+
+        resetOrderDetail: (state) => {
+            state.orderDetail = null;
         },
     },
 });
 
-export const { setProductToCheckout, resetCheckout } = checkoutSlice.actions;
+export const { setProductToCheckout, resetCheckout, setOrderDetail, resetOrderDetail } = checkoutSlice.actions;
 
 export default checkoutSlice.reducer;

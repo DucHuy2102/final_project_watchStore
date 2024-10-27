@@ -31,6 +31,7 @@ export { default as DashboardCart_Page } from './Products/DashboardCart';
 
 // checkout
 export { default as DashCheckout_Page } from './Products/DashCheckout';
+export { default as FormOrderInfo } from '../components/components_Product/Cart/FormOrderInfo';
 
 // services
 export { default as DashService_Page } from './Services/DashService';

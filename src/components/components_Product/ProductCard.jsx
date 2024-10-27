@@ -28,24 +28,18 @@ export default function ProductCard({ product }) {
     // function buy now
     const handleBuyNow = () => {
         const totalAmountToPay = quantity * (price - product.discount);
-        // dispatch(
-        //     setProductToCheckout({
-        //         productItems: product,
-        //         totalPrice: price,
-        //         totalDiscountPrice: product.discount,
-        //         totalAmountToPay: totalAmountToPay,
-        //         totalQuantity: quantity,
-        //         isBuyNow: true,
-        //     }),
-        // );
-        console.log('Buy now', {
-            productItems: product,
-            totalPrice: price,
-            totalDiscountPrice: product.discount,
-            totalAmountToPay: totalAmountToPay,
-            totalQuantity: quantity,
-            isBuyNow: true,
-        });
+        dispatch(
+            setProductToCheckout({
+                productItems: product,
+                totalPrice: price * quantity,
+                totalDiscountPrice: product.discount * quantity,
+                totalAmountToPay: totalAmountToPay,
+                totalQuantity: quantity,
+                isBuyNow: true,
+            }),
+        );
+        navigate('/checkout');
+        setShowModalBuyNow(false);
     };
 
     // function navigate to login page

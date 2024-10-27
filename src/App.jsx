@@ -10,6 +10,7 @@ import {
     DashService_Page,
     EmailVerification_Page,
     ForgotPassword_Page,
+    FormOrderInfo,
     Home_Page,
     Login_Page,
     PageNotFound_Page,
@@ -90,6 +91,7 @@ export default function App() {
                     <Route element={<PrivateRoute_Page />}>
                         <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
                         <Route path='/checkout' element={<DashCheckout_Page />} />
+                        <Route path='/order/order-detail' element={<FormOrderInfo />} />   
                     </Route>
 
                     {/* route only for admin */}

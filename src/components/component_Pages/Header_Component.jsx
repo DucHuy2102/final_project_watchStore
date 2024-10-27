@@ -10,6 +10,7 @@ import { Badge } from 'antd';
 import { user_SignOut } from '../../redux/slices/userSlice';
 import { useEffect, useRef, useState } from 'react';
 import { resetCart } from '../../redux/slices/cartSlice';
+import { resetCheckout } from '../../redux/slices/checkoutSlice';
 
 export default function Header_Component() {
     // states
@@ -32,6 +33,7 @@ export default function Header_Component() {
     const handleSignOutAccount = () => {
         dispatch(user_SignOut());
         dispatch(resetCart());
+        dispatch(resetCheckout());
     };
 
     // ========================================= Search =========================================
