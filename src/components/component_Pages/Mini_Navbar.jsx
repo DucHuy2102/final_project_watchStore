@@ -12,11 +12,8 @@ export default function Mini_Navbar() {
     const location = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { tokenUser, currentUser } = useSelector((state) => ({
-        tokenUser: state.user.access_token,
-        currentUser: state.user.user,
-    }));
-    // const currentUser = useSelector((state) => state.user.user);
+    const tokenUser = useSelector((state) => state.user.access_token);
+    const currentUser = useSelector((state) => state.user.user);
     const avatarUser = currentUser?.avatarImg ?? '../assets/default_Avatar.jpg';
     const theme = useSelector((state) => state.theme.theme);
 

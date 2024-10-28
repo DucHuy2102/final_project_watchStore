@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 // format price to VND
@@ -33,6 +34,10 @@ export default function ProductInfo_CheckoutPage({ dataProduct }) {
             ? ` ${productItem.height} mm`
             : `${productItem.height} x ${productItem.width} mm`;
 
+    const idProduct = useMemo(() => {
+        return dataProduct.idProduct ? dataProduct.idProduct : productItem.id;
+    }, [dataProduct.idProduct, productItem.id]);
+
     return (
         <div className='cursor-pointer relative flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg transition-all hover:shadow-md'>
             {discountPercentage > 0 && <DiscountBadge discount={discountPercentage} />}
@@ -44,7 +49,7 @@ export default function ProductInfo_CheckoutPage({ dataProduct }) {
 
             <div className='flex-grow'>
                 <h3
-                    onClick={() => navigate(`/product-detail/${dataProduct.idProduct}`)}
+                    onClick={() => navigate(`/product-detail/${idProduct}`)}
                     className='font-semibold text-lg text-gray-800 hover:text-blue-500 transition-colors duration-200 dark:text-gray-200 mb-2'
                 >
                     {productItem.productName}

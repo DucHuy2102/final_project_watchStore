@@ -10,10 +10,10 @@ import { addProductToCart } from '../../redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { Breadcrumb_Component } from '../../components/exportComponent';
+import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
 
 // format price to VND
-const formatPrice = (price) =>
-    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 // PR product
 const prProduct = [
@@ -21,8 +21,7 @@ const prProduct = [
         id: 1,
         url: '//timex.com/cdn/shop/files/Steel.svg?v=1688056464&width=40',
         title: 'Chất liệu vỏ đồng hồ',
-        description:
-            'Vỏ đồng hồ được làm từ các chất liệu cao cấp, mang đến độ bền và sang trọng cho sản phẩm.',
+        description: 'Vỏ đồng hồ được làm từ các chất liệu cao cấp, mang đến độ bền và sang trọng cho sản phẩm.',
     },
     {
         id: 2,
@@ -148,9 +147,7 @@ export default function ProductDetail() {
             <div className='w-full min-h-screen flex justify-center items-center '>
                 <div className='flex flex-col items-center'>
                     <Spinner size='xl' color='info' />
-                    <p className='mt-4 text-gray-400 text-lg font-semibold'>
-                        Vui lòng chờ trong giây lát...
-                    </p>
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
                 </div>
             </div>
         );
@@ -233,8 +230,7 @@ export default function ProductDetail() {
     // format price & discountPrice to VND
     const priceFormat = formatPrice(price);
     const discountPrice = formatPrice(price - discount);
-    const percentDiscount =
-        discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
+    const percentDiscount = discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
 
     // navgigate to another product detail page
     const handleNavigateToProductDetail = (productId) => {
@@ -272,7 +268,7 @@ export default function ProductDetail() {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
                     },
-                }
+                },
             );
             if (res?.status === 200) {
                 const data = res.data;
@@ -283,7 +279,7 @@ export default function ProductDetail() {
                         productItem: product,
                         quantity: quantityProduct,
                         discountPrice: discount,
-                    })
+                    }),
                 );
                 toast.success('Đã thêm sản phẩm vào giỏ hàng');
             }
@@ -297,7 +293,19 @@ export default function ProductDetail() {
 
     // function buy now product
     const handleBuyNow = () => {
-        console.log('Buy now');
+        console.log('Buy now product', product);
+        const totalAmountToPay = quantityProduct * (price - discount);
+        dispatch(
+            setProductToCheckout({
+                productItems: product,
+                totalPrice: price * quantityProduct,
+                totalDiscountPrice: discount * quantityProduct,
+                totalAmountToPay: totalAmountToPay,
+                totalQuantity: quantityProduct,
+                isBuyNow: true,
+            }),
+        );
+        navigate('/checkout');
     };
 
     return (
@@ -321,11 +329,7 @@ export default function ProductDetail() {
                     >
                         {img.map((item, index) => (
                             <SwiperSlide key={index}>
-                                <img
-                                    src={item}
-                                    alt='Image'
-                                    className='w-full h-auto object-cover rounded-xl'
-                                />
+                                <img src={item} alt='Image' className='w-full h-auto object-cover rounded-xl' />
                             </SwiperSlide>
                         ))}
                     </Swiper>
@@ -334,17 +338,13 @@ export default function ProductDetail() {
                 {/* info product & button: buy now and add to cart */}
                 <div className='md:col-span-1 lg:col-span-2'>
                     {/* name product */}
-                    <h2 className='text-xl sm:text-2xl font-extrabold text-black dark:text-white'>
-                        {productName}
-                    </h2>
+                    <h2 className='text-xl sm:text-2xl font-extrabold text-black dark:text-white'>{productName}</h2>
 
                     {/* price product */}
                     <div className='flex flex-wrap justify-start items-center gap-x-5 mt-5'>
                         {discount !== 0 ? (
                             <>
-                                <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>
-                                    {discountPrice}
-                                </p>
+                                <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>{discountPrice}</p>
                                 <p className='text-gray-400 text-xl flex justify-start items-center'>
                                     <strike>{priceFormat}</strike>
                                     <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3'>
@@ -355,10 +355,7 @@ export default function ProductDetail() {
                         ) : (
                             <div className='flex items-center'>
                                 <span className='text-blue-500 text-xl font-medium'>
-                                    Giá đang bán:{' '}
-                                    <span className='text-3xl text-red-500 font-bold'>
-                                        {priceFormat}
-                                    </span>
+                                    Giá đang bán: <span className='text-3xl text-red-500 font-bold'>{priceFormat}</span>
                                 </span>
                             </div>
                         )}
@@ -366,11 +363,7 @@ export default function ProductDetail() {
 
                     {/* description */}
                     <div className='text-gray-600 dark:text-gray-200 mt-5'>
-                        <p>
-                            {isDescriptionExpanded
-                                ? description
-                                : `${description.substring(0, 100)}...`}
-                        </p>
+                        <p>{isDescriptionExpanded ? description : `${description.substring(0, 100)}...`}</p>
                         <button
                             onClick={toggleDescription}
                             className='text-gray-800 hover:text-blue-500 dark:text-blue-500 underline'
@@ -386,9 +379,7 @@ export default function ProductDetail() {
                                 key={spec.id}
                                 className='w-full flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700'
                             >
-                                <span className='text-gray-800 dark:text-gray-200'>
-                                    {spec.title}
-                                </span>
+                                <span className='text-gray-800 dark:text-gray-200'>{spec.title}</span>
                                 <span className='text-gray-800 dark:text-gray-200 font-medium w-[50%]'>
                                     {spec.value}
                                 </span>
@@ -398,9 +389,7 @@ export default function ProductDetail() {
 
                     {/* quantity */}
                     <div className='flex justify-start items-center mt-5 gap-x-5'>
-                        <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
-                            Số lượng đặt mua:
-                        </p>
+                        <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>Số lượng đặt mua:</p>
                         <div className='flex items-center justify-center'>
                             <Button
                                 outline
@@ -409,9 +398,7 @@ export default function ProductDetail() {
                             >
                                 -
                             </Button>
-                            <span className='text-lg text-center w-8 md:w-12'>
-                                {quantityProduct}
-                            </span>
+                            <span className='text-lg text-center w-8 md:w-12'>{quantityProduct}</span>
                             <Button
                                 outline
                                 onClick={() => setQuantityProduct(quantityProduct + 1)}
@@ -429,18 +416,11 @@ export default function ProductDetail() {
                         } items-center mt-5 gap-4`}
                     >
                         {tokenUser && (
-                            <Button
-                                onClick={handleAddProductToCart}
-                                outline
-                                className='w-full md:w-48 lg:w-52'
-                            >
+                            <Button onClick={handleAddProductToCart} outline className='w-full md:w-48 lg:w-52'>
                                 Thêm vào giỏ hàng
                             </Button>
                         )}
-                        <Button
-                            onClick={handleVerifyUser}
-                            className={`w-full ${tokenUser && 'md:w-48 lg:w-52'}`}
-                        >
+                        <Button onClick={handleVerifyUser} className={`w-full ${tokenUser && 'md:w-48 lg:w-52'}`}>
                             Mua ngay
                         </Button>
                     </div>
@@ -501,18 +481,9 @@ export default function ProductDetail() {
 
                 <div className='grid grid-cols-1 lg:grid-cols-3 gap-5 p-4 dark:bg-gray-900'>
                     {prProduct.map((item) => (
-                        <div
-                            key={item.id}
-                            className='flex flex-col justify-start items-center bg-white rounded-lg p-6'
-                        >
-                            <img
-                                src={item.url}
-                                alt={item.title}
-                                className='object-fit h-[10vh] w-[8vw] mb-4 p-4'
-                            />
-                            <h4 className='text-lg font-semibold mb-2 dark:text-gray-800'>
-                                {item.title}
-                            </h4>
+                        <div key={item.id} className='flex flex-col justify-start items-center bg-white rounded-lg p-6'>
+                            <img src={item.url} alt={item.title} className='object-fit h-[10vh] w-[8vw] mb-4 p-4' />
+                            <h4 className='text-lg font-semibold mb-2 dark:text-gray-800'>{item.title}</h4>
                             <p className='text-gray-600 text-center'>{item.description}</p>
                         </div>
                     ))}
@@ -523,15 +494,9 @@ export default function ProductDetail() {
             <Modal show={showModalBuyNow} size='md' popup>
                 <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                     <CiWarning size='70px' color={'#0e7490'} />
-                    <span className='text-lg font-medium text-black'>
-                        Bạn cần đăng nhập để mua hàng
-                    </span>
+                    <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
                     <div className='w-full flex justify-between items-center gap-x-5'>
-                        <Button
-                            outline
-                            className='w-full'
-                            onClick={() => setShowModalBuyNow(false)}
-                        >
+                        <Button outline className='w-full' onClick={() => setShowModalBuyNow(false)}>
                             Hủy
                         </Button>
                         <Button className='w-full' onClick={handleNavigateToLoginPage}>

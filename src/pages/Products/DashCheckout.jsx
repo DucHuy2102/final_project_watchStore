@@ -6,7 +6,6 @@ import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
 import { Button, Label, Modal, Radio, Spinner, TextInput } from 'flowbite-react';
 import {
-    FormOrderInfo_Component,
     ProductInfo_CheckoutPage_Component,
     SelectedVoucher_Component,
     VoucherModal_Component,
@@ -18,7 +17,7 @@ import { toast } from 'react-toastify';
 import { RiCoupon3Fill } from 'react-icons/ri';
 import { user_UpdateProfile } from '../../redux/slices/userSlice';
 import { resetCart } from '../../redux/slices/cartSlice';
-import { resetCheckout, setOrderDetail } from '../../redux/slices/checkoutSlice';
+import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../redux/slices/checkoutSlice';
 import { IoCartOutline } from 'react-icons/io5';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
@@ -136,6 +135,8 @@ export default function DashCheckout() {
     const [isLoading, setIsLoading] = useState(false);
     const [formOrderResponse, setFormOrderResponse] = useState(null);
     const [countdown, setCountdown] = useState(5);
+    const [urlRedirect, setUrlRedirect] = useState('');
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // voucher state
     const [allVouchers, setAllVouchers] = useState([]);
@@ -198,13 +199,26 @@ export default function DashCheckout() {
         }
     }, [totalPrice, navigate]);
 
-    // redirect to order detail page after create order success
+    // redirect to payment gateway after buy now success
     useEffect(() => {
         if (formOrderResponse) {
             dispatch(setOrderDetail(formOrderResponse));
-            navigate('/order/order-detail');
+
+            if (paymentMethod !== 'cash') {
+                const redirectTimer = setTimeout(() => {
+                    window.open(formOrderResponse.redirectUrl, '_blank');
+                    dispatch(resetCart());
+                    dispatch(resetCheckout());
+                    dispatch(resetOrderDetail());
+                }, 3000);
+                return () => clearTimeout(redirectTimer);
+            } else {
+                dispatch(resetCart());
+                dispatch(resetCheckout());
+                navigate('/order/order-detail');
+            }
         }
-    }, [dispatch, formOrderResponse, navigate]);
+    }, [dispatch, formOrderResponse, navigate, paymentMethod]);
 
     // handle selected option
     useEffect(() => {
@@ -642,11 +656,13 @@ export default function DashCheckout() {
                     },
                 );
                 if (res.status === 201) {
-                    toast.success('Đặt hàng thành công');
+                    if (paymentMethod === 'cash') {
+                        toast.success('Đặt hàng thành công');
+                    } else {
+                        toast.success('Đang chuyển hướng đến cổng thanh toán...');
+                    }
                     const { data } = res;
                     setFormOrderResponse(data);
-                    dispatch(resetCart());
-                    dispatch(resetCheckout());
                 }
             } catch (error) {
                 console.log('Error create order', error);
@@ -693,11 +709,13 @@ export default function DashCheckout() {
                     },
                 );
                 if (res.status === 200) {
-                    toast.success('Đặt hàng thành công');
+                    if (paymentMethod === 'cash') {
+                        toast.success('Đặt hàng thành công');
+                    } else {
+                        toast.success('Đang chuyển hướng đến cổng thanh toán...');
+                    }
                     const { data } = res;
                     setFormOrderResponse(data);
-                    dispatch(resetCart());
-                    dispatch(resetCheckout());
                 }
             } catch (error) {
                 console.log('Error create order', error);
