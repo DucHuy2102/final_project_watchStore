@@ -6,11 +6,11 @@ import 'swiper/css';
 import { Button, Modal, Spinner } from 'flowbite-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
-import { addProductToCart } from '../../redux/slices/cartSlice';
+import { addProductToCart } from '../../services/redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { Breadcrumb_Component } from '../../components/exportComponent';
-import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
+import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 
 // format price to VND
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);

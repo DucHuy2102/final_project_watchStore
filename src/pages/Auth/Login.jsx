@@ -6,13 +6,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
-import { user_SignIn } from '../../redux/slices/userSlice';
+import { user_SignIn } from '../../services/redux/slices/userSlice';
 import { TfiHandPointRight } from 'react-icons/tfi';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
-import { LoginSocialFacebook } from 'reactjs-social-login';
-import { IoIosCart, IoIosHome } from 'react-icons/io';
-import { MdHomeRepairService, MdWatch } from 'react-icons/md';
+import { IoIosHome } from 'react-icons/io';
 
 export default function Login() {
     // state

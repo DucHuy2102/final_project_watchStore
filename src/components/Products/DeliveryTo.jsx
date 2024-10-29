@@ -6,9 +6,9 @@ import { CiEdit } from 'react-icons/ci';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { update_Address } from '../../../redux/slices/userSlice';
 import { FaHouseUser, FaPhone, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { update_Address } from '../../services/redux/slices/userSlice';
 
 const AddressItem = ({ icon, text, placeholder, bgColor }) => (
     <div

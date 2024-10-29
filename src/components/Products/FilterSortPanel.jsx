@@ -2,9 +2,9 @@ import { Button, Dropdown, Modal, TextInput } from 'flowbite-react';
 import { useEffect, useState } from 'react';
 import { FaSortAlphaDown, FaSortAlphaUpAlt, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
-import { Chip_Filter_Component } from '../exportComponent';
 import { Badge } from 'antd';
 import { useSearchParams } from 'react-router-dom';
+import { Chip_Filter_Component } from '../exportComponent';
 
 // option values for advanced filter
 const options = [
@@ -124,14 +124,12 @@ export default function FilterSortPanel() {
     const filteredOptions = options.map((option) => ({
         ...option,
         choices: option.choices.filter((choice) =>
-            choice.label.toLowerCase().includes(searchFilterOption.toLowerCase())
+            choice.label.toLowerCase().includes(searchFilterOption.toLowerCase()),
         ),
     }));
 
     const handleSelect = (choice) => {
-        const isChoiceExist = selectedFilters.some(
-            (item) => item.key === choice.key && item.value === choice.value
-        );
+        const isChoiceExist = selectedFilters.some((item) => item.key === choice.key && item.value === choice.value);
         if (!isChoiceExist) {
             setSelectedFilters([...selectedFilters, choice]);
         }
@@ -139,8 +137,7 @@ export default function FilterSortPanel() {
 
     const handleRemoveOptionFilter = (filterToRemove) => {
         const updatedFilters = selectedFilters.filter(
-            (filter) =>
-                !(filter.key === filterToRemove.key && filter.value === filterToRemove.value)
+            (filter) => !(filter.key === filterToRemove.key && filter.value === filterToRemove.value),
         );
         setSelectedFilters(updatedFilters);
     };
@@ -189,28 +186,16 @@ export default function FilterSortPanel() {
 
                 {/* sort */}
                 <Dropdown outline label={sortValue.label ? sortValue.label : 'Sắp xếp'}>
-                    <Dropdown.Item
-                        onClick={() => handleSortChange('gia-tang-dan', 'Giá tăng dần')}
-                        icon={FaArrowUp}
-                    >
+                    <Dropdown.Item onClick={() => handleSortChange('gia-tang-dan', 'Giá tăng dần')} icon={FaArrowUp}>
                         Giá tăng dần
                     </Dropdown.Item>
-                    <Dropdown.Item
-                        onClick={() => handleSortChange('gia-giam-dan', 'Giá giảm dần')}
-                        icon={FaArrowDown}
-                    >
+                    <Dropdown.Item onClick={() => handleSortChange('gia-giam-dan', 'Giá giảm dần')} icon={FaArrowDown}>
                         Giá giảm dần
                     </Dropdown.Item>
-                    <Dropdown.Item
-                        onClick={() => handleSortChange('a-z', 'Từ A - Z')}
-                        icon={FaSortAlphaDown}
-                    >
+                    <Dropdown.Item onClick={() => handleSortChange('a-z', 'Từ A - Z')} icon={FaSortAlphaDown}>
                         Từ A - Z
                     </Dropdown.Item>
-                    <Dropdown.Item
-                        onClick={() => handleSortChange('z-a', 'Từ Z - A')}
-                        icon={FaSortAlphaUpAlt}
-                    >
+                    <Dropdown.Item onClick={() => handleSortChange('z-a', 'Từ Z - A')} icon={FaSortAlphaUpAlt}>
                         Từ Z - A
                     </Dropdown.Item>
                     {sortValue.value && (
@@ -251,9 +236,7 @@ export default function FilterSortPanel() {
                     {/* show filter options */}
                     {filteredOptions.map((option, index) => (
                         <div key={index} className='mb-4'>
-                            <div className='font-semibold mb-2 border-b border-gray-300'>
-                                {option.title}
-                            </div>
+                            <div className='font-semibold mb-2 border-b border-gray-300'>{option.title}</div>
                             <div className='flex flex-wrap gap-x-2 gap-y-3'>
                                 {option.choices.map((choice, i) => (
                                     <div

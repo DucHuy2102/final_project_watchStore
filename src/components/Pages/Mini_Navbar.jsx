@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { toggleTheme } from '../../redux/slices/themeSlice';
+import { toggleTheme } from '../../services/redux/slices/themeSlice';
 import { IoIosCart, IoIosHome, IoIosSearch } from 'react-icons/io';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
-import { user_SignOut } from '../../redux/slices/userSlice';
+import { user_SignOut } from '../../services/redux/slices/userSlice';
 
 export default function Mini_Navbar() {
     const location = useLocation();
@@ -115,22 +115,23 @@ export default function Mini_Navbar() {
                         }
                     >
                         <Dropdown.Header className='cursor-pointer'>
-                            <span
+                            <Link
+                                to={'/dashboard?tab=dashboard'}
                                 className={`block text-center text-sm font-medium truncate ${
                                     currentUser.admin ? 'text-orange-500' : 'text-blue-500'
                                 }`}
                             >
                                 {currentUser?.username}
-                            </span>
+                            </Link>
                         </Dropdown.Header>
                         <Dropdown.Item className='flex justify-center items-center'>
-                            <Link to={'/dashboard?tab=dashboard'} className='font-medium'>
+                            <Link to={'/dashboard?tab=profile'} className='font-medium'>
                                 Trang cá nhân
                             </Link>
                         </Dropdown.Item>
                         <Dropdown.Item className='flex justify-center items-center'>
                             <Link to={'/dashboard?tab=orders'} className='font-medium'>
-                                Đơn hàng của tôi
+                                Đơn hàng
                             </Link>
                         </Dropdown.Item>
                         <Dropdown.Divider />

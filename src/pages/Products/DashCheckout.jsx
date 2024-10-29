@@ -15,9 +15,9 @@ import axios from 'axios';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { RiCoupon3Fill } from 'react-icons/ri';
-import { user_UpdateProfile } from '../../redux/slices/userSlice';
-import { resetCart } from '../../redux/slices/cartSlice';
-import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../redux/slices/checkoutSlice';
+import { user_UpdateProfile } from '../../services/redux/slices/userSlice';
+import { resetCart } from '../../services/redux/slices/cartSlice';
+import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../services/redux/slices/checkoutSlice';
 import { IoCartOutline } from 'react-icons/io5';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);

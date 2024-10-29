@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
-import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
+import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 
 export default function ProductCard({ product }) {
     const { id, productName, price, img, genderUser, length, width } = product;

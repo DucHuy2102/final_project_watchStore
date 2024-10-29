@@ -5,11 +5,11 @@ import { FaClock, FaMinus, FaPlus } from 'react-icons/fa';
 import { MdDeleteOutline } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { changeProductQuantity, deleteProductFromCart } from '../../redux/slices/cartSlice';
+import { changeProductQuantity, deleteProductFromCart } from '../../services/redux/slices/cartSlice';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
 import { DeliveryTo_Component } from '../../components/exportComponent';
-import { setProductToCheckout } from '../../redux/slices/checkoutSlice';
+import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 import { FiMinus } from 'react-icons/fi';
 
 // format price to VND
@@ -135,17 +135,17 @@ export default function DashboardCart() {
             {totalQuantity === 0 ? (
                 <div className='min-h-[85vh] flex flex-col items-center justify-center px-4 py-8'>
                     <div className='w-full max-w-4xl mb-8'>
-                        <div className='flex flex-col sm:flex-row justify-between sm:justify-center items-center space-y-4 sm:space-y-0 sm:space-x-1'>
+                        <div className='cursor-pointer flex flex-col sm:flex-row justify-between sm:justify-center items-center space-y-4 sm:space-y-0 sm:space-x-1'>
                             <div className='w-full sm:w-auto text-center sm:text-left'>
-                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200'>
+                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200 hover:text-[#0A5B6E] transition-colors duration-300'>
                                     Đẳng Cấp Thời Gian
                                 </span>
                             </div>
                             <div className='hidden sm:flex items-center justify-center'>
-                                <FaClock className='text-3xl text-[#0E7490] dark:text-gray-200 mx-4' />
+                                <FaClock className='text-3xl text-[#0E7490] dark:text-gray-200 mx-4 hover:rotate-12 transition-transform duration-300' />
                             </div>
                             <div className='w-full sm:w-auto text-center sm:text-right'>
-                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200'>
+                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200 hover:text-[#0A5B6E] transition-colors duration-300'>
                                     Giá Trị Vượt Trội
                                 </span>
                             </div>
@@ -173,7 +173,7 @@ export default function DashboardCart() {
                             </>
                         ) : (
                             <>
-                                <p className='font-semibold text-gray-600 dark:text-gray-400 text-lg text-center'>
+                                <p className='font-semibold text-gray-600 dark:text-gray-400 text-lg text-center animate-pulse hover:text-[#0E7490] transition-colors duration-300'>
                                     Đăng nhập để xem giỏ hàng của bạn
                                 </p>
                                 <div className='w-full'>

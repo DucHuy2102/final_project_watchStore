@@ -2,14 +2,14 @@ import { useState, useEffect, Fragment, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import { Tooltip } from 'antd';
-import { user_SignOut } from '../../redux/slices/userSlice';
+import { user_SignOut } from '../../services/redux/slices/userSlice';
 import { Button, Modal } from 'flowbite-react';
 import { HiChartPie, HiOutlineExclamationCircle, HiOutlineUserGroup, HiShoppingBag, HiUser } from 'react-icons/hi';
 import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
 import { MdDiscount } from 'react-icons/md';
 import { SlArrowLeft, SlArrowRight } from 'react-icons/sl';
-import { resetCheckout } from '../../redux/slices/checkoutSlice';
+import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
 
 const SidebarItem = ({ to, icon: Icon, active, showSidebar, children }) => {
     return (

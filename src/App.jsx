@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ScrollToTop, Header_Component, Footer_Component, FloatingShape } from './components/exportComponent';
 import {
     AdminLogin_Page,
@@ -23,8 +23,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { getCartUser } from './redux/slices/cartSlice';
 import { useEffect } from 'react';
+import { getCartUser } from './services/redux/slices/cartSlice';
 
 const AdminLayout = ({ children }) => {
     return (
@@ -91,7 +91,7 @@ export default function App() {
                     <Route element={<PrivateRoute_Page />}>
                         <Route path='/dashboard' element={<Dashboard_DefaultPage />} />
                         <Route path='/checkout' element={<DashCheckout_Page />} />
-                        <Route path='/order/order-detail' element={<FormOrderInfo />} />   
+                        <Route path='/order/order-detail' element={<FormOrderInfo />} />
                     </Route>
 
                     {/* route only for admin */}

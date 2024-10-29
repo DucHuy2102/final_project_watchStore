@@ -3,14 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { toggleTheme } from '../../redux/slices/themeSlice';
+import { toggleTheme } from '../../services/redux/slices/themeSlice';
 import { IoIosCart, IoIosHome } from 'react-icons/io';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 import { Badge } from 'antd';
-import { user_SignOut } from '../../redux/slices/userSlice';
+import { user_SignOut } from '../../services/redux/slices/userSlice';
 import { useEffect, useRef, useState } from 'react';
-import { resetCart } from '../../redux/slices/cartSlice';
-import { resetCheckout } from '../../redux/slices/checkoutSlice';
+import { resetCart } from '../../services/redux/slices/cartSlice';
+import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
 
 export default function Header_Component() {
     // states
@@ -130,7 +130,7 @@ export default function Header_Component() {
             )}
 
             {!showMobileSearch && (
-                <div className='flex gap-2 md:order-2'>
+                <div className='flex gap-x-4 md:order-2'>
                     <Button onClick={() => dispatch(toggleTheme())} color={theme === 'light' ? 'light' : 'dark'} pill>
                         {theme === 'light' ? (
                             <FaSun size={14} className='text-yellow-400 mt-[3px]' />
@@ -154,22 +154,21 @@ export default function Header_Component() {
                             }
                         >
                             <Dropdown.Header className='cursor-pointer'>
-                                <span
-                                    className={`block text-center text-sm font-medium truncate ${
-                                        currentUser.admin ? 'text-orange-500' : 'text-blue-500'
-                                    }`}
+                                <Link
+                                    to={'/dashboard?tab=dashboard'}
+                                    className='block text-center text-sm font-medium truncate text-blue-500 '
                                 >
                                     {currentUser?.username}
-                                </span>
+                                </Link>
                             </Dropdown.Header>
                             <Dropdown.Item className='flex justify-center items-center'>
-                                <Link to={'/dashboard?tab=dashboard'} className='font-medium'>
+                                <Link to={'/dashboard?tab=profile'} className='font-medium'>
                                     Trang cá nhân
                                 </Link>
                             </Dropdown.Item>
                             <Dropdown.Item className='flex justify-center items-center'>
                                 <Link to={'/dashboard?tab=order'} className='font-medium'>
-                                    Đơn hàng của tôi
+                                    Đơn hàng
                                 </Link>
                             </Dropdown.Item>
                             <Dropdown.Divider />
