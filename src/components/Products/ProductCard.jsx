@@ -87,7 +87,7 @@ export default function ProductCard({ product }) {
                 onClick={handleNavigateToProductDetail}
                 className='w-full px-4 py-2 sm:px-6 lg:px-4 lg:pb-4 xl:px-5 cursor-pointer'
             >
-                <h3 className='text-lg lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
+                <h3 className='text-lg truncate lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
                     {productName}
                 </h3>
                 <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
@@ -106,7 +106,7 @@ export default function ProductCard({ product }) {
                 <Button
                     onClick={() => setShowModalBuyNow(true)}
                     className={`w-full rounded-t-none font-medium py-1 ${
-                        tokenUser ? '' : 'bg-black text-white dark:bg-gray-800 dark:text-white hover:!bg-gray-700'
+                        tokenUser ? 'bg-gray-400 dark:bg-gray-500' : 'bg-black hover:!bg-gray-500 dark:bg-gray-700'
                     }`}
                 >
                     Mua hàng ngay

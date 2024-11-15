@@ -8,7 +8,7 @@ export default function OrderDetail({ orderData, onBack }) {
     const tokenUser = useSelector((state) => state.user.access_token);
     const [openModal, setOpenModal] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
+    const [message, setMessage] = useState('');
 
     const formatDate = (dateStr) => {
         return dateStr

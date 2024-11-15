@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ScrollToTop, Header_Component, Footer_Component, FloatingShape } from './components/exportComponent';
+import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
 import {
-    AdminLogin_Page,
-    AdminRoute_Page,
     Dashboard_DefaultPage,
     DashboardCart_Page,
     DashboardProduct_Page,
@@ -25,20 +23,6 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getCartUser } from './services/redux/slices/cartSlice';
-
-const AdminLayout = ({ children }) => {
-    return (
-        <div
-            className='min-h-screen bg-gradient-to-r from-gray-800 via-green-800 to-emerald-800 
-            flex justify-center items-center overflow-hidden relative'
-        >
-            <FloatingShape color='bg-green-500' size='w-64 h-64' top='-5%' left='10%' delay={0} />
-            <FloatingShape color='bg-emerald-500' size='w-48 h-48' top='70%' left='80%' delay={5} />
-            <FloatingShape color='bg-lime-500' size='w-32 h-32' top='40%' left='-10%' delay={2} />
-            {children}
-        </div>
-    );
-};
 
 export default function App() {
     // state
@@ -85,7 +69,6 @@ export default function App() {
                     <Route path='/product-detail/:id' element={<ProductDetail_Page />} />
                     <Route path='/cart' element={<DashboardCart_Page />} />
                     <Route path='/services' element={<DashService_Page />} />
-                    <Route path='/admin/login' element={<AdminLogin_Page />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>
@@ -93,22 +76,6 @@ export default function App() {
                         <Route path='/checkout' element={<DashCheckout_Page />} />
                         <Route path='/order/order-detail' element={<FormOrderInfo />} />
                     </Route>
-
-                    {/* route only for admin */}
-                    <Route
-                        path='/admin'
-                        element={
-                            <AdminLayout>
-                                <Routes>
-                                    <Route path='/admin/login' element={<AdminLogin_Page />} />
-                                    <Route element={<AdminRoute_Page />}>
-                                        <Route path='/create-post' element={'<CreatePost_Page />'} />
-                                        <Route path='update-post/:postID' element={'<UpdatePost_Page />'} />
-                                    </Route>
-                                </Routes>
-                            </AdminLayout>
-                        }
-                    />
 
                     {/* page not found */}
                     <Route path='*' element={<PageNotFound_Page />} />

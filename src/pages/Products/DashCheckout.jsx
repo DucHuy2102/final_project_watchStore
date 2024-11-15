@@ -206,7 +206,7 @@ export default function DashCheckout() {
 
             if (paymentMethod !== 'cash') {
                 const redirectTimer = setTimeout(() => {
-                    window.open(formOrderResponse.redirectUrl, '_blank');
+                    window.open(formOrderResponse.redirectUrl, '_self');
                     dispatch(resetCart());
                     dispatch(resetCheckout());
                     dispatch(resetOrderDetail());
@@ -627,6 +627,7 @@ export default function DashCheckout() {
                         productItem: cartRedux.map((item) => item.idCart),
                         paymentMethod: paymentMethod,
                         shippingPrice: shippingFee,
+                        quantity: totalQuantity,
                         couponCode: appliedVoucher,
                         profile: {
                             name: formData.fullName,
@@ -679,6 +680,7 @@ export default function DashCheckout() {
                     {
                         productId: productItems.id,
                         paymentMethod: paymentMethod,
+
                         shippingPrice: shippingFee,
                         couponCode: appliedVoucher,
                         profile: {

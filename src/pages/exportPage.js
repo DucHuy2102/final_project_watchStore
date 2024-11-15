@@ -17,13 +17,6 @@ export { default as Dashboard_Page } from './User/Dashboard';
 export { default as Profile_Page } from './User/Profile';
 export { default as Order_Page } from './User/Order';
 
-// admin
-export { default as AdminLogin_Page } from './Admin/AdminLogin';
-export { default as ManageProducts_Page } from './Admin/ManageProducts';
-export { default as ManageUsers_Page } from './Admin/ManageUsers';
-export { default as ManageOrders_Page } from './Admin/ManageOrders';
-export { default as ManageVouchers_Page } from './Admin/ManageVouchers';
-
 // products
 export { default as DashboardProduct_Page } from './Products/DashboardProduct';
 export { default as ProductDetail_Page } from './Products/ProductDetail';
