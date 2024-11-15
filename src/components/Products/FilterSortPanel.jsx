@@ -179,7 +179,7 @@ export default function FilterSortPanel() {
             <div className='flex justify-center items-center gap-x-2 sm:gap-x-5'>
                 {/* filter */}
                 <Badge count={selectedFilters.length}>
-                    <Button outline onClick={() => setShowModalFilter(true)} className=''>
+                    <Button outline onClick={() => setShowModalFilter(true)} className='focus:!ring-0'>
                         Bộ lọc
                     </Button>
                 </Badge>
@@ -253,10 +253,10 @@ export default function FilterSortPanel() {
                     ))}
                 </Modal.Body>
                 <Modal.Footer className='flex justify-between items-center'>
-                    <Button color='gray' onClick={() => setShowModalFilter(false)}>
+                    <Button color='gray' className='focus:!ring-0' onClick={() => setShowModalFilter(false)}>
                         Đóng
                     </Button>
-                    <Button color='blue' onClick={handleSubmitFilter}>
+                    <Button color='blue' className='focus:!ring-0' onClick={handleSubmitFilter}>
                         Lọc
                     </Button>
                 </Modal.Footer>

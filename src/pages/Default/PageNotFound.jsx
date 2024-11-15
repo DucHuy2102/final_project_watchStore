@@ -10,7 +10,7 @@ export default function PageNotFound() {
             <img src={'/assets/pageNotFound.jpg'} alt='Image page not found' />
             <span className='text-lg font-semibold'>Trang bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</span>
             <Link className='w-full py-1' to={'/'}>
-                <Button className='w-full transition ease-in-out duration-300 hover:scale-110' outline>
+                <Button className='w-full focus:!ring-0 transition ease-in-out duration-300 hover:scale-110' outline>
                     Trở lại trang chủ
                 </Button>
             </Link>

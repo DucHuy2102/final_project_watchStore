@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-    Dashboard_Page,
-    ManageOrders_Page,
-    ManageProducts_Page,
-    ManageUsers_Page,
-    ManageVouchers_Page,
-    Order_Page,
-    Profile_Page,
-} from '../exportPage';
+import { Dashboard_Page, Order_Page, Profile_Page } from '../exportPage';
 import { Mini_Navbar_Component, Sidebar_Component } from '../../components/exportComponent';
 
 export default function Dashboard_DefaultPage() {
@@ -34,10 +26,6 @@ export default function Dashboard_DefaultPage() {
                     {tab === 'dashboard' && <Dashboard_Page />}
                     {tab === 'profile' && <Profile_Page />}
                     {tab === 'order' && <Order_Page />}
-                    {tab === 'products' && <ManageProducts_Page />}
-                    {tab === 'users' && <ManageUsers_Page />}
-                    {tab === 'orders' && <ManageOrders_Page />}
-                    {tab === 'vouchers' && <ManageVouchers_Page />}
                 </main>
             </div>
         </div>

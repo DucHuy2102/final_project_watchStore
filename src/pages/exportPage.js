@@ -2,7 +2,6 @@
 export { default as Home_Page } from './Default/Home';
 export { default as PageNotFound_Page } from './Default/PageNotFound';
 export { default as PrivateRoute_Page } from './Default/PrivateRoute';
-export { default as AdminRoute_Page } from './Default/AdminRoute';
 export { default as Dashboard_DefaultPage } from './Default/Dashboard_DefaultPage';
 
 // auth

@@ -108,7 +108,7 @@ export default function Header_Component() {
 
             <div className='md:hidden ml-14'>
                 <Button
-                    className='rounded-full w-10'
+                    className='rounded-full w-10 focus:!ring-0'
                     onClick={() => {
                         setShowMobileSearch(!showMobileSearch);
                     }}
@@ -181,7 +181,7 @@ export default function Header_Component() {
                         </Dropdown>
                     ) : (
                         <Link to='/login' className='ml-2'>
-                            <Button pill outline>
+                            <Button pill outline className='focus:!ring-0'>
                                 Đăng nhập
                             </Button>
                         </Link>

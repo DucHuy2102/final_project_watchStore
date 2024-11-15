@@ -167,7 +167,7 @@ export default function DashboardCart() {
                                 </p>
                                 <div className='w-full'>
                                     <Link to='/products'>
-                                        <Button className='w-full'>Tiếp tục mua hàng</Button>
+                                        <Button className='w-full focus:!ring-0'>Tiếp tục mua hàng</Button>
                                     </Link>
                                 </div>
                             </>
@@ -177,7 +177,7 @@ export default function DashboardCart() {
                                     Đăng nhập để xem giỏ hàng của bạn
                                 </p>
                                 <div className='w-full'>
-                                    <Button onClick={handleNavigateToLoginPage} className='w-full'>
+                                    <Button onClick={handleNavigateToLoginPage} className='w-full focus:!ring-0'>
                                         Đăng nhập
                                     </Button>
                                 </div>
@@ -301,12 +301,15 @@ export default function DashboardCart() {
                                         <div className='w-full flex justify-between items-center gap-x-5'>
                                             <Button
                                                 outline
-                                                className='w-full'
+                                                className='w-full focus:!ring-0'
                                                 onClick={() => setShowModalDeleteProduct(false)}
                                             >
                                                 Hủy
                                             </Button>
-                                            <Button className='w-full' onClick={handleDeleteProductFromCart}>
+                                            <Button
+                                                className='w-full focus:!ring-0'
+                                                onClick={handleDeleteProductFromCart}
+                                            >
                                                 Xóa
                                             </Button>
                                         </div>

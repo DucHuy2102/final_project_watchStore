@@ -105,7 +105,7 @@ export default function ProductCard({ product }) {
             <div className='w-full'>
                 <Button
                     onClick={() => setShowModalBuyNow(true)}
-                    className={`w-full rounded-t-none font-medium py-1 ${
+                    className={`w-full rounded-t-none font-medium py-1 focus:!ring-0 ${
                         tokenUser ? 'bg-gray-400 dark:bg-gray-500' : 'bg-black hover:!bg-gray-500 dark:bg-gray-700'
                     }`}
                 >
@@ -138,6 +138,7 @@ export default function ProductCard({ product }) {
                                 <p className='text-lg font-semibold sm:text-xl text-blue-500'>{priceFormat}</p>
                                 <div className='flex items-center mt-4'>
                                     <Button
+                                        className='focus:!ring-0'
                                         pill
                                         color={'gray'}
                                         onClick={(e) => {
@@ -149,6 +150,7 @@ export default function ProductCard({ product }) {
                                     </Button>
                                     <span className='text-center font-semibold text-lg w-10 sm:w-12'>{quantity}</span>
                                     <Button
+                                        className='focus:!ring-0'
                                         pill
                                         color={'gray'}
                                         onClick={(e) => {
@@ -159,7 +161,7 @@ export default function ProductCard({ product }) {
                                         +
                                     </Button>
                                 </div>
-                                <Button className='w-full mt-4' onClick={handleBuyNow}>
+                                <Button className='w-full mt-4 focus:!ring-0' onClick={handleBuyNow}>
                                     Mua hàng ngay
                                 </Button>
                             </div>
@@ -171,10 +173,14 @@ export default function ProductCard({ product }) {
                             <CiWarning size='70px' color={'red'} />
                             <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
                             <div className='w-full flex justify-between items-center gap-x-5'>
-                                <Button outline className='w-full' onClick={() => setShowModalBuyNow(false)}>
+                                <Button
+                                    outline
+                                    className='w-full focus:!ring-0'
+                                    onClick={() => setShowModalBuyNow(false)}
+                                >
                                     Hủy
                                 </Button>
-                                <Button className='w-full' onClick={handleNavigateToLoginPage}>
+                                <Button className='w-full focus:!ring-0' onClick={handleNavigateToLoginPage}>
                                     Đăng nhập
                                 </Button>
                             </div>

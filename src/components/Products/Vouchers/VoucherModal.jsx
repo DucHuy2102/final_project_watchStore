@@ -50,7 +50,7 @@ const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, tot
                 )}
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={onClose} className='w-full'>
+                <Button onClick={onClose} className='w-full focus:!ring-0'>
                     Đóng
                 </Button>
             </Modal.Footer>
@@ -94,7 +94,12 @@ const VoucherCard = ({ voucher, onApplyVoucher, totalAmount }) => {
                 <div className='mt-2 flex items-center justify-between'>
                     <span className='text-sm text-gray-500'>HSD: {formattedExpiryDate}</span>
                     {isApplicable ? (
-                        <Button onClick={onApplyVoucher} size='sm' gradientDuoTone='greenToBlue'>
+                        <Button
+                            className='focus:!ring-0'
+                            onClick={onApplyVoucher}
+                            size='sm'
+                            gradientDuoTone='greenToBlue'
+                        >
                             Áp dụng
                         </Button>
                     ) : (

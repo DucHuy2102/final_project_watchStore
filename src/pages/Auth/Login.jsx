@@ -181,7 +181,7 @@ export default function Login() {
                                     Quên mật khẩu?
                                 </Link>
                             </div>
-                            <Button disabled={loadingState} type='submit' color='blue' className='w-full'>
+                            <Button disabled={loadingState} type='submit' color='blue' className='focus:!ring-0 w-full'>
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />
@@ -216,7 +216,7 @@ export default function Login() {
                                     <span className='px-2 bg-gray-50 dark:bg-gray-900 text-gray-500'>Hoặc</span>
                                 </div>
                             </div>
-                            <Button color={'gray'} className='w-full mt-3' onClick={() => loginGoogle()}>
+                            <Button color={'gray'} className='w-full mt-3 focus:!ring-0' onClick={() => loginGoogle()}>
                                 <div className='flex items-center justify-center gap-x-2'>
                                     <FcGoogle />
                                     <span>Đăng nhập bằng Google</span>

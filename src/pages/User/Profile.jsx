@@ -448,7 +448,7 @@ export default function Profile_Component() {
                             <Button
                                 outline
                                 type='button'
-                                className='w-full'
+                                className='w-full focus:!ring-0'
                                 gradientDuoTone='cyanToBlue'
                                 onClick={() => setModalVerifyResetPassword(true)}
                                 disabled={imgUploadProgress && imgUploadProgress < 100}
@@ -458,7 +458,7 @@ export default function Profile_Component() {
                             <Button
                                 outline
                                 type='button'
-                                className='w-full'
+                                className='w-full focus:!ring-0'
                                 gradientDuoTone='cyanToBlue'
                                 onClick={() => setModalChangeAddress(true)}
                                 disabled={imgUploadProgress && imgUploadProgress < 100}
@@ -470,7 +470,7 @@ export default function Profile_Component() {
                         <Button
                             outline
                             type='submit'
-                            className='w-full'
+                            className='w-full focus:!ring-0'
                             gradientDuoTone='purpleToBlue'
                             disabled={imgUploadProgress && imgUploadProgress < 100}
                         >
@@ -484,6 +484,7 @@ export default function Profile_Component() {
                 {/* buttons: return to shop & sign out */}
                 <div className='flex flex-col md:flex-row justify-between items-center mt-8 text-black dark:text-white'>
                     <Button
+                        className='focus:!ring-0'
                         as={Link}
                         to='/'
                         type='submit'
@@ -526,10 +527,14 @@ export default function Profile_Component() {
                         />
 
                         <div className='w-full flex justify-between items-center'>
-                            <Button color='gray' onClick={() => setModalVerifyResetPassword(false)}>
+                            <Button
+                                className='focus:!ring-0'
+                                color='gray'
+                                onClick={() => setModalVerifyResetPassword(false)}
+                            >
                                 Hủy
                             </Button>
-                            <Button color='blue' onClick={handleVerifyResetPassword}>
+                            <Button className='focus:!ring-0' color='blue' onClick={handleVerifyResetPassword}>
                                 Xác nhận
                             </Button>
                         </div>
@@ -559,7 +564,7 @@ export default function Profile_Component() {
                         <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                             <FaBan size='50px' color='red' />
                             <span className='text-lg font-medium text-black'>Xác thực mật khẩu thất bại !!!</span>
-                            <Button className='w-full' onClick={handleNavigateUser}>
+                            <Button className='w-full focus:!ring-0' onClick={handleNavigateUser}>
                                 Đăng nhập
                             </Button>
                         </div>
@@ -618,10 +623,14 @@ export default function Profile_Component() {
                         )}
 
                         <div className='w-full flex justify-between items-center'>
-                            <Button color='gray' onClick={() => setModalChangePassword(false)}>
+                            <Button
+                                className='focus:!ring-0'
+                                color='gray'
+                                onClick={() => setModalChangePassword(false)}
+                            >
                                 Hủy
                             </Button>
-                            <Button color='blue' onClick={handleResetPassword}>
+                            <Button className='focus:!ring-0' color='blue' onClick={handleResetPassword}>
                                 Xác nhận
                             </Button>
                         </div>
@@ -736,10 +745,10 @@ export default function Profile_Component() {
                             )}
 
                         <div className='w-full flex justify-between items-center'>
-                            <Button color='gray' onClick={() => setModalChangeAddress(false)}>
+                            <Button className='focus:!ring-0' color='gray' onClick={() => setModalChangeAddress(false)}>
                                 Hủy
                             </Button>
-                            <Button color='blue' onClick={handleUpdateAddress}>
+                            <Button className='focus:!ring-0' color='blue' onClick={handleUpdateAddress}>
                                 Xác nhận
                             </Button>
                         </div>
@@ -755,10 +764,10 @@ export default function Profile_Component() {
                         <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
                         <span className='text-lg font-medium text-black'>Bạn có chắc chắn muốn đăng xuất?</span>
                         <div className='flex justify-between items-center mt-5'>
-                            <Button color='gray' onClick={() => setShowModal(false)}>
+                            <Button className='focus:!ring-0' color='gray' onClick={() => setShowModal(false)}>
                                 Hủy
                             </Button>
-                            <Button color='warning' onClick={handleSignOutAccount}>
+                            <Button className='focus:!ring-0' color='warning' onClick={handleSignOutAccount}>
                                 Xác nhận
                             </Button>
                         </div>

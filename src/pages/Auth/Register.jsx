@@ -147,7 +147,7 @@ export default function Register() {
                             </div>
                             <PasswordStrengthMeter password={formData.password} strength={passwordStrength} />
 
-                            <Button disabled={loadingState} type='submit' color='blue' className='w-full'>
+                            <Button disabled={loadingState} type='submit' color='blue' className='focus:!ring-0 w-full'>
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
@@ -60,6 +60,15 @@ const prProduct = [
     },
 ];
 
+const isLightColor = (color) => {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    return brightness > 155;
+};
+
 export default function ProductDetail() {
     // redux
     const tokenUser = useSelector((state) => state.user.access_token);
@@ -75,6 +84,15 @@ export default function ProductDetail() {
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [moreProduct, setMoreProduct] = useState([]);
+
+    // navgigate to another product detail page
+    const handleNavigateToProductDetail = useCallback(
+        (productId) => {
+            console.log(productId);
+            navigate(`/product-detail/${productId}`);
+        },
+        [navigate],
+    );
 
     // call API to get product detail by productId
     useEffect(() => {
@@ -120,143 +138,104 @@ export default function ProductDetail() {
         width,
         height,
     } = product;
+
     const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
 
-    // get more product of the same brand
-    useEffect(() => {
-        const getMoreProduct = async () => {
-            if (!category) return;
-            try {
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/category`, {
-                    params: { idCategory: category },
-                });
-                if (res?.status === 200) {
-                    const { data } = res;
-                    setMoreProduct(data);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        };
-        getMoreProduct();
-    }, [category]);
-
-    // loading
-    if (loading) {
-        return (
-            <div className='w-full min-h-screen flex justify-center items-center '>
-                <div className='flex flex-col items-center'>
-                    <Spinner size='xl' color='info' />
-                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
-                </div>
-            </div>
-        );
-    }
+    // format price & discountPrice to VND
+    const priceFormat = useMemo(() => formatPrice(price), [price]);
+    const discountPrice = useMemo(() => formatPrice(price - discount), [price, discount]);
+    const percentDiscount = useMemo(() => {
+        return discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
+    }, [discount, price]);
 
     // specifications of product detail
-    const specifications = [
-        {
-            id: 1,
-            title: 'Thương Hiệu',
-            value: brand,
-        },
-        {
-            id: 2,
-            title: 'Xuất xứ',
-            value: origin,
-        },
-        {
-            id: 3,
-            title: 'Độ dầy',
-            value: `${height} mm`,
-        },
-        {
-            id: 4,
-            title: 'Kích thước mặt',
-            value: sizeProduct,
-        },
-        {
-            id: 5,
-            title: 'Chất liệu dây',
-            value: wireMaterial,
-        },
-        {
-            id: 6,
-            title: 'Chất liệu vỏ',
-            value: shellMaterial,
-        },
-        {
-            id: 7,
-            title: 'Phong cách',
-            value: style,
-        },
-        {
-            id: 8,
-            title: 'Tính năng',
-            value: feature,
-        },
-        {
-            id: 9,
-            title: 'Hình dạng',
-            value: shape,
-        },
-        {
-            id: 10,
-            title: 'Kháng nước',
-            value: `${waterproof}atm`,
-        },
-        {
-            id: 11,
-            title: 'Trọng lượng',
-            value: `${weight} g`,
-        },
-        {
-            id: 12,
-            title: 'Màu sắc',
-            value: color,
-        },
-        {
-            id: 13,
-            title: 'Đối tượng sử dụng',
-            value: genderUser,
-        },
-    ];
+    const specifications = useMemo(
+        () => [
+            {
+                id: 1,
+                title: 'Thương Hiệu',
+                value: brand,
+            },
+            {
+                id: 2,
+                title: 'Xuất xứ',
+                value: origin,
+            },
+            {
+                id: 3,
+                title: 'Độ dầy',
+                value: `${height} mm`,
+            },
+            {
+                id: 4,
+                title: 'Kích thước mặt',
+                value: sizeProduct,
+            },
+            {
+                id: 5,
+                title: 'Chất liệu dây',
+                value: wireMaterial,
+            },
+            {
+                id: 6,
+                title: 'Chất liệu vỏ',
+                value: shellMaterial,
+            },
+            {
+                id: 7,
+                title: 'Phong cách',
+                value: style,
+            },
+            {
+                id: 8,
+                title: 'Tính năng',
+                value: feature,
+            },
+            {
+                id: 9,
+                title: 'Hình dạng',
+                value: shape,
+            },
+            {
+                id: 10,
+                title: 'Kháng nước',
+                value: `${waterproof}atm`,
+            },
+            {
+                id: 11,
+                title: 'Trọng lượng',
+                value: `${weight} g`,
+            },
+            {
+                id: 12,
+                title: 'Đối tượng sử dụng',
+                value: genderUser,
+            },
+        ],
+        [
+            brand,
+            feature,
+            genderUser,
+            height,
+            origin,
+            shape,
+            shellMaterial,
+            sizeProduct,
+            style,
+            waterproof,
+            weight,
+            wireMaterial,
+        ],
+    );
 
-    // toggle description
-    const toggleDescription = () => {
-        setIsDescriptionExpanded(!isDescriptionExpanded);
-    };
-
-    // format price & discountPrice to VND
-    const priceFormat = formatPrice(price);
-    const discountPrice = formatPrice(price - discount);
-    const percentDiscount = discount !== 0 && !isNaN(discount) ? Math.floor((discount / price) * 100) : 0;
-
-    // navgigate to another product detail page
-    const handleNavigateToProductDetail = (productId) => {
-        console.log(productId);
-        navigate(`/product-detail/${productId}`);
-    };
-
-    // handle verify user to buy now product:
-    // if user not login, show modal to login page
-    // else, handle buy now product
-    const handleVerifyUser = () => {
-        if (!tokenUser) {
-            setShowModalBuyNow(true);
-        } else {
-            handleBuyNow();
-        }
-    };
-
-    // function navigate to login page
-    const handleNavigateToLoginPage = () => {
-        navigate('/login', { state: { from: pathname } });
-        setShowModalBuyNow(false);
-    };
+    const [selectedColor, setSelectedColor] = useState(color?.[0] || null);
 
     // function add product to cart
-    const handleAddProductToCart = async () => {
+    const handleAddProductToCart = useCallback(async () => {
+        if(!selectedColor) {
+            toast.error('Vui lòng chọn màu sắc sản phẩm');
+            return;
+        }
         try {
             const res = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/cart/add-product-to-cart`,
@@ -289,6 +268,59 @@ export default function ProductDetail() {
         } finally {
             setQuantityProduct(0);
         }
+    }, [id, quantityProduct, tokenUser, dispatch, product, discount]);
+
+    // get more product of the same brand
+    useEffect(() => {
+        const getMoreProduct = async () => {
+            if (!category) return;
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/category`, {
+                    params: { idCategory: category },
+                });
+                if (res?.status === 200) {
+                    const { data } = res;
+                    setMoreProduct(data);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getMoreProduct();
+    }, [category]);
+
+    // loading
+    if (loading) {
+        return (
+            <div className='w-full min-h-screen flex justify-center items-center '>
+                <div className='flex flex-col items-center'>
+                    <Spinner size='xl' color='info' />
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // toggle description
+    const toggleDescription = () => {
+        setIsDescriptionExpanded(!isDescriptionExpanded);
+    };
+
+    // handle verify user to buy now product:
+    // if user not login, show modal to login page
+    // else, handle buy now product
+    const handleVerifyUser = () => {
+        if (!tokenUser) {
+            setShowModalBuyNow(true);
+        } else {
+            handleBuyNow();
+        }
+    };
+
+    // function navigate to login page
+    const handleNavigateToLoginPage = () => {
+        navigate('/login', { state: { from: pathname } });
+        setShowModalBuyNow(false);
     };
 
     // function buy now product
@@ -347,7 +379,7 @@ export default function ProductDetail() {
                                 <p className='text-blue-500 text-2xl sm:text-4xl font-bold'>{discountPrice}</p>
                                 <p className='text-gray-400 text-xl flex justify-start items-center'>
                                     <strike>{priceFormat}</strike>
-                                    <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3'>
+                                    <span className='text-sm bg-red-500 text-white px-2 py-1 rounded-lg ml-3 animate-pulse'>
                                         -{percentDiscount !== 0 ? percentDiscount : 0}%
                                     </span>
                                 </p>
@@ -392,6 +424,7 @@ export default function ProductDetail() {
                         <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>Số lượng đặt mua:</p>
                         <div className='flex items-center justify-center'>
                             <Button
+                                className='focus:!ring-0'
                                 outline
                                 onClick={() => setQuantityProduct(quantityProduct - 1)}
                                 disabled={quantityProduct === 0}
@@ -400,6 +433,7 @@ export default function ProductDetail() {
                             </Button>
                             <span className='text-lg text-center w-8 md:w-12'>{quantityProduct}</span>
                             <Button
+                                className='focus:!ring-0'
                                 outline
                                 onClick={() => setQuantityProduct(quantityProduct + 1)}
                                 disabled={!tokenUser}
@@ -409,6 +443,43 @@ export default function ProductDetail() {
                         </div>
                     </div>
 
+                    {/* color */}
+                    <div className='flex flex-col gap-y-2'>
+                        <p className='text-lg font-semibold text-gray-800 dark:text-gray-200'>Màu sắc</p>
+                        <div className='flex items-center gap-x-3'>
+                            {color?.map((item, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setSelectedColor(item)}
+                                    className={`
+              w-10 h-10 rounded-full border-2 transition-all
+              ${selectedColor === item ? 'border-blue-500 scale-110' : 'border-gray-300'}
+              hover:scale-105
+            `}
+                                    style={{ backgroundColor: item }}
+                                    title={`Màu ${item}`}
+                                >
+                                    {selectedColor === item && (
+                                        <div className='w-full h-full rounded-full flex items-center justify-center'>
+                                            <span
+                                                className={`text-xl ${
+                                                    isLightColor(item) ? 'text-gray-800' : 'text-white'
+                                                }`}
+                                            >
+                                                ✓
+                                            </span>
+                                        </div>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                        {selectedColor && (
+                            <p className='text-sm text-gray-600'>
+                                Màu đã chọn: <span className='font-medium'>{selectedColor}</span>
+                            </p>
+                        )}
+                    </div>
+
                     {/* buttons */}
                     <div
                         className={`w-full flex flex-col md:flex-row ${
@@ -416,11 +487,18 @@ export default function ProductDetail() {
                         } items-center mt-5 gap-4`}
                     >
                         {tokenUser && (
-                            <Button onClick={handleAddProductToCart} outline className='w-full md:w-48 lg:w-52'>
+                            <Button
+                                onClick={handleAddProductToCart}
+                                outline
+                                className='w-full md:w-48 lg:w-52 focus:!ring-0'
+                            >
                                 Thêm vào giỏ hàng
                             </Button>
                         )}
-                        <Button onClick={handleVerifyUser} className={`w-full ${tokenUser && 'md:w-48 lg:w-52'}`}>
+                        <Button
+                            onClick={handleVerifyUser}
+                            className={`w-full focus:!ring-0 ${tokenUser && 'md:w-48 lg:w-52'}`}
+                        >
                             Mua ngay
                         </Button>
                     </div>
@@ -455,8 +533,9 @@ export default function ProductDetail() {
                     {moreProduct?.map((product, index) => (
                         <SwiperSlide key={index}>
                             <div
-                                className='bg-white p-4 min-h-[60vh] rounded-lg 
-                                shadow-md hover:shadow-lg transition-shadow cursor-pointer'
+                                className='bg-white p-4 min-h-[60vh] rounded-lg group relative
+                            shadow-md hover:shadow-lg transition-all duration-300 ease-in-out 
+                            transform hover:scale-105 cursor-pointer'
                                 onClick={() => handleNavigateToProductDetail(product.id)}
                             >
                                 <img
@@ -493,13 +572,13 @@ export default function ProductDetail() {
             {/* if user not login */}
             <Modal show={showModalBuyNow} size='md' popup>
                 <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                    <CiWarning size='70px' color={'#0e7490'} />
+                    <CiWarning size='70px' color={'#FFE31A'} />
                     <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
                     <div className='w-full flex justify-between items-center gap-x-5'>
-                        <Button outline className='w-full' onClick={() => setShowModalBuyNow(false)}>
+                        <Button outline className='w-full focus:!ring-0' onClick={() => setShowModalBuyNow(false)}>
                             Hủy
                         </Button>
-                        <Button className='w-full' onClick={handleNavigateToLoginPage}>
+                        <Button className='w-full focus:!ring-0' onClick={handleNavigateToLoginPage}>
                             Đăng nhập
                         </Button>
                     </div>
@@ -507,11 +586,4 @@ export default function ProductDetail() {
             </Modal>
         </div>
     );
-}
-
-{
-    /* <div className='mt-12'>
-        <h3 className='text-xl font-bold text-gray-900 mb-4'>Nhận xét sản phẩm</h3>
-        <Comment idProduct={product_Redux.id} />
-    </div> */
 }

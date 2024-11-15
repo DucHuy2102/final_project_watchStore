@@ -95,10 +95,7 @@ export default function ResetPassword() {
                     </div>
                     <PasswordStrengthMeter password={password} strength={passwordStrength} />
                     <div>
-                        <Label
-                            value='Xác nhận mật khẩu'
-                            className='text-gray-700 dark:text-gray-300'
-                        />
+                        <Label value='Xác nhận mật khẩu' className='text-gray-700 dark:text-gray-300' />
                         <TextInput
                             icon={GoLock}
                             type='password'
@@ -112,7 +109,7 @@ export default function ResetPassword() {
                     <Button
                         type='submit'
                         outline
-                        className='w-full bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500
+                        className='w-full focus:!ring-0 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500
                                 dark:from-slate-700 dark:via-slate-700 dark:to-zinc-700
                                 text-gray-800 dark:text-gray-200 font-medium'
                     >

@@ -259,10 +259,10 @@ export default function Sidebar_Component() {
                             Bạn có chắc chắn muốn đăng xuất?
                         </h3>
                         <div className='flex justify-center gap-4'>
-                            <Button color='failure' onClick={handleSignOutAccount}>
+                            <Button className='focus:!ring-0' color='failure' onClick={handleSignOutAccount}>
                                 Đăng xuất
                             </Button>
-                            <Button color='gray' onClick={() => setShowModal(false)}>
+                            <Button className='focus:!ring-0' color='gray' onClick={() => setShowModal(false)}>
                                 Hủy
                             </Button>
                         </div>

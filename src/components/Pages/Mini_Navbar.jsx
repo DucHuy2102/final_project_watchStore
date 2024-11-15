@@ -144,7 +144,7 @@ export default function Mini_Navbar() {
                     </Dropdown>
                 ) : (
                     <Link to='/login' className='ml-2'>
-                        <Button pill outline>
+                        <Button pill outline className='focus:!ring-0'>
                             Đăng nhập
                         </Button>
                     </Link>

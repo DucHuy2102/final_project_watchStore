@@ -237,7 +237,7 @@ export default function DeliveryTo() {
                                 Cập nhật địa chỉ giao hàng
                             </h3>
                             <Button
-                                className='w-full mt-3'
+                                className='w-full mt-3 focus:!ring-0'
                                 onClick={() => {
                                     handleChangeAddress();
                                 }}
@@ -346,10 +346,14 @@ export default function DeliveryTo() {
                         )}
 
                         <div className='w-full flex justify-between items-center'>
-                            <Button color='gray' onClick={() => setShowModalChangeAddress(false)}>
+                            <Button
+                                color='gray'
+                                className='focus:!ring-0'
+                                onClick={() => setShowModalChangeAddress(false)}
+                            >
                                 Hủy
                             </Button>
-                            <Button color='blue' onClick={handleUpdateAddress}>
+                            <Button color='blue' className='focus:!ring-0' onClick={handleUpdateAddress}>
                                 Xác nhận
                             </Button>
                         </div>

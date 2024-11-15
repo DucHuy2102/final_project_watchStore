@@ -754,7 +754,12 @@ export default function DashCheckout() {
                                         <h3 className='font-semibold text-xl text-gray-700 dark:text-gray-300 mb-4'>
                                             Thông tin người nhận
                                         </h3>
-                                        <Button onClick={() => setShowModalEditAddress(true)} size='sm' outline>
+                                        <Button
+                                            className='focus:!ring-0'
+                                            onClick={() => setShowModalEditAddress(true)}
+                                            size='sm'
+                                            outline
+                                        >
                                             <CiEdit className='mr-2 mt-1' />
                                             Chỉnh sửa thông tin
                                         </Button>
@@ -957,10 +962,14 @@ export default function DashCheckout() {
                                     </>
                                 </Modal.Body>
                                 <Modal.Footer className='flex justify-between h-16'>
-                                    <Button color='gray' onClick={() => setShowModalEditAddress(false)}>
+                                    <Button
+                                        className='focus:!ring-0'
+                                        color='gray'
+                                        onClick={() => setShowModalEditAddress(false)}
+                                    >
                                         Hủy
                                     </Button>
-                                    <Button color='blue' onClick={handleConfirmInfo}>
+                                    <Button className='focus:!ring-0' color='blue' onClick={handleConfirmInfo}>
                                         Xác nhận
                                     </Button>
                                 </Modal.Footer>
@@ -1005,7 +1014,11 @@ export default function DashCheckout() {
                                                 value={voucherCode}
                                                 onChange={(e) => setVoucherCode(e.target.value)}
                                             />
-                                            <Button onClick={handleApplyVoucherCode} color='blue'>
+                                            <Button
+                                                className='focus:!ring-0'
+                                                onClick={handleApplyVoucherCode}
+                                                color='blue'
+                                            >
                                                 Áp dụng
                                             </Button>
                                         </div>
@@ -1075,7 +1088,12 @@ export default function DashCheckout() {
                                 <p className='text-sm text-gray-500 dark:text-gray-400 mb-3 text-end mt-1'>
                                     (Đã bao gồm thuế VAT)
                                 </p>
-                                <Button onClick={handleCreateOrder} color='blue' size='lg' className='w-full'>
+                                <Button
+                                    onClick={handleCreateOrder}
+                                    color='blue'
+                                    size='lg'
+                                    className='w-full focus:!ring-0'
+                                >
                                     Đặt hàng
                                 </Button>
                             </div>

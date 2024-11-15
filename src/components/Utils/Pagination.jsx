@@ -26,6 +26,7 @@ export default function Pagination({ totalPages, totalProduct }) {
                 <div className='flex flex-wrap justify-center items-center gap-2 mt-4'>
                     <Button
                         color='gray'
+                        className='focus:!ring-0'
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
                     >
@@ -34,6 +35,7 @@ export default function Pagination({ totalPages, totalProduct }) {
 
                     {pageNumbers.map((number) => (
                         <Button
+                            className='focus:!ring-0'
                             key={number}
                             color={currentPage === number ? 'blue' : 'gray'}
                             onClick={() => handlePageChange(number)}
@@ -44,6 +46,7 @@ export default function Pagination({ totalPages, totalProduct }) {
 
                     <Button
                         color='gray'
+                        className='focus:!ring-0'
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                     >

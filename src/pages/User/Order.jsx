@@ -140,6 +140,7 @@ export default function Order() {
             return (
                 <div className='flex gap-2'>
                     <Button
+                        className='focus:!ring-0'
                         size='sm'
                         color='blue'
                         onClick={() => {
@@ -152,14 +153,14 @@ export default function Order() {
                             <span>Nhận hàng</span>
                         </div>
                     </Button>
-                    <Button onClick={() => setOrderDetail(order)} size='sm' color='gray'>
+                    <Button className='focus:!ring-0' onClick={() => setOrderDetail(order)} size='sm' color='gray'>
                         Chi tiết
                     </Button>
                 </div>
             );
         }
         return (
-            <Button onClick={() => setOrderDetail(order)} size='sm' color='gray'>
+            <Button className='focus:!ring-0' onClick={() => setOrderDetail(order)} size='sm' color='gray'>
                 Chi tiết
             </Button>
         );
@@ -258,10 +259,18 @@ export default function Order() {
                                     Bạn xác nhận đã nhận được đơn hàng?
                                 </h3>
                                 <div className='flex justify-center gap-4'>
-                                    <Button color='success' onClick={() => handleConfirmDelivery(confirmingOrder?.id)}>
+                                    <Button
+                                        className='focus:!ring-0'
+                                        color='success'
+                                        onClick={() => handleConfirmDelivery(confirmingOrder?.id)}
+                                    >
                                         Xác nhận
                                     </Button>
-                                    <Button color='gray' onClick={() => setShowConfirmModal(false)}>
+                                    <Button
+                                        className='focus:!ring-0'
+                                        color='gray'
+                                        onClick={() => setShowConfirmModal(false)}
+                                    >
                                         Hủy
                                     </Button>
                                 </div>

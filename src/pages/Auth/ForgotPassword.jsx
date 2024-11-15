@@ -82,10 +82,7 @@ export default function ForgotPassword() {
                                 </p>
                                 <form className='flex flex-col gap-6 mt-6' onSubmit={handleSubmit}>
                                     <div>
-                                        <Label
-                                            value='Email của bạn'
-                                            className='text-gray-700 dark:text-gray-300'
-                                        />
+                                        <Label value='Email của bạn' className='text-gray-700 dark:text-gray-300' />
                                         <TextInput
                                             icon={CiMail}
                                             type='email'
@@ -97,7 +94,7 @@ export default function ForgotPassword() {
                                         />
                                     </div>
 
-                                    <Button type='submit' color={'blue'} className='group w-full'>
+                                    <Button type='submit' color={'blue'} className='group w-full focus:!ring-0'>
                                         {loadingState ? (
                                             <>
                                                 <Spinner size='sm' />
@@ -118,18 +115,13 @@ export default function ForgotPassword() {
                                     Đã gửi yêu cầu thành công!
                                 </span>
                                 <div className='w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto my-4'>
-                                    <a
-                                        href='https://mail.google.com'
-                                        target='_blank'
-                                        rel='noopener noreferrer'
-                                    >
+                                    <a href='https://mail.google.com' target='_blank' rel='noopener noreferrer'>
                                         <CiMail className='h-8 w-8 text-white' />
                                     </a>
                                 </div>
                                 <p className='text-gray-500 text-md font-semibold w-[32vw] text-center dark:text-gray-300'>
-                                    Nếu tài khoản với địa chỉ email <strong>{email}</strong> tồn
-                                    tại, bạn sẽ nhận được liên kết đặt lại mật khẩu được gửi qua
-                                    email của bạn.
+                                    Nếu tài khoản với địa chỉ email <strong>{email}</strong> tồn tại, bạn sẽ nhận được
+                                    liên kết đặt lại mật khẩu được gửi qua email của bạn.
                                 </p>
                             </div>
                         )}

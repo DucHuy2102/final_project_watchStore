@@ -53,7 +53,7 @@ export default function OrderDetail({ orderData, onBack }) {
         <div className='space-y-6'>
             <div className='flex items-center justify-between'>
                 <h2 className='text-xl font-semibold'>Chi tiết đơn hàng: {orderData.id}</h2>
-                <Button color='gray' onClick={onBack}>
+                <Button color='gray' className='focus:!ring-0' onClick={onBack}>
                     Quay lại
                 </Button>
             </div>
@@ -191,7 +191,7 @@ export default function OrderDetail({ orderData, onBack }) {
 
             {orderData.state === 'processing' && (
                 <div className='flex justify-center'>
-                    <Button color='failure' onClick={() => setOpenModal(true)}>
+                    <Button color='failure' className='focus:!ring-0' onClick={() => setOpenModal(true)}>
                         Hủy đơn hàng
                     </Button>
                 </div>
@@ -215,10 +215,15 @@ export default function OrderDetail({ orderData, onBack }) {
                             />
                         </div>
                         <div className='flex justify-center gap-4'>
-                            <Button color='failure' onClick={handleCancelOrder} isProcessing={loading}>
+                            <Button
+                                color='failure'
+                                className='focus:!ring-0'
+                                onClick={handleCancelOrder}
+                                isProcessing={loading}
+                            >
                                 Xác nhận
                             </Button>
-                            <Button color='gray' onClick={() => setOpenModal(false)}>
+                            <Button color='gray' className='focus:!ring-0' onClick={() => setOpenModal(false)}>
                                 Hủy
                             </Button>
                         </div>
