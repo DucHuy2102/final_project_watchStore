@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
@@ -7,9 +7,16 @@ import { CiWarning } from 'react-icons/ci';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 
 export default function ProductCard({ product }) {
-    const { id, productName, price, img, genderUser, length, width } = product;
-    const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
-    const handleRenderGenderUser = genderUser === 'Male' ? 'Nam' : 'Nữ';
+    const { id, productName, price, img, genderUser, length, width, style, waterproof, option } = product;
+    const sizeProduct = useMemo(() => {
+        return length === width ? `${length} mm` : `${length} x ${width} mm`;
+    }, [length, width]);
+    const handleRenderGenderUser = useMemo(() => {
+        return genderUser === 'Male' ? 'Nam' : 'Nữ';
+    }, [genderUser]);
+    const initialSelectedColor = useMemo(() => {
+        return option?.find((opt) => opt.value.state === 'saling')?.key || null;
+    }, [option]);
 
     // state
     const dispatch = useDispatch();
@@ -18,40 +25,102 @@ export default function ProductCard({ product }) {
     const tokenUser = useSelector((state) => state.user.access_token);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [selectedColor, setSelectedColor] = useState(initialSelectedColor);
 
-    // format price to VND
-    const priceFormat = new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND',
-    }).format(price);
+    const selectedOption = option?.find((opt) => opt.key === selectedColor)?.value;
+
+    const priceFormat = useCallback((price) => {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+        }).format(price);
+    }, []);
+
+    const handleQuantityDecrease = useCallback((e) => {
+        e.stopPropagation();
+        setQuantity((prev) => Math.max(1, prev - 1));
+    }, []);
+
+    const handleQuantityIncrease = useCallback((e) => {
+        e.stopPropagation();
+        setQuantity((prev) => prev + 1);
+    }, []);
+
+    const handleColorSelect = useCallback((e, colorKey) => {
+        e.stopPropagation();
+        setSelectedColor(colorKey);
+    }, []);
+
+    const renderColorOptions = useMemo(() => {
+        if (!option) return null;
+
+        return option.map((opt) => (
+            <button
+                key={opt.key}
+                onClick={(e) => handleColorSelect(e, opt.key)}
+                className={`w-8 h-8 rounded-full border-2 transition-all
+                    ${opt.value.state === 'soldOf' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                    ${selectedColor === opt.key ? 'border-blue-500 scale-110' : 'border-gray-300'}
+                    hover:scale-110`}
+                style={{ backgroundColor: opt.key }}
+                disabled={opt.value.state === 'soldOf'}
+                title={opt.value.color}
+            />
+        ));
+    }, [option, selectedColor, handleColorSelect]);
+
+    const priceDisplay = useMemo(() => {
+        if (!selectedOption) return null;
+
+        const finalPrice = selectedOption.price - selectedOption.discount;
+        return (
+            <div className='flex items-baseline gap-2'>
+                <span className='text-xl font-bold text-gray-900'>{priceFormat(finalPrice)}</span>
+                {selectedOption.discount > 0 && (
+                    <>
+                        <span className='text-sm text-gray-500 line-through'>{priceFormat(selectedOption.price)}</span>
+                        <span className='text-sm text-red-500'>
+                            -{Math.round((selectedOption.discount / selectedOption.price) * 100)}%
+                        </span>
+                    </>
+                )}
+            </div>
+        );
+    }, [selectedOption, priceFormat]);
 
     // function buy now
-    const handleBuyNow = () => {
-        const totalAmountToPay = quantity * (price - product.discount);
+    const handleBuyNow = useCallback(() => {
+        if (!selectedOption) return;
+
+        const totalAmountToPay = quantity * (selectedOption.price - selectedOption.discount);
         dispatch(
             setProductToCheckout({
-                productItems: product,
-                totalPrice: price * quantity,
-                totalDiscountPrice: product.discount * quantity,
-                totalAmountToPay: totalAmountToPay,
+                productItems: {
+                    ...product,
+                    selectedColor,
+                    selectedOption,
+                },
+                totalPrice: selectedOption.price * quantity,
+                totalDiscountPrice: selectedOption.discount * quantity,
+                totalAmountToPay,
                 totalQuantity: quantity,
                 isBuyNow: true,
             }),
         );
         navigate('/checkout');
         setShowModalBuyNow(false);
-    };
+    }, [dispatch, navigate, product, quantity, selectedColor, selectedOption]);
 
     // function navigate to login page
-    const handleNavigateToLoginPage = () => {
+    const handleNavigateToLoginPage = useCallback(() => {
         navigate('/login', { state: { from: pathname } });
         setShowModalBuyNow(false);
-    };
+    }, [navigate, pathname]);
 
     // function navigate to product detail
-    const handleNavigateToProductDetail = () => {
+    const handleNavigateToProductDetail = useCallback(() => {
         navigate(`/product-detail/${id}`);
-    };
+    }, [navigate, id]);
 
     return (
         <div
@@ -63,6 +132,15 @@ export default function ProductCard({ product }) {
             max-w-md min-h-[50vh] mx-auto rounded-lg overflow-hidden 
             transition-transform duration-500 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] transform hover:scale-105'
         >
+            <div className='absolute top-2 left-2 z-10 flex gap-2'>
+                <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+                    {style}
+                </span>
+                <span className='bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
+                    {waterproof}ATM
+                </span>
+            </div>
+
             {/* Image watches */}
             <div
                 className='w-full p-1 h-[50vh] sm:h-[40vh] md:h-[40vh] 
@@ -82,23 +160,23 @@ export default function ProductCard({ product }) {
                 </Swiper>
             </div>
 
-            {/* Name and price */}
-            <div
-                onClick={handleNavigateToProductDetail}
-                className='w-full px-4 py-2 sm:px-6 lg:px-4 lg:pb-4 xl:px-5 cursor-pointer'
-            >
-                <h3 className='text-lg truncate lg:text-xl xl:text-xl font-semibold text-gray-700 transition-colors duration-300 hover:text-gray-900'>
-                    {productName}
-                </h3>
-                <p className='text-sm sm:text-base lg:text-lg text-gray-500'>
-                    {sizeProduct} | {handleRenderGenderUser} giới
-                </p>
-                <p
-                    className='text-lg sm:font-medium lg:font-bold lg:text-xl 
-                    xl:text-2xl font-bold text-gray-900 transition-colors duration-300'
-                >
-                    {priceFormat}
-                </p>
+            {/*  Product info */}
+            <div onClick={handleNavigateToProductDetail} className='w-full px-4 py-3 cursor-pointer'>
+                <div className='mb-3'>
+                    <h3
+                        className='text-lg font-semibold text-gray-700 
+                        hover:text-gray-900 transition-colors duration-300'
+                    >
+                        {productName}
+                    </h3>
+                </div>
+
+                {option && (
+                    <div className='space-y-3'>
+                        <div className='flex gap-2'>{renderColorOptions}</div>
+                        {priceDisplay}
+                    </div>
+                )}
             </div>
 
             {/* Button buy */}
@@ -106,7 +184,7 @@ export default function ProductCard({ product }) {
                 <Button
                     onClick={() => setShowModalBuyNow(true)}
                     className={`w-full rounded-t-none font-medium py-1 focus:!ring-0 ${
-                        tokenUser ? 'bg-gray-400 dark:bg-gray-500' : 'bg-black hover:!bg-gray-500 dark:bg-gray-700'
+                        !tokenUser && 'bg-black hover:!bg-gray-500 dark:bg-gray-700'
                     }`}
                 >
                     Mua hàng ngay
@@ -133,18 +211,17 @@ export default function ProductCard({ product }) {
                                 </Swiper>
                                 <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>{productName}</h4>
                                 <p className='text-sm sm:text-base text-gray-500'>
-                                    {sizeProduct} | {genderUser === 'Male' ? 'Nam' : 'Nữ'} giới
+                                    {sizeProduct} | {handleRenderGenderUser} giới
                                 </p>
-                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>{priceFormat}</p>
+                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>
+                                    {selectedOption && priceFormat(selectedOption.price - selectedOption.discount)}
+                                </p>
                                 <div className='flex items-center mt-4'>
                                     <Button
                                         className='focus:!ring-0'
                                         pill
                                         color={'gray'}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setQuantity((prev) => Math.max(1, prev - 1));
-                                        }}
+                                        onClick={handleQuantityDecrease}
                                     >
                                         -
                                     </Button>
@@ -153,10 +230,7 @@ export default function ProductCard({ product }) {
                                         className='focus:!ring-0'
                                         pill
                                         color={'gray'}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setQuantity((prev) => prev + 1);
-                                        }}
+                                        onClick={handleQuantityIncrease}
                                     >
                                         +
                                     </Button>
