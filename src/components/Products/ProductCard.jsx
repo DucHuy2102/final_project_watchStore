@@ -5,9 +5,12 @@ import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
+import { Tag } from 'antd';
+import { BsCheck } from 'react-icons/bs';
 
 export default function ProductCard({ product }) {
-    const { id, productName, price, img, genderUser, length, width, style, waterproof, option } = product;
+    console.log(product);
+    const { id, productName, img, genderUser, length, width, style, waterproof, option } = product;
     const sizeProduct = useMemo(() => {
         return length === width ? `${length} mm` : `${length} x ${width} mm`;
     }, [length, width]);
@@ -51,6 +54,15 @@ export default function ProductCard({ product }) {
         setSelectedColor(colorKey);
     }, []);
 
+    const isLightColor = (hex) => {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5;
+    };
+
     const renderColorOptions = useMemo(() => {
         if (!option) return null;
 
@@ -58,14 +70,24 @@ export default function ProductCard({ product }) {
             <button
                 key={opt.key}
                 onClick={(e) => handleColorSelect(e, opt.key)}
-                className={`w-8 h-8 rounded-full border-2 transition-all
+                className={`w-8 h-8 rounded-full relative flex items-center justify-center
                     ${opt.value.state === 'soldOf' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                    ${selectedColor === opt.key ? 'border-blue-500 scale-110' : 'border-gray-300'}
-                    hover:scale-110`}
-                style={{ backgroundColor: opt.key }}
+                    transition-all duration-200 hover:scale-110`}
                 disabled={opt.value.state === 'soldOf'}
                 title={opt.value.color}
-            />
+            >
+                <div
+                    className={`absolute inset-0 rounded-full border-2
+                        ${selectedColor === opt.key && 'border-blue-500'}`}
+                    style={{ backgroundColor: opt.key }}
+                />
+                {selectedColor === opt.key && (
+                    <BsCheck
+                        className={`z-10 text-xl
+                            ${isLightColor(opt.key) ? 'text-black' : 'text-white'}`}
+                    />
+                )}
+            </button>
         ));
     }, [option, selectedColor, handleColorSelect]);
 
@@ -73,15 +95,15 @@ export default function ProductCard({ product }) {
         if (!selectedOption) return null;
 
         const finalPrice = selectedOption.price - selectedOption.discount;
+        const discountPercent = Math.round((selectedOption.discount / selectedOption.price) * 100);
+
         return (
             <div className='flex items-baseline gap-2'>
                 <span className='text-xl font-bold text-gray-900'>{priceFormat(finalPrice)}</span>
                 {selectedOption.discount > 0 && (
                     <>
                         <span className='text-sm text-gray-500 line-through'>{priceFormat(selectedOption.price)}</span>
-                        <span className='text-sm text-red-500'>
-                            -{Math.round((selectedOption.discount / selectedOption.price) * 100)}%
-                        </span>
+                        <Tag color='red'>-{discountPercent}%</Tag>
                     </>
                 )}
             </div>
@@ -132,7 +154,7 @@ export default function ProductCard({ product }) {
             max-w-md min-h-[50vh] mx-auto rounded-lg overflow-hidden 
             transition-transform duration-500 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] transform hover:scale-105'
         >
-            <div className='absolute top-2 left-2 z-10 flex gap-2'>
+            <div className='absolute top-2 left-2 z-20 flex gap-2 [&>*]:backdrop-blur-none'>
                 <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
                     {style}
                 </span>
@@ -153,7 +175,8 @@ export default function ProductCard({ product }) {
                             <img
                                 src={item}
                                 alt={productName}
-                                className='h-auto w-auto rounded-lg object-cover transition-transform duration-500 ease-in-out transform hover:scale-105'
+                                className='h-auto w-auto cursor-pointer rounded-lg object-cover 
+                                transition-transform duration-500 ease-in-out transform hover:scale-105'
                             />
                         </SwiperSlide>
                     ))}
