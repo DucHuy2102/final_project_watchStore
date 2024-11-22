@@ -8,10 +8,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { addProductToCart } from '../../services/redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { Breadcrumb_Component } from '../../components/exportComponent';
+import { Breadcrumb_Component, Policy } from '../../components/exportComponent';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 import { CiWarning } from 'react-icons/ci';
+import { Image } from 'antd';
+import { formatWatchDescription, prProduct } from '../../components/Utils/infomationComponent';
 
 export default function ProductDetail() {
     // redux
@@ -33,63 +35,14 @@ export default function ProductDetail() {
         return brightness > 155;
     }, []);
 
-    // PR product
-    const prProduct = useCallback(
-        [
-            {
-                id: 1,
-                url: '//timex.com/cdn/shop/files/Steel.svg?v=1688056464&width=40',
-                title: 'Chất liệu vỏ đồng hồ',
-                description:
-                    'Vỏ đồng hồ được làm từ các chất liệu cao cấp, mang đến độ bền và sang trọng cho sản phẩm.',
-            },
-            {
-                id: 2,
-                url: '//timex.com/cdn/shop/files/Adjustable_Watch.svg?v=1688056476&width=40',
-                title: 'Chất lượng dây đồng hồ',
-                description:
-                    'Dây đồng hồ được làm từ các chất liệu chọn lọc, có khả năng chịu nước ở độ sâu nhất định, giúp thoải mái sử dụng trong mọi hoàn cảnh.',
-            },
-            {
-                id: 3,
-                url: '//timex.com/cdn/shop/files/Stopwatch_bc7a4d6c-d8af-4131-a0f5-a68fa54e5f5c.svg?v=1688056464&width=40',
-                title: 'Đồng hồ bấm giờ',
-                description:
-                    'Đồng hồ có tính năng bấm giờ chính xác, kích thước mặt đồng hồ phù hợp với cỡ cổ tay của bạn, giúp tự tin và thoải mái hơn khi đeo.',
-            },
-            {
-                id: 4,
-                url: '//timex.com/cdn/shop/files/Water_Resistant.svg?v=1687971970&width=40',
-                title: 'Khả năng chống nước',
-                description:
-                    'Đồng hồ có khả năng chống nước đáp ứng các tiêu chuẩn an toàn, dây đồng hồ được làm từ chất liệu cao cấp, giúp bạn thoải mái sử dụng trong thời gian dài.',
-            },
-            {
-                id: 5,
-                url: 'https://timex.com/cdn/shop/files/Calendar.svg?v=1687971335&width=40',
-                title: 'Tính năng xem ngày',
-                description:
-                    'Đồng hồ có tính năng xem ngày hiện đại và tiện dụng, độ dày phù hợp với cỡ cổ tay của bạn, giúp tự tin và thoải mái hơn khi sử dụng.',
-            },
-            {
-                id: 6,
-                url: 'https://timex.com/cdn/shop/files/Fits_Wrist.svg?v=1688403513&width=40',
-                title: 'Tương thích với cỡ cổ tay',
-                description:
-                    'Đồng hồ nhẹ và tương thích với mọi cỡ cổ tay, trọng lượng nhẹ giúp bạn thoải mái sử dụng trong thời gian dài mà không gây khó chịu.',
-            },
-        ],
-        [],
-    );
-
     // state
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { id } = useParams();
     const [product, setProduct] = useState({});
+    console.log(product);
     const [loading, setLoading] = useState(true);
-    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [moreProduct, setMoreProduct] = useState([]);
@@ -239,6 +192,7 @@ export default function ProductDetail() {
         if (!selectedColor || !product?.option) return null;
         return product.option.find((opt) => opt.key === selectedColor);
     }, [selectedColor, product?.option]);
+    console.log(selectedColor, selectedOptionDetails);
 
     // price, discount, priceFormat, discountPrice, percentDiscount of product
     const prices = useMemo(() => {
@@ -293,12 +247,17 @@ export default function ProductDetail() {
             toast.error('Vui lòng chọn màu sắc sản phẩm');
             return;
         }
+        if (quantityProduct === 0) {
+            toast.error('Vui lòng chọn số lượng sản phẩm');
+            return;
+        }
         try {
             const res = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/cart/add-product-to-cart`,
                 {
                     product: id,
                     quantity: quantityProduct,
+                    option: selectedColor,
                 },
                 {
                     headers: {
@@ -307,14 +266,14 @@ export default function ProductDetail() {
                 },
             );
             if (res?.status === 200) {
-                const data = res.data;
+                const { data } = res;
+                console.log(data);
                 dispatch(
                     addProductToCart({
                         idCart: data.id,
-                        idProduct: product.id,
                         productItem: product,
                         quantity: quantityProduct,
-                        discountPrice: discount,
+                        option: selectedColor,
                     }),
                 );
                 toast.success('Đã thêm sản phẩm vào giỏ hàng');
@@ -325,7 +284,7 @@ export default function ProductDetail() {
         } finally {
             setQuantityProduct(0);
         }
-    }, [selectedColor, id, quantityProduct, tokenUser, dispatch, product, discount]);
+    }, [tokenUser, selectedColor, id, quantityProduct, dispatch, product]);
 
     // get more product of the same brand
     useEffect(() => {
@@ -368,11 +327,6 @@ export default function ProductDetail() {
         );
     }
 
-    // toggle description
-    const toggleDescription = () => {
-        setIsDescriptionExpanded(!isDescriptionExpanded);
-    };
-
     // handle verify user to buy now product:
     // if user not login, show modal to login page
     // else, handle buy now product
@@ -408,16 +362,18 @@ export default function ProductDetail() {
     };
 
     return (
-        <div className='min-h-screen bg-[#f8f9fb] dark:bg-gray-900'>
+        <div className='min-h-screen bg-gradient-to-b from-[#f8f9fb] to-white dark:from-gray-900 dark:to-gray-800'>
             {/* Hero section with breadcrumb */}
-            <div className='px-20 pt-1'>
+            <div className='px-20 pt-5'>
                 <Breadcrumb_Component displayName={productName} />
             </div>
 
-            <div className='px-10 mt-1 lg:max-w-7xl max-w-4xl mx-auto'>
-                {/* Product main section */}
-                <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8 mb-8'>
-                    <div className='grid items-start grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8'>
+            <div className='px-10 py-2 lg:max-w-7xl max-w-4xl mx-auto'>
+                <div
+                    className='bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 p-10 mb-10
+                    backdrop-blur-xl backdrop-filter'
+                >
+                    <div className='grid items-start grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-10'>
                         {/* Left: Image gallery */}
                         <div className='space-y-6'>
                             <Swiper
@@ -426,63 +382,98 @@ export default function ProductDetail() {
                                 modules={[Navigation, Autoplay]}
                                 autoplay={{ delay: 4000 }}
                                 navigation
-                                className='aspect-square rounded-xl overflow-hidden bg-gray-50'
+                                className='aspect-square rounded-2xl overflow-hidden bg-gray-50 
+                                shadow-md hover:shadow-xl transition-shadow duration-300'
                             >
                                 {img.map((item, index) => (
                                     <SwiperSlide key={index}>
-                                        <img src={item} alt='Image' className='w-full h-full object-contain' />
+                                        <Image
+                                            src={item}
+                                            preview={{
+                                                mask: <div className='text-xs'>Xem</div>,
+                                            }}
+                                            alt='Image'
+                                            className='w-full h-full object-contain'
+                                        />
                                     </SwiperSlide>
                                 ))}
                             </Swiper>
 
-                            <div className='grid grid-cols-5 gap-3'>
+                            <div className='grid grid-cols-5 gap-4'>
                                 {img.slice(0, 5).map((item, index) => (
                                     <div
                                         key={index}
-                                        className='aspect-square rounded-lg overflow-hidden cursor-pointer
-                                        border hover:border-blue-500 transition-all bg-gray-50'
+                                        className='aspect-square rounded-xl overflow-hidden cursor-pointer
+                                        border-2 hover:border-blue-500 transition-all bg-gray-50
+                                        hover:shadow-lg transform hover:scale-105 duration-300'
                                     >
-                                        <img src={item} alt='Thumbnail' className='w-full h-full object-contain p-2' />
+                                        <Image
+                                            src={item}
+                                            preview={{
+                                                mask: <div className='text-xs'>Xem</div>,
+                                            }}
+                                            alt='Thumbnail'
+                                            className='w-full h-full object-contain p-2'
+                                        />
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Right: Product info */}
-                        <div className='space-y-8'>
+                        <div className='space-y-6'>
                             {/* Brand & Name */}
-                            <div className='space-y-2'>
-                                <h3 className='text-sm font-medium text-blue-600 dark:text-blue-400 tracking-wide uppercase'>
+                            <div className='space-y-3'>
+                                <h3 className='text-sm font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase'>
                                     {brand}
                                 </h3>
-                                <h1 className='text-3xl font-bold text-gray-900 dark:text-white tracking-tight'>
+                                <h1 className='text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight'>
                                     {productName}
                                 </h1>
                             </div>
 
                             {/* Price */}
-                            <div className='p-4 bg-gray-50 dark:bg-gray-700 rounded-xl space-y-2'>
+                            <div
+                                className='p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 
+                                dark:to-gray-600 rounded-2xl space-y-3 shadow-inner'
+                            >
                                 {prices.discount !== 0 ? (
                                     <>
-                                        <div className='flex items-baseline gap-x-3'>
-                                            <p className='text-3xl font-bold text-blue-600'>{prices.discountPrice}</p>
+                                        <div className='flex items-baseline gap-x-4'>
+                                            <p
+                                                className='text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 
+                                                bg-clip-text text-transparent'
+                                            >
+                                                {prices.discountPrice}
+                                            </p>
                                             <p className='text-xl text-gray-400 line-through'>{prices.priceFormat}</p>
                                         </div>
-                                        <div className='inline-block px-3 py-1 text-sm font-semibold text-red-600 bg-red-50 rounded-full'>
+                                        <div
+                                            className='inline-block px-4 py-1.5 text-sm font-bold text-red-600 
+                                            bg-red-50 rounded-full shadow-sm'
+                                        >
                                             Tiết kiệm {prices.percentDiscount}%
                                         </div>
                                     </>
                                 ) : (
-                                    <p className='text-3xl font-bold text-blue-600'>{prices.priceFormat}</p>
+                                    <p
+                                        className='text-4xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 
+                                        bg-clip-text text-transparent'
+                                    >
+                                        {prices.priceFormat}
+                                    </p>
                                 )}
                             </div>
 
                             {/* Color selection */}
                             <div className='space-y-4'>
                                 <div className='flex items-center justify-between'>
-                                    <h3 className='text-base font-medium text-gray-900 dark:text-white'>Màu sắc</h3>
+                                    <h3 className='text-lg font-semibold text-gray-900 dark:text-white'>Màu sắc</h3>
                                     {selectedOption && (
-                                        <span className='text-sm text-gray-600 dark:text-gray-400 font-semibold'>
+                                        <span
+                                            className='px-4 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-full
+                                            text-sm text-blue-600 dark:text-blue-400 font-medium'
+                                        >
                                             Còn {selectedOption.value.quantity} sản phẩm
                                         </span>
                                     )}
@@ -529,7 +520,7 @@ export default function ProductDetail() {
                             </div>
 
                             {/* Quantity selector */}
-                            <div className='space-y-4'>
+                            <div className='flex items-center gap-x-5'>
                                 <h3 className='text-base font-medium text-gray-900 dark:text-white'>Số lượng</h3>
                                 <div className='flex items-center gap-x-6'>
                                     <div className='flex items-center border border-gray-200 rounded-lg bg-white'>
@@ -555,32 +546,54 @@ export default function ProductDetail() {
                             </div>
 
                             {/* Action buttons */}
-                            <div className='grid grid-cols-2 gap-4 pt-4'>
+                            <div className='grid grid-cols-2 gap-6'>
                                 <Button
                                     onClick={handleAddProductToCart}
-                                    className='w-full font-medium text-base py-2.5 !ring-0'
+                                    className='w-full font-semibold text-base py-3 !ring-0
+                                    transition-all duration-300 transform hover:scale-105'
                                 >
                                     Thêm vào giỏ hàng
                                 </Button>
                                 <Button
                                     onClick={handleVerifyUser}
-                                    className='w-full font-medium text-base py-2.5 !ring-0'
+                                    className='w-full font-semibold text-base py-3 !ring-0
+                                    bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 
+                                    hover:to-gray-700 transition-all duration-300 transform hover:scale-105'
                                 >
                                     Mua ngay
                                 </Button>
                             </div>
+
+                            {/* Policy section */}
+                            <Policy />
                         </div>
                     </div>
                 </div>
 
                 {/* Product details tabs */}
                 <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8 mb-8'>
-                    <Tabs>
+                    <Tabs className='focus:!ring-0 !outline-none'>
                         <Tabs.Item title='Mô tả sản phẩm'>
                             <div className='prose dark:prose-invert max-w-none py-6'>
-                                <p className='text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line'>
-                                    {description}
-                                </p>
+                                <div
+                                    className='space-y-6'
+                                    dangerouslySetInnerHTML={{
+                                        __html: formatWatchDescription(description, productName)
+                                            .split('\n')
+                                            .map(
+                                                (paragraph) =>
+                                                    `<p class="text-gray-600 dark:text-gray-300 leading-relaxed 
+                        hover:text-gray-900 dark:hover:text-white transition-colors duration-300
+                        pl-6 relative before:content-[''] before:absolute before:left-0 before:top-3 
+                        before:w-2 before:h-2 before:bg-gray-300 dark:before:bg-gray-600 
+                        before:rounded-full before:transition-colors before:duration-300
+                        hover:before:bg-blue-500 dark:hover:before:bg-blue-400">
+                            ${paragraph}
+                        </p>`,
+                                            )
+                                            .join(''),
+                                    }}
+                                />
                             </div>
                         </Tabs.Item>
                         <Tabs.Item title='Thông số kỹ thuật'>
@@ -606,31 +619,81 @@ export default function ProductDetail() {
                     </Tabs>
                 </div>
 
-                {/* Features section with new design */}
-                <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8 mb-8'>
-                    <h2 className='text-2xl font-bold text-center mb-10 text-gray-900 dark:text-white'>
-                        Tính năng nổi bật
+                {/* Features section */}
+                <div
+                    className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8 mb-8
+    bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900'
+                >
+                    <h2
+                        className='text-2xl font-bold text-center mb-12 bg-gradient-to-r from-gray-900 to-gray-700 
+        bg-clip-text text-transparent dark:from-white dark:to-gray-300'
+                    >
+                        Những tính năng nổi bật của sản phẩm
                     </h2>
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
+                    <div className='grid grid-cols-3 gap-8'>
                         {prProduct.map((item) => (
                             <div
                                 key={item.id}
-                                className='group p-6 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 
-                                dark:from-gray-700 dark:to-gray-800
-                                hover:shadow-lg transition-all duration-300
-                                transform hover:-translate-y-1'
+                                className='group relative p-8 rounded-2xl
+                    bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900
+                    hover:shadow-xl transition-all duration-700 ease-in-out
+                    border border-gray-100 dark:border-gray-700
+                    hover:border-blue-100 dark:hover:border-blue-900
+                    transform hover:-translate-y-2 hover:scale-[1.02]'
                             >
-                                <div className='flex flex-col items-center text-center'>
-                                    <div
-                                        className='w-16 h-16 mb-6 rounded-full bg-blue-100 dark:bg-blue-900/30
-                                        flex items-center justify-center group-hover:scale-110 transition-transform'
-                                    >
-                                        <img src={item.url} alt={item.title} className='w-10 h-10 object-contain' />
+                                <div
+                                    className='absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-50/0 to-blue-100/0 
+                    dark:from-blue-500/0 dark:to-blue-600/0 opacity-0 group-hover:opacity-100 
+                    transition-all duration-700 ease-in-out'
+                                ></div>
+
+                                <div
+                                    className='absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100/20 via-blue-50/10 to-transparent 
+                    dark:from-blue-500/10 rounded-full blur-3xl transition-all duration-700 ease-in-out 
+                    opacity-0 group-hover:opacity-100 group-hover:scale-150'
+                                ></div>
+
+                                <div className='relative flex flex-col items-center text-center cursor-pointer'>
+                                    <div className='relative mb-8'>
+                                        <div
+                                            className='absolute inset-0 bg-gradient-to-br from-blue-200/30 to-blue-100/20 
+                            dark:from-blue-400/20 dark:to-blue-300/10 rounded-full blur-2xl
+                            transform scale-75 group-hover:scale-125 transition-all duration-700 ease-in-out'
+                                        ></div>
+                                        <div
+                                            className='relative w-24 h-24 rounded-2xl rotate-45 transform 
+                            bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700
+                            group-hover:rotate-[225deg] transition-all duration-1000 ease-in-out
+                            shadow-lg group-hover:shadow-xl border border-gray-100/50 dark:border-gray-600/30'
+                                        >
+                                            <div
+                                                className='absolute inset-0 flex items-center justify-center -rotate-45
+                                group-hover:rotate-[135deg] transition-all duration-1000 ease-in-out'
+                                            >
+                                                <img
+                                                    src={item.url}
+                                                    alt={item.title}
+                                                    className='w-12 h-12 object-contain transform 
+                                    group-hover:scale-110 transition-all duration-700 ease-in-out'
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h3 className='text-lg font-semibold mb-3 text-gray-900 dark:text-white'>
+
+                                    <h3
+                                        className='text-lg font-bold mb-3 bg-gradient-to-r from-gray-900 via-gray-700 to-gray-800 
+                        bg-clip-text text-transparent dark:from-white dark:via-gray-200 dark:to-gray-300
+                        group-hover:from-blue-600 group-hover:via-blue-500 group-hover:to-blue-600 
+                        transition-all duration-700 ease-in-out'
+                                    >
                                         {item.title}
                                     </h3>
-                                    <p className='text-sm text-gray-600 dark:text-gray-300 leading-relaxed'>
+                                    <p
+                                        className='text-sm text-gray-600 dark:text-gray-400 leading-relaxed
+                        transition-all duration-700 ease-in-out
+                        opacity-80 group-hover:opacity-100 max-w-[250px]
+                        transform group-hover:scale-[1.02]'
+                                    >
                                         {item.description}
                                     </p>
                                 </div>
@@ -648,7 +711,6 @@ export default function ProductDetail() {
                         spaceBetween={24}
                         slidesPerView={1}
                         navigation
-                        autoplay={{ delay: 4000 }}
                         breakpoints={{
                             640: { slidesPerView: 2 },
                             768: { slidesPerView: 3 },
@@ -672,18 +734,19 @@ export default function ProductDetail() {
                                     </div>
                                     <h3
                                         className='font-medium text-gray-900 dark:text-white
-                                        group-hover:text-blue-600 transition-colors line-clamp-2'
+                                        group-hover:text-blue-600 transition-colors line-clamp-2 truncate'
                                     >
                                         {product.productName}
                                     </h3>
                                     <p className='text-sm text-gray-500 mb-2'>{product.brand}</p>
-                                    <p className='font-bold text-blue-600'>{formatPrice(product.price)}</p>
+                                    <p className='font-bold text-blue-600'>{formatPrice(product.priceSafely)}</p>
                                 </div>
                             </SwiperSlide>
                         ))}
                     </Swiper>
                 </div>
 
+                {/* Modal verify user */}
                 <Modal show={showModalBuyNow} size='md' popup>
                     <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                         <CiWarning size='70px' color={'#FFE31A'} />

@@ -207,7 +207,8 @@ export default function ProductCard({ product }) {
                 <Button
                     onClick={() => setShowModalBuyNow(true)}
                     className={`w-full rounded-t-none font-medium py-1 focus:!ring-0 ${
-                        !tokenUser && 'bg-black hover:!bg-gray-500 dark:bg-gray-700'
+                        !tokenUser &&
+                        'bg-black hover:!bg-black dark:bg-white dark:text-black dark:border-t-black dark:hover:!bg-white'
                     }`}
                 >
                     Mua hàng ngay

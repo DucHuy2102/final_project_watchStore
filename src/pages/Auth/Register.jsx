@@ -84,31 +84,46 @@ export default function Register() {
     };
 
     return (
-        <div className='w-full h-screen'>
-            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5'>
-                <div className='hidden lg:block lg:w-1/2'>
-                    <img
-                        src={'../assets/register.webp'}
-                        alt='Login'
-                        className='w-full h-screen object-cover rounded-lg lg:rounded-none'
-                    />
+        <div className='w-full h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800'>
+            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-10 relative'>
+                <div className='hidden lg:block lg:w-1/2 h-screen'>
+                    <div className='relative h-full w-full'>
+                        <img
+                            src={'../assets/register.webp'}
+                            alt='Register'
+                            className='w-full h-full object-cover rounded-r-[40px] shadow-2xl transform hover:scale-105 
+                            transition-all duration-700 animate-ken-burns'
+                        />
+                    </div>
                 </div>
-
-                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center relative'>
-                    <div className='absolute -top-2 left-6'>
+                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
+                    <div className='absolute top-6 right-6'>
                         <Link
                             to={'/'}
-                            className='flex items-center gap-2 px-4 py-2 hover:text-blue-500 text-gray-700 
-                        dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 group'
+                            className='flex items-center gap-2 px-6 py-2.5 hover:text-blue-600 text-gray-700 
+                        dark:text-gray-200 bg-white dark:bg-gray-800 rounded-tl-3xl rounded-br-3xl shadow-lg hover:shadow-xl
+                        transition-all duration-300 group'
                         >
                             <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
-                            <span className='font-medium'>Quay lại trang chủ</span>
+                            <span className='font-medium'>Trang chủ</span>
                         </Link>
                     </div>
-                    <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
-                        <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-2'>Tạo tài khoản mới</h2>
 
-                        <form className='w-full space-y-4' onSubmit={handleSubmit}>
+                    <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
+                        <h2
+                            className='text-3xl font-bold md:text-4xl text-gray-800 dark:text-white
+                            bg-gradient-to-r from-blue-600 to-purple-600 h-12 bg-clip-text text-transparent'
+                        >
+                            Tạo tài khoản mới
+                        </h2>
+                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-8 text-center'>
+                            Điền thông tin của bạn để tạo tài khoản
+                        </p>
+
+                        <form
+                            className='w-full max-w-md space-y-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl'
+                            onSubmit={handleSubmit}
+                        >
                             <div>
                                 <Label value='Tên người dùng' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
@@ -147,28 +162,35 @@ export default function Register() {
                             </div>
                             <PasswordStrengthMeter password={formData.password} strength={passwordStrength} />
 
-                            <Button disabled={loadingState} type='submit' color='blue' className='focus:!ring-0 w-full'>
+                            <Button
+                                disabled={loadingState}
+                                type='submit'
+                                color='blue'
+                                className='focus:!ring-0 w-full rounded-xl py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                            >
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />
-                                        <span className='pl-3'>Đang xử lý...</span>
+                                        <span className='ml-2'>Đang xử lý...</span>
                                     </>
                                 ) : (
-                                    <span className='flex justify-center items-center gap-x-2 text-sm sm:text-lg'>
+                                    <span className='flex justify-center items-center gap-x-2'>
                                         <IoIosSend className='transition-transform duration-300 transform group-hover:-translate-x-2' />
                                         Đăng ký tài khoản
                                     </span>
                                 )}
                             </Button>
                         </form>
-                        <div className='w-full mt-6'>
+
+                        <div className='w-full max-w-md mt-6'>
                             <div className='flex items-center justify-center gap-x-2 mb-4'>
-                                <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn muốn đăng nhập?</span>
+                                <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn đã có tài khoản?</span>
                                 <Link
                                     to='/login'
-                                    className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'
+                                    className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
+                                    flex items-center font-medium transition-colors duration-300'
                                 >
-                                    <TfiHandPointRight className='mr-1' /> Trang đăng nhập
+                                    <TfiHandPointRight className='mr-1' /> Đăng nhập ngay
                                 </Link>
                             </div>
                         </div>
@@ -177,4 +199,99 @@ export default function Register() {
             </div>
         </div>
     );
+
+    // return (
+    //     <div className='w-full h-screen'>
+    //         <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5'>
+    //             <div className='hidden lg:block lg:w-1/2'>
+    //                 <img
+    //                     src={'../assets/register.webp'}
+    //                     alt='Login'
+    //                     className='w-full h-screen object-cover rounded-lg lg:rounded-none'
+    //                 />
+    //             </div>
+
+    //             <div className='w-full lg:w-1/2 flex flex-col items-center justify-center relative'>
+    //                 <div className='absolute -top-2 left-6'>
+    //                     <Link
+    //                         to={'/'}
+    //                         className='flex items-center gap-2 px-4 py-2 hover:text-blue-500 text-gray-700
+    //                     dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 group'
+    //                     >
+    //                         <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
+    //                         <span className='font-medium'>Quay lại trang chủ</span>
+    //                     </Link>
+    //                 </div>
+    //                 <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
+    //                     <h2 className='text-2xl font-bold text-gray-800 dark:text-white mb-2'>Tạo tài khoản mới</h2>
+
+    //                     <form className='w-full space-y-4' onSubmit={handleSubmit}>
+    //                         <div>
+    //                             <Label value='Tên người dùng' className='text-gray-700 dark:text-gray-300' />
+    //                             <TextInput
+    //                                 icon={CiUser}
+    //                                 type='text'
+    //                                 placeholder='Tên người dùng'
+    //                                 id='username'
+    //                                 value={formData.username}
+    //                                 onChange={handleChange}
+    //                                 className='mt-1'
+    //                             />
+    //                         </div>
+    //                         <div>
+    //                             <Label value='Email' className='text-gray-700 dark:text-gray-300' />
+    //                             <TextInput
+    //                                 icon={CiMail}
+    //                                 type='text'
+    //                                 placeholder='Địa chỉ email'
+    //                                 id='email'
+    //                                 value={formData.email}
+    //                                 onChange={handleChange}
+    //                                 className='mt-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+    //                             />
+    //                         </div>
+    //                         <div>
+    //                             <Label value='Mật khẩu' className='text-gray-700 dark:text-gray-300' />
+    //                             <TextInput
+    //                                 icon={GoLock}
+    //                                 type='password'
+    //                                 placeholder='Mật khẩu'
+    //                                 id='password'
+    //                                 value={formData.password}
+    //                                 onChange={handleChange}
+    //                                 className='mt-1'
+    //                             />
+    //                         </div>
+    //                         <PasswordStrengthMeter password={formData.password} strength={passwordStrength} />
+
+    //                         <Button disabled={loadingState} type='submit' color='blue' className='focus:!ring-0 w-full'>
+    //                             {loadingState ? (
+    //                                 <>
+    //                                     <Spinner size='sm' />
+    //                                     <span className='pl-3'>Đang xử lý...</span>
+    //                                 </>
+    //                             ) : (
+    //                                 <span className='flex justify-center items-center gap-x-2 text-sm sm:text-lg'>
+    //                                     <IoIosSend className='transition-transform duration-300 transform group-hover:-translate-x-2' />
+    //                                     Đăng ký tài khoản
+    //                                 </span>
+    //                             )}
+    //                         </Button>
+    //                     </form>
+    //                     <div className='w-full mt-6'>
+    //                         <div className='flex items-center justify-center gap-x-2 mb-4'>
+    //                             <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn muốn đăng nhập?</span>
+    //                             <Link
+    //                                 to='/login'
+    //                                 className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'
+    //                             >
+    //                                 <TfiHandPointRight className='mr-1' /> Trang đăng nhập
+    //                             </Link>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     </div>
+    // );
 }

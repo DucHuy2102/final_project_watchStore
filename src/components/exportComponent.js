@@ -22,3 +22,4 @@ export { default as VoucherModal_Component } from './Products/Vouchers/VoucherMo
 export { default as SelectedVoucher_Component } from './Products/Vouchers/SelectedVoucher';
 export { default as FormOrderInfo_Component } from './Products/Checkout/FormOrderInfo';
 export { default as OrderDetail_Component } from './Products/Checkout/OrderDetail';
+export { default as Policy } from './Products/Policy';

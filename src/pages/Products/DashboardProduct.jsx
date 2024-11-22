@@ -98,7 +98,7 @@ export default function DashboardProduct() {
                 <div
                     className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 
             lg:grid-cols-3 lg:gap-x-3 xl:grid-cols-3 xl:gap-x-2
-            my-10 gap-y-8 justify-items-center'
+            my-5 gap-y-8 justify-items-center'
                 >
                     {products.map((product) => (
                         <ProductCard_Component key={product.id} product={product} />

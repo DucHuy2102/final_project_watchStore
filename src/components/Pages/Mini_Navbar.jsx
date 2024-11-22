@@ -92,7 +92,12 @@ export default function Mini_Navbar() {
             </div>
 
             <div className='flex gap-2 md:order-2'>
-                <Button onClick={() => dispatch(toggleTheme())} color={theme === 'light' ? 'light' : 'dark'} pill>
+                <Button
+                    onClick={() => dispatch(toggleTheme())}
+                    color={theme === 'light' ? 'light' : 'dark'}
+                    pill
+                    className='focus:!ring-0'
+                >
                     {theme === 'light' ? (
                         <FaSun size={14} className='text-yellow-400 mt-[2px]' />
                     ) : (

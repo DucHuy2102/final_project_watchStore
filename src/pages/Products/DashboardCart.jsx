@@ -1,398 +1,479 @@
-import { Button, Modal } from 'flowbite-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CiWarning } from 'react-icons/ci';
-import { FaClock, FaMinus, FaPlus } from 'react-icons/fa';
-import { MdDeleteOutline } from 'react-icons/md';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { changeProductQuantity, deleteProductFromCart } from '../../services/redux/slices/cartSlice';
-import axios from 'axios';
+import {
+    Table,
+    InputNumber,
+    Button,
+    Card,
+    Divider,
+    Badge,
+    Typography,
+    Space,
+    Popconfirm,
+    Image,
+    Select,
+    Tag,
+} from 'antd';
+import { DeleteOutlined, ShoppingCartOutlined, WarningOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
-import { DeliveryTo_Component } from '../../components/exportComponent';
-import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
-import { FiMinus } from 'react-icons/fi';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+    changeColorProduct,
+    changeProductQuantity,
+    deleteProductFromCart,
+} from '../../services/redux/slices/cartSlice';
+import { FaClock } from 'react-icons/fa';
+import axios from 'axios';
 
-// format price to VND
+const { Title, Text } = Typography;
+
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 export default function DashboardCart() {
-    // ================================================ Get data from redux store ================================================
-    const tokenUser = useSelector((state) => state.user.access_token);
-    const totalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
-    const totalPrice = useSelector((state) => state.cart.cartTotalAmount);
-    const productCartItem = useSelector((state) => state.cart.cartItem);
-
-    // get product info from productCartItem
-    const infoProduct = useMemo(() => {
-        return productCartItem.map((item) => item.productItem);
-    }, [productCartItem]);
-
-    // calculate total discount price of all product in cart
-    const totalDiscountPrice = useMemo(() => {
-        return infoProduct.reduce((total, item) => {
-            const qualityProduct = productCartItem.find((product) => product.idProduct === item.id).quantity;
-            return total + item.discount * qualityProduct;
-        }, 0);
-    }, [infoProduct, productCartItem]);
-
-    // calculate total price of all product in cart
-    const totalAmountToPay = useMemo(() => {
-        return totalPrice - totalDiscountPrice;
-    }, [totalPrice, totalDiscountPrice]);
-
-    // ================================================ State ================================================
+    const { access_token: tokenUser } = useSelector((state) => state.user);
+    const { cartItem, cartTotalQuantity } = useSelector((state) => state.cart);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [showModalDeleteProduct, setShowModalDeleteProduct] = useState(false);
-    const [idProductToDelete, setIdProductToDelete] = useState(null);
     const { pathname } = useLocation();
+    const [loading, setLoading] = useState(false);
 
-    // call API update cart when change quantity
-    const updateCartApiCall = async (updateCartItem) => {
-        if (!tokenUser) {
-            console.log('Token user is null');
-            return;
-        }
+    // Calculate cart summary
+    const cartSummary = useMemo(() => {
+        return cartItem.reduce(
+            (acc, item) => {
+                const selectedOption = item.productItem.option.find((opt) => opt.key === item.option);
+                const price = selectedOption.value.price;
+                const discount = selectedOption.value.discount;
+                const quantity = item.quantity;
+
+                acc.totalPrice += price * quantity;
+                acc.totalDiscount += discount * quantity;
+                acc.finalTotal = acc.totalPrice - acc.totalDiscount;
+
+                return acc;
+            },
+            { totalPrice: 0, totalDiscount: 0, finalTotal: 0 },
+        );
+    }, [cartItem]);
+
+    const sizeProduct = useCallback((height, width) => {
+        return height === width ? `${height}mm` : `${height} x ${width}mm`;
+    }, []);
+
+    const { totalPrice, totalDiscount, finalTotal } = cartSummary;
+    const productCartItem = cartItem;
+    const totalAmountToPay = finalTotal;
+    const totalDiscountPrice = totalDiscount;
+
+    // Table columns configuration
+    const columns = [
+        {
+            title: 'Sản phẩm',
+            key: 'product',
+            width: '40%',
+            render: (_, item) => (
+                <Space className='cursor-pointer'>
+                    <Image
+                        preview={{
+                            mask: <div className='text-xs font-medium'>Xem</div>,
+                        }}
+                        src={item.productItem.img[0]}
+                        alt={item.productItem.productName}
+                        className='!w-36 !h-auto object-cover'
+                    />
+                    <Space direction='vertical' size={2}>
+                        <Text
+                            strong
+                            className='text-lg hover:text-blue-600 transition-colors'
+                            onClick={() => navigate(`/product-detail/${item.productItem.id}`)}
+                        >
+                            {item.productItem.productName}
+                        </Text>
+                        <Text type='secondary'>
+                            Kích thước: {sizeProduct(item.productItem.height, item.productItem.width)}
+                        </Text>
+                    </Space>
+                </Space>
+            ),
+        },
+        {
+            title: 'Màu sắc',
+            align: 'center',
+            render: (_, item) => (
+                <div className='color-selector-container'>
+                    <Select
+                        value={item.option}
+                        onChange={(value) => handleColorChange(item, value)}
+                        style={{ width: 70 }}
+                        dropdownStyle={{ padding: '8px' }}
+                        suffixIcon={null}
+                    >
+                        {item.productItem.option.map((opt) => (
+                            <Select.Option key={opt.key} value={opt.key}>
+                                <div
+                                    className='w-6 h-6 rounded-full mx-auto border cursor-pointer transition-all duration-200 hover:scale-110'
+                                    style={{
+                                        backgroundColor: opt.key,
+                                    }}
+                                />
+                            </Select.Option>
+                        ))}
+                    </Select>
+                    <Badge
+                        className='color-name-badge'
+                        count={item.productItem.option.find((opt) => opt.key === item.option)?.value.color}
+                        style={{
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                            borderRadius: '12px',
+                        }}
+                    />
+                </div>
+            ),
+        },
+        {
+            title: 'Đơn giá',
+            align: 'center',
+            width: '20%',
+            render: (_, item) => {
+                const selectedOption = item.productItem.option.find((opt) => opt.key === item.option);
+                console.log('selectedOption', selectedOption);
+                const originalPrice = selectedOption.value.price;
+                const discount = selectedOption.value.discount;
+                const discountPercent = Math.round((discount / originalPrice) * 100);
+                const finalPrice = originalPrice - discount;
+
+                return (
+                    <Space direction='vertical' size={0}>
+                        <Text delete type='secondary' className='text-sm italic'>
+                            {formatPrice(originalPrice)}
+                        </Text>
+                        <Text strong className='text-lg text-blue-600'>
+                            {formatPrice(finalPrice)}
+                        </Text>
+                        {discount > 0 && (
+                            <Tag color='red' className='mt-1 font-semibold'>
+                                Giảm {discountPercent}%
+                            </Tag>
+                        )}
+                    </Space>
+                );
+            },
+        },
+        {
+            title: 'Số lượng',
+            align: 'center',
+            width: '10%',
+            render: (_, item) => (
+                <Space>
+                    <Button
+                        onClick={() => handleChangeQuantity('decrease', item.idCart)}
+                        icon={<MinusOutlined />}
+                        className='border-gray-300 hover:border-blue-500 hover:text-blue-500'
+                    />
+                    <InputNumber value={item.quantity} className='w-10 pl-1' controls={false} />
+                    <Button
+                        onClick={() => handleChangeQuantity('increase', item.idCart)}
+                        icon={<PlusOutlined />}
+                        className='border-gray-300 hover:border-blue-500 hover:text-blue-500'
+                    />
+                </Space>
+            ),
+        },
+        {
+            title: 'Thành tiền',
+            align: 'center',
+            width: '20%',
+            render: (_, item) => {
+                const selectedOption = item.productItem.option.find((opt) => opt.key === item.option);
+                const originalPrice = selectedOption.value.price;
+                const discount = selectedOption.value.discount;
+                const finalPrice = originalPrice - discount;
+
+                return (
+                    <Text strong className='text-lg text-blue-600'>
+                        {formatPrice(finalPrice * item.quantity)}
+                    </Text>
+                );
+            },
+        },
+        {
+            title: <DeleteOutlined className='text-red-600' />,
+            align: 'center',
+            width: '5%',
+            render: (_, item) => (
+                <Popconfirm
+                    title='Xóa sản phẩm'
+                    description='Bạn có chắc chắn muốn xóa sản phẩm này?'
+                    onConfirm={() => handleDeleteProductFromCart(item.productItem.id)}
+                    okText='Xóa'
+                    cancelText='Hủy'
+                    icon={<WarningOutlined className='text-red-500' />}
+                >
+                    <Button type='text' danger icon={<DeleteOutlined />} className='hover:bg-red-50' />
+                </Popconfirm>
+            ),
+        },
+    ];
+
+    useEffect(() => {
+        console.log(cartItem);
+    }, [cartItem]);
+
+    const updateCartItem = async (dataToUpdate) => {
         try {
-            const res = await axios.put(`${import.meta.env.VITE_API_URL}/api/cart/update-cart`, updateCartItem, {
+            setLoading(true);
+            await axios.put(`${import.meta.env.VITE_API_URL}/api/cart/update-cart`, dataToUpdate, {
                 headers: {
                     Authorization: `Bearer ${tokenUser}`,
-                    'Content-Type': 'application/json',
                 },
             });
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     };
 
-    // debounce update cart after 500ms when change quantity
     const debouncedUpdateCart = useRef(
         debounce((updatedCartItem) => {
-            updateCartApiCall(updatedCartItem);
+            updateCartItem(updatedCartItem);
         }, 500),
     ).current;
 
-    // get product cart item to update cart
-    // when unmount page or change quantity
-    useEffect(() => {
-        const updatedCartItem = productCartItem.map(({ idCart, quantity }) => ({
-            itemId: idCart,
-            quantity: quantity,
-        }));
-        if (tokenUser && updatedCartItem.length > 0) {
-            debouncedUpdateCart(updatedCartItem);
-        }
-    }, [productCartItem, debouncedUpdateCart, tokenUser]);
+    // const handleColorChange = (item, newColor) => {
+    //     dispatch(changeColorProduct({ productId: item.productItem.id, option: newColor }));
 
-    // when unmount page, cancel debounce
+    //     const updateData = cartItem.map((item) => ({
+    //         itemId: item.idCart,
+    //         quantity: item.quantity,
+    //         option: newColor,
+    //     }));
+
+    //     debouncedUpdateCart(updateData);
+    // };
+
+    const handleChangeQuantity = (type, idCart) => {
+        const checkItem = cartItem.find((item) => item.idCart === idCart);
+        if (!checkItem) return;
+        const quantityCheckItem = checkItem.quantity;
+
+        if (type === 'decrease' && quantityCheckItem === 1) return;
+        dispatch(changeProductQuantity({ type, idCart }));
+
+        const updateData = cartItem.map((item) => ({
+            itemId: item.idCart,
+            quantity: type === 'increase' ? item.quantity + 1 : item.quantity - 1,
+            option: item.option,
+        }));
+
+        debouncedUpdateCart(updateData);
+    };
+
     useEffect(() => {
         return () => {
             debouncedUpdateCart.cancel();
         };
     }, [debouncedUpdateCart]);
 
-    // handle change quantity
-    const handleChangeQuantity = useCallback(
-        (type, productId) => {
-            if (tokenUser) {
-                dispatch(changeProductQuantity({ type, productId }));
+    const handleColorChange = async (item, newColor) => {
+        try {
+            setLoading(true);
+            const res = await axios.put(
+                `${import.meta.env.VITE_API_URL}/api/cart/update-orderLine`,
+                {
+                    itemId: item.idCart,
+                    quantity: item.quantity,
+                    option: newColor,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
+            if (res?.status === 200) {
+                dispatch(changeColorProduct({ idCart: item.idCart, option: newColor }));
             }
-        },
-        [dispatch, tokenUser],
-    );
-
-    // handle delete product from cart
-    const handleDeleteProductFromCart = () => {
-        if (tokenUser) {
-            dispatch(deleteProductFromCart(idProductToDelete));
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
         }
-        setShowModalDeleteProduct(false);
     };
 
-    // function navigate to login page
     const handleNavigateToLoginPage = () => {
         navigate('/login', { state: { from: pathname } });
     };
 
-    // ================================================ Checkout product ================================================
-    // function navigate to checkout page
+    const handleDeleteProductFromCart = (idProduct) => {
+        dispatch(deleteProductFromCart(idProduct));
+    };
+
     const handleNavigateToCheckoutPage = () => {
-        dispatch(
-            setProductToCheckout({
-                productItems: productCartItem,
-                totalPrice: totalPrice,
-                totalDiscountPrice: totalDiscountPrice,
-                totalAmountToPay: totalAmountToPay,
-                totalQuantity: totalQuantity,
-                isBuyNow: false,
-            }),
-        );
         navigate('/checkout');
     };
 
     return (
-        <div className='mx-auto px-4 py-4'>
-            {totalQuantity === 0 ? (
-                <div className='min-h-[85vh] flex flex-col items-center justify-center px-4 py-8'>
-                    <div className='w-full max-w-4xl mb-8'>
-                        <div className='cursor-pointer flex flex-col sm:flex-row justify-between sm:justify-center items-center space-y-4 sm:space-y-0 sm:space-x-1'>
-                            <div className='w-full sm:w-auto text-center sm:text-left'>
-                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200 hover:text-[#0A5B6E] transition-colors duration-300'>
-                                    Đẳng Cấp Thời Gian
-                                </span>
-                            </div>
-                            <div className='hidden sm:flex items-center justify-center'>
-                                <FaClock className='text-3xl text-[#0E7490] dark:text-gray-200 mx-4 hover:rotate-12 transition-transform duration-300' />
-                            </div>
-                            <div className='w-full sm:w-auto text-center sm:text-right'>
-                                <span className='text-xl sm:text-2xl font-bold text-[#0E7490] dark:text-gray-200 hover:text-[#0A5B6E] transition-colors duration-300'>
-                                    Giá Trị Vượt Trội
-                                </span>
+        <>
+            {cartTotalQuantity === 0 ? (
+                <div className='min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-white dark:bg-gray-900 transition-colors duration-300'>
+                    <div className='absolute inset-0 bg-[url("/assets/luxuryWatch.jpg")] bg-no-repeat bg-center bg-cover opacity-10 dark:opacity-10' />
+                    <div className='absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-amber-500/5 to-rose-500/5 dark:from-amber-500/10 dark:to-rose-500/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob' />
+                    <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/5 to-emerald-500/5 dark:from-blue-500/10 dark:to-emerald-500/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000' />
+
+                    <div className='relative z-10 w-full max-w-5xl'>
+                        <div className='mb-5 text-center'>
+                            <h1 className='font-serif text-3xl md:text-4xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-700 to-amber-600 dark:from-amber-200 dark:via-yellow-400 dark:to-amber-200 animate-shimmer'>
+                                Giỏ Hàng Của Bạn
+                            </h1>
+                            <div className='w-16 h-0.5 mx-auto bg-gradient-to-r from-amber-400 to-amber-600 dark:from-amber-200 dark:to-amber-400'></div>
+                        </div>
+
+                        <div className='relative rounded-3xl p-8'>
+                            <div className='grid md:grid-cols-2 gap-8 items-center'>
+                                <div className='relative group perspective'>
+                                    <div className='relative transform transition-all duration-700 group-hover:rotate-y-12'>
+                                        <img
+                                            src='/assets/watchMiniCart.avif'
+                                            alt='Đồng Hồ Cao Cấp'
+                                            className='rounded-2xl shadow-2xl w-auto h-[60vh] object-cover'
+                                        />
+                                        <div className='absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-2xl'></div>
+                                    </div>
+                                </div>
+
+                                <div className='space-y-6'>
+                                    {tokenUser ? (
+                                        <div className='space-y-6 animate-fadeIn'>
+                                            <h2 className='text-2xl md:text-3xl font-serif text-amber-700 dark:text-amber-300 leading-tight'>
+                                                Giỏ Hàng Đang Chờ Kiệt Tác
+                                            </h2>
+                                            <p className='text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed'>
+                                                Khám phá bộ sưu tập đồng hồ tinh tế, nơi hội tụ những thiết kế độc đáo
+                                                và đẳng cấp nhất.
+                                            </p>
+                                            <Link to='/products'>
+                                                <button className='group relative w-full'>
+                                                    <div className='absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-amber-300 rounded-lg blur opacity-40 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt'></div>
+                                                    <div className='relative px-6 py-3 bg-white dark:bg-gray-900 rounded-lg leading-none flex items-center justify-center'>
+                                                        <span className='text-amber-700 dark:text-amber-300 group-hover:text-amber-800 dark:group-hover:text-amber-200 transition duration-200 text-sm font-medium'>
+                                                            Khám Phá Bộ Sưu Tập
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            </Link>
+                                        </div>
+                                    ) : (
+                                        <div className='space-y-6 animate-fadeIn'>
+                                            <h2 className='text-2xl md:text-3xl font-serif text-amber-700 dark:text-amber-300 leading-tight'>
+                                                Trải Nghiệm Giá Trị Vượt Trội
+                                            </h2>
+                                            <p className='text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed'>
+                                                Đăng nhập để bắt đầu hành trình khám phá thế giới đồng hồ cao cấp và
+                                                những trải nghiệm xa xỉ được tuyển chọn đặc biệt kỹ lưỡng.
+                                            </p>
+                                            <button
+                                                onClick={handleNavigateToLoginPage}
+                                                className='group relative w-full overflow-hidden rounded-lg p-[2px] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2'
+                                            >
+                                                <div className='absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 animate-gradient-x'></div>
+
+                                                <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000'></div>
+
+                                                <div className='relative px-6 py-3.5 rounded-lg leading-none flex items-center justify-center'>
+                                                    <div className='absolute inset-0 bg-black rounded-lg transition-opacity duration-500 group-hover:opacity-0'></div>
+
+                                                    <span className='flex items-center gap-2 text-amber-300 group-hover:text-amber-200 transition-colors duration-200 text-base font-medium relative z-10'>
+                                                        <span className='tracking-wide'>ĐĂNG NHẬP NGAY</span>
+                                                        <svg
+                                                            className='w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200'
+                                                            fill='none'
+                                                            stroke='currentColor'
+                                                            viewBox='0 0 24 24'
+                                                        >
+                                                            <path
+                                                                strokeLinecap='round'
+                                                                strokeLinejoin='round'
+                                                                strokeWidth='2'
+                                                                d='M14 5l7 7m0 0l-7 7m7-7H3'
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div className='flex flex-col items-center justify-center gap-y-6 max-w-md w-full'>
-                        <img
-                            src={'../assets/cartEmpty.jpg'}
-                            alt='High-quality watch'
-                            className='w-auto h-60 sm:h-80 object-contain rounded-lg'
-                        />
-
-                        {tokenUser ? (
-                            <>
-                                <h2 className='text-xl sm:text-2xl font-bold text-center'>Giỏ hàng trống</h2>
-                                <p className='text-lg sm:text-xl text-center'>
-                                    Không có sản phẩm nào trong giỏ hàng của bạn
-                                </p>
-                                <div className='w-full'>
-                                    <Link to='/products'>
-                                        <Button className='w-full focus:!ring-0'>Tiếp tục mua hàng</Button>
-                                    </Link>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <p className='font-semibold text-gray-600 dark:text-gray-400 text-lg text-center animate-pulse hover:text-[#0E7490] transition-colors duration-300'>
-                                    Đăng nhập để xem giỏ hàng của bạn
-                                </p>
-                                <div className='w-full'>
-                                    <Button onClick={handleNavigateToLoginPage} className='w-full focus:!ring-0'>
-                                        Đăng nhập
-                                    </Button>
-                                </div>
-                            </>
-                        )}
                     </div>
                 </div>
             ) : (
-                <div className='w-full flex flex-col lg:flex-row gap-x-4'>
-                    {/* Product Table Section */}
-                    <div className='lg:w-3/4 w-full dark:bg-gray-800 rounded-lg'>
-                        <div
-                            className='border border-gray-200 dark:border-none shadow-gray-100 dark:shadow-gray-800/50 
-                        p-6 overflow-x-auto rounded-lg shadow-sm'
-                        >
-                            <table className='w-full'>
-                                <thead>
-                                    <tr className='border-b border-gray-200 dark:border-gray-700'>
-                                        <th className='text-left font-semibold pb-5'>
-                                            Tất cả{' '}
-                                            <span className='text-blue-600 font-bold'>{productCartItem?.length}</span>{' '}
-                                            sản phẩm
-                                        </th>
-                                        <th className='font-semibold text-center pb-5'>Trạng thái</th>
-                                        <th className='font-semibold text-center pb-5'>Màu sắc</th>
-                                        <th className='font-semibold text-center pb-5'>Đơn giá (VNĐ)</th>
-                                        <th className='font-semibold text-center pb-5'>Số lượng</th>
-                                        <th className='font-semibold text-center pb-5'>Thành tiền (VNĐ)</th>
-                                        <th className='text-center flex justify-center items-center pt-1'>
-                                            <MdDeleteOutline size={20} />
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {infoProduct?.map((item, index) => {
-                                        const currentSellPrice = item.price - item.discount;
-                                        const qualityProduct = productCartItem.find(
-                                            (product) => product.idProduct === item.id,
-                                        ).quantity;
-                                        const totalPrice = (item.price - item.discount) * qualityProduct;
-                                        return (
-                                            <tr
-                                                key={index}
-                                                className={`${
-                                                    index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : ''
-                                                } hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer`}
-                                            >
-                                                <td className='py-5 w-1/3'>
-                                                    <div
-                                                        className='flex items-center cursor-pointer'
-                                                        onClick={() => navigate(`/product-detail/${item.id}`)}
-                                                    >
-                                                        <img
-                                                            className='h-20 w-20 object-cover ml-4 mr-4 rounded-lg'
-                                                            src={item.img[0]}
-                                                            alt='Product image'
-                                                        />
-                                                        <span className='font-semibold line-clamp-2 hover:text-blue-600'>
-                                                            {item.productName}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className='py-5 text-center'>{item.condition}</td>
-                                                <td className='py-5 text-center'>{item.color}</td>
-                                                <td className='py-5 text-center'>
-                                                    <div className='flex flex-col items-center justify-center gap-y-1'>
-                                                        <span className='text-red-500 font-medium text-sm line-through'>
-                                                            {formatPrice(item.price)}
-                                                        </span>
-                                                        <span className='text-blue-500 font-semibold text-lg'>
-                                                            {formatPrice(currentSellPrice)}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className='py-5'>
-                                                    <div className='flex items-center justify-center'>
-                                                        <button
-                                                            onClick={() => handleChangeQuantity('decrease', item.id)}
-                                                            className='hover:bg-blue-100 hover:text-blue-600 border rounded-l-lg 
-                                                        text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
-                                                        >
-                                                            <FaMinus />
-                                                        </button>
+                <div className='px-20 mx-auto py-8'>
+                    <Title level={2} className='mb-6 flex items-center justify-center gap-2 dark:text-gray-100'>
+                        <ShoppingCartOutlined className='text-blue-600' />
+                        Giỏ hàng của bạn
+                    </Title>
 
-                                                        <span className='text-center w-10 py-1 border-t border-b border-gray-300'>
-                                                            {qualityProduct}
-                                                        </span>
-
-                                                        <button
-                                                            onClick={() => handleChangeQuantity('increase', item.id)}
-                                                            className='hover:bg-blue-100 hover:text-blue-600 border rounded-r-lg 
-                                                        text-md py-2 px-3 font-bold border-gray-300 transition-colors duration-200'
-                                                        >
-                                                            <FaPlus />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td className='py-5 text-center text-blue-600 text-lg font-semibold'>
-                                                    {formatPrice(totalPrice)}
-                                                </td>
-                                                <td className='py-5 text-center'>
-                                                    <button
-                                                        onClick={() => {
-                                                            setIdProductToDelete(item.id);
-                                                            setShowModalDeleteProduct(true);
-                                                        }}
-                                                    >
-                                                        <MdDeleteOutline size={20} />
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                                <Modal show={showModalDeleteProduct} size='lg' popup>
-                                    <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                                        <CiWarning size='70px' color={'red'} />
-                                        <span className='text-lg font-medium text-black'>
-                                            Bạn có muốn xóa sản phẩm này khỏi giỏ hàng?
-                                        </span>
-                                        <div className='w-full flex justify-between items-center gap-x-5'>
-                                            <Button
-                                                outline
-                                                className='w-full focus:!ring-0'
-                                                onClick={() => setShowModalDeleteProduct(false)}
-                                            >
-                                                Hủy
-                                            </Button>
-                                            <Button
-                                                className='w-full focus:!ring-0'
-                                                onClick={handleDeleteProductFromCart}
-                                            >
-                                                Xóa
-                                            </Button>
-                                        </div>
-                                    </Modal.Body>
-                                </Modal>
-                            </table>
+                    <div className='flex flex-col lg:flex-row gap-x-3'>
+                        <div className='lg:w-3/4'>
+                            <Table
+                                loading={loading}
+                                columns={columns}
+                                dataSource={productCartItem}
+                                rowKey='idCart'
+                                pagination={false}
+                                scroll={{ x: 1000 }}
+                            />
                         </div>
-                    </div>
 
-                    {/* Summary & Vouchers Section */}
-                    <div className='lg:w-1/4 w-full flex flex-col items-center gap-y-5'>
-                        <DeliveryTo_Component />
-                        <div className='w-full shadow-sm border border-gray-200 dark:border-none dark:bg-gray-800 rounded-lg p-6'>
-                            <div className='flex justify-between mb-2 text-md font-medium'>
-                                <span>Tạm tính</span>
-                                <span className='text-red-500 font-semibold'>{formatPrice(totalPrice)}</span>
-                            </div>
-
-                            <div className='flex justify-between mb-2 text-md'>
-                                <span>Giảm giá từ Deal</span>
-                                <div className='text-green-500 font-medium flex justify-center items-center gap-x-1'>
-                                    <FiMinus />
-                                    <span>{formatPrice(totalDiscountPrice)}</span>
-                                </div>
-                            </div>
-
-                            <div className='my-2 h-[1px] bg-gray-300 dark:bg-gray-500' />
-
-                            <div className='flex justify-between mb-3 text-xl font-semibold'>
-                                <span>Tổng tiền</span>
-                                <span className='text-blue-500 font-semibold'>{formatPrice(totalAmountToPay)}</span>
-                            </div>
-
-                            <button
-                                onClick={handleNavigateToCheckoutPage}
-                                type='button'
-                                className='group inline-flex w-full items-center justify-center rounded-md 
-                            bg-gray-700 dark:bg-gray-700 hover:bg-[#0E7490] dark:hover:bg-[#0E7490]
-                            px-6 py-4 text-lg font-semibold text-white transition-all duration-200 ease-in-out focus:shadow'
+                        <div className='lg:w-1/4'>
+                            <Card
+                                className='sticky top-4 border border-gray-100 shadow-md hover:shadow-lg transition-shadow'
+                                bordered={false}
                             >
-                                Mua hàng
-                                <svg
-                                    xmlns='http://www.w3.org/2000/svg'
-                                    className='group-hover:ml-8 ml-4 h-6 w-6 transition-all'
-                                    fill='none'
-                                    viewBox='0 0 24 24'
-                                    stroke='currentColor'
-                                    strokeWidth='2'
-                                >
-                                    <path strokeLinecap='round' strokeLinejoin='round' d='M13 7l5 5m0 0l-5 5m5-5H6' />
-                                </svg>
-                            </button>
+                                <Space direction='vertical' className='w-full' size='large'>
+                                    <div className='flex justify-between items-center'>
+                                        <Text>Tạm tính</Text>
+                                        <Text delete type='secondary'>
+                                            {formatPrice(totalPrice)}
+                                        </Text>
+                                    </div>
 
-                            <div className='flex flex-col items-center justify-center mt-3'>
-                                <p className='ml-2'>Thanh toán an toàn với các phương thức:</p>
+                                    <div className='flex justify-between items-center'>
+                                        <Text>Giảm giá</Text>
+                                        <Text type='success'>-{formatPrice(totalDiscountPrice)}</Text>
+                                    </div>
 
-                                <div className='flex items-center justify-center gap-3'>
-                                    <img
-                                        className='rounded-sm w-10 h-10 object-cover cursor-pointer transform hover:scale-110 transition-transform duration-300'
-                                        src='https://www.material-tailwind.com/image/logos/visa.svg'
-                                        alt='Visa'
-                                    />
-                                    <img
-                                        className='rounded-sm w-10 h-7 object-cover cursor-pointer transform hover:scale-110 transition-transform duration-300'
-                                        src='https://www.material-tailwind.com/image/logos/master-card.png'
-                                        alt='MasterCard'
-                                    />
-                                    <img
-                                        className='rounded-sm w-10 h-10 object-cover cursor-pointer transform hover:scale-110 transition-transform duration-300'
-                                        src='https://www.material-tailwind.com/image/logos/american-express-logo.svg'
-                                        alt='American Express'
-                                    />
-                                    <img
-                                        className='rounded-sm w-10 h-10 object-cover cursor-pointer transform hover:scale-110 transition-transform duration-300'
-                                        src='https://www.material-tailwind.com/image/logos/paypal.png'
-                                        alt='PayPal'
-                                    />
-                                </div>
-                            </div>
+                                    <Divider className='my-2' />
+
+                                    <div className='flex justify-between items-center'>
+                                        <Title level={4} className='!mb-0'>
+                                            Tổng cộng
+                                        </Title>
+                                        <Title level={4} className='!mb-0 text-blue-600'>
+                                            {formatPrice(totalAmountToPay)}
+                                        </Title>
+                                    </div>
+
+                                    <Button
+                                        type='primary'
+                                        size='large'
+                                        block
+                                        onClick={handleNavigateToCheckoutPage}
+                                        className='h-12 text-lg font-medium bg-gradient-to-r from-blue-500 to-blue-600 
+                                    hover:from-blue-600 hover:to-blue-700 border-none shadow-md'
+                                    >
+                                        Tiến hành thanh toán
+                                    </Button>
+                                </Space>
+                            </Card>
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }

@@ -101,53 +101,39 @@ export default function Login() {
         }
     };
 
-    // Facebook Login
-    const responseFacebook = async (response) => {
-        const token = response.data.accessToken;
-        try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/facebook?token=${token}`);
-            console.log(res);
-            if (res.status === 200) {
-                const { data } = res;
-                dispatch(user_SignIn({ access_token: data.access_token, user: data }));
-                toast.success('Đăng nhập thành công!');
-                setTimeout(() => {
-                    if (state?.from) {
-                        navigate(state.from);
-                    } else {
-                        navigate('/');
-                    }
-                }, 3000);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
     return (
-        <div className='w-full h-screen'>
-            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-5 relative'>
+        <div className='w-full h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800'>
+            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-10 relative'>
                 <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
                     <div className='absolute top-6 left-6'>
                         <Link
                             to={'/'}
-                            className='flex items-center gap-2 px-4 py-2 hover:text-blue-500 text-gray-700 
-                        dark:text-gray-200 bg-white dark:bg-gray-800 rounded-lg transition-all duration-300 group'
+                            className='flex items-center gap-2 px-6 py-2.5 hover:text-blue-600 text-gray-700 
+                            dark:text-gray-200 bg-white dark:bg-gray-800 rounded-tl-3xl rounded-br-3xl shadow-lg hover:shadow-xl
+                            transition-all duration-300 group'
                         >
                             <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
                             <span className='font-medium'>Trang chủ</span>
                         </Link>
                     </div>
+
                     <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
-                        <h2 className='text-2xl font-bold md:text-3xl text-gray-800 dark:text-white mb-2'>
+                        <h2
+                            className='text-3xl font-bold md:text-4xl text-gray-800 dark:text-white
+                            bg-gradient-to-r from-blue-600 to-purple-600 h-12 bg-clip-text text-transparent'
+                        >
                             Chào mừng bạn trở lại
                         </h2>
-                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6 text-center'>
+                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-8 text-center'>
                             Sử dụng tên người dùng và mật khẩu để đăng nhập
                         </p>
-                        <form className='w-full space-y-6' onSubmit={handleSubmit}>
+
+                        <form
+                            className='w-full max-w-md space-y-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl'
+                            onSubmit={handleSubmit}
+                        >
                             <div>
-                                <Label htmlFor='username' className='text-gray-700 dark:text-gray-300 mb-1'>
+                                <Label htmlFor='username' className='text-gray-700 dark:text-gray-300'>
                                     Tên người dùng
                                 </Label>
                                 <TextInput
@@ -160,7 +146,7 @@ export default function Login() {
                                 />
                             </div>
                             <div>
-                                <Label htmlFor='password' className='text-gray-700 dark:text-gray-300 mb-1'>
+                                <Label htmlFor='password' className='text-gray-700 dark:text-gray-300'>
                                     Mật khẩu
                                 </Label>
                                 <TextInput
@@ -172,16 +158,21 @@ export default function Login() {
                                     onChange={handleChange}
                                 />
                             </div>
-
                             <div className='flex items-center justify-end'>
                                 <Link
-                                    className='text-sm text-gray-500 hover:text-blue-600 hover:underline dark:text-blue-400'
                                     to='/forgot-password'
+                                    className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
+                    transition-colors duration-300'
                                 >
                                     Quên mật khẩu?
                                 </Link>
                             </div>
-                            <Button disabled={loadingState} type='submit' color='blue' className='focus:!ring-0 w-full'>
+                            <Button
+                                disabled={loadingState}
+                                type='submit'
+                                color='blue'
+                                className='focus:!ring-0 w-full rounded-xl py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                            >
                                 {loadingState ? (
                                     <>
                                         <Spinner size='sm' />
@@ -198,27 +189,41 @@ export default function Login() {
                                 )}
                             </Button>
                         </form>
-                        <div className='w-full mt-6'>
-                            <div className='flex items-center justify-center gap-x-2 mb-4'>
+
+                        <div className='w-full max-w-md mt-6'>
+                            <div className='flex items-center justify-center gap-x-2 mb-6'>
                                 <span className='text-sm text-gray-600 dark:text-gray-400'>Bạn chưa có tài khoản?</span>
                                 <Link
                                     to='/register'
-                                    className='text-sm text-blue-600 hover:underline dark:text-blue-400 flex items-center'
+                                    className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
+                                    flex items-center font-medium transition-colors duration-300'
                                 >
                                     <TfiHandPointRight className='mr-1' /> Đăng ký ngay
                                 </Link>
                             </div>
-                            <div className='relative'>
+
+                            <div className='relative my-6'>
                                 <div className='absolute inset-0 flex items-center'>
-                                    <div className='w-full border-t border-gray-300'></div>
+                                    <div className='w-full border-t border-gray-200 dark:border-gray-700'></div>
                                 </div>
                                 <div className='relative flex justify-center text-sm'>
-                                    <span className='px-2 bg-gray-50 dark:bg-gray-900 text-gray-500'>Hoặc</span>
+                                    <span
+                                        className='px-4 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 
+                                    dark:to-gray-800 text-gray-500 font-medium'
+                                    >
+                                        Hoặc
+                                    </span>
                                 </div>
                             </div>
-                            <Button color={'gray'} className='w-full mt-3 focus:!ring-0' onClick={() => loginGoogle()}>
-                                <div className='flex items-center justify-center gap-x-2'>
-                                    <FcGoogle />
+
+                            <Button
+                                color={'gray'}
+                                className='w-full mt-3 focus:!ring-0 rounded-xl py-2.5 bg-white hover:bg-gray-50 
+                                dark:bg-gray-800 dark:hover:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-300'
+                                onClick={() => loginGoogle()}
+                            >
+                                <div className='flex items-center justify-center gap-x-3'>
+                                    <FcGoogle className='text-xl' />
                                     <span>Đăng nhập bằng Google</span>
                                 </div>
                             </Button>
@@ -226,12 +231,16 @@ export default function Login() {
                     </div>
                 </div>
 
-                <div className='hidden lg:block lg:w-1/2'>
-                    <img
-                        src={'../assets/login.webp'}
-                        alt='Login'
-                        className='w-full h-screen object-cover rounded-lg lg:rounded-none'
-                    />
+                <div className='hidden lg:block lg:w-1/2 h-screen'>
+                    <div className='relative h-full w-full'>
+                        <img
+                            src={'../assets/login.webp'}
+                            alt='Login'
+                            className='w-full h-full object-cover rounded-l-[40px] shadow-2xl transform hover:scale-105 
+            transition-all duration-700 animate-ken-burns'
+                        />
+                        <div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-l-[40px]'></div>
+                    </div>
                 </div>
             </div>
         </div>
