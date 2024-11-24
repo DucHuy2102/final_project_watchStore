@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Table, Badge, TextInput, Select, Button, Spinner, Modal } from 'flowbite-react';
@@ -8,7 +8,7 @@ import { BsArrowUp, BsArrowDown } from 'react-icons/bs';
 import { OrderDetail_Component } from '../../components/exportComponent';
 
 export default function Order() {
-    const tokenUser = useSelector((state) => state.user.access_token);
+    const { access_token: tokenUser } = useSelector((state) => state.user);
     const [isLoading, setIsLoading] = useState(false);
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState('');
@@ -47,6 +47,34 @@ export default function Order() {
         getAllOrders();
     }, [tokenUser]);
 
+    const getStatusColor = useCallback((state) => {
+        const colors = {
+            processing: 'warning',
+            delivered: 'success',
+            cancel: 'failure',
+        };
+        return colors[state] || 'default';
+    }, []);
+
+    const getStatusText = useCallback((state) => {
+        const text = {
+            processing: 'Đang chờ giao',
+            delivered: 'Đã giao',
+            cancel: 'Hủy đơn',
+        };
+        return text[state] || state;
+    }, []);
+
+    const formatDate = useCallback((dateStr) => {
+        return new Date(dateStr).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }, []);
+
     // loading
     if (isLoading) {
         return (
@@ -59,38 +87,10 @@ export default function Order() {
         );
     }
 
-    const getStatusColor = (state) => {
-        const colors = {
-            processing: 'warning',
-            delivered: 'success',
-            cancel: 'failure',
-        };
-        return colors[state] || 'default';
-    };
-
-    const getStatusText = (state) => {
-        const text = {
-            processing: 'Đang chờ giao',
-            delivered: 'Đã giao',
-            cancel: 'Hủy đơn',
-        };
-        return text[state] || state;
-    };
-
-    const formatDate = (dateStr) => {
-        return new Date(dateStr).toLocaleDateString('vi-VN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
     const filteredOrders = orders.filter((order) => {
         const matchSearch =
-            order.user.name.toLowerCase().includes(search.toLowerCase()) ||
-            order.user.phone.includes(search) ||
+            order.user?.name.toLowerCase().includes(search.toLowerCase()) ||
+            order.user?.phone.includes(search) ||
             order.id.includes(search);
         const matchState = filterState === 'all' || order.state === filterState;
         return matchSearch && matchState;
@@ -135,139 +135,174 @@ export default function Order() {
         }
     };
 
-    const renderActionButton = (order) => {
-        if (order.state === 'delivered') {
-            return (
-                <div className='flex gap-2'>
-                    <Button
-                        className='focus:!ring-0'
-                        size='sm'
-                        color='blue'
-                        onClick={() => {
-                            setConfirmingOrder(order);
-                            setShowConfirmModal(true);
-                        }}
-                    >
-                        <div className='flex justify-center items-center gap-x-2'>
-                            <HiCheck className='h-4 w-4' />
-                            <span>Nhận hàng</span>
-                        </div>
-                    </Button>
-                    <Button className='focus:!ring-0' onClick={() => setOrderDetail(order)} size='sm' color='gray'>
-                        Chi tiết
-                    </Button>
-                </div>
-            );
-        }
-        return (
-            <Button className='focus:!ring-0' onClick={() => setOrderDetail(order)} size='sm' color='gray'>
-                Chi tiết
-            </Button>
-        );
-    };
-
     return (
-        <div className='px-6 py-2 space-y-6'>
-            <h1 className='text-2xl font-bold'>Đơn hàng của tôi</h1>
-
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             {orderDetail ? (
                 <OrderDetail_Component orderData={orderDetail} onBack={() => setOrderDetail(null)} />
             ) : (
                 <>
-                    <div className='flex flex-col md:flex-row gap-4 items-start md:items-center'>
-                        <div className='w-full md:w-1/2'>
-                            <TextInput
-                                icon={HiSearch}
-                                placeholder='Tìm kiếm theo tên, SĐT hoặc mã đơn hàng...'
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-white border-b pb-3'>Đơn hàng của tôi</h1>
+                    <div className='p-6'>
+                        <div className='flex flex-col md:flex-row gap-6 items-start md:items-center'>
+                            <div className='w-full md:w-1/2'>
+                                <TextInput
+                                    icon={HiSearch}
+                                    placeholder='Tìm kiếm theo tên, SĐT hoặc mã đơn hàng...'
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    className='!ring-0 border-gray-300'
+                                />
+                            </div>
 
-                        <Select
-                            className='w-full md:w-48'
-                            value={filterState}
-                            onChange={(e) => setFilterState(e.target.value)}
-                        >
-                            <option value='all'>Tất cả đơn hàng</option>
-                            <option value='processing'>Đơn đang chờ giao</option>
-                            <option value='delivered'>Đơn hàng đã nhận</option>
-                            <option value='cancel'>Đơn hàng đã hủy</option>
-                        </Select>
+                            <Select
+                                className='w-full md:w-48 !ring-0'
+                                value={filterState}
+                                onChange={(e) => setFilterState(e.target.value)}
+                            >
+                                <option value='all'>Tất cả đơn hàng</option>
+                                <option value='processing'>Đơn đang chờ giao</option>
+                                <option value='delivered'>Đơn hàng đã nhận</option>
+                                <option value='cancel'>Đơn hàng đã hủy</option>
+                            </Select>
+                        </div>
                     </div>
 
-                    <Table striped hoverable>
-                        <Table.Head align='center'>
-                            <Table.HeadCell>Mã đơn hàng</Table.HeadCell>
-                            <Table.HeadCell align='center'>
-                                <div
-                                    className='flex items-center justify-center gap-1 cursor-pointer'
-                                    onClick={() => handleSort('createdAt')}
-                                >
-                                    Ngày đặt
-                                    {sortConfig.key === 'createdAt' && (
-                                        <span>{sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}</span>
-                                    )}
-                                </div>
-                            </Table.HeadCell>
-                            <Table.HeadCell>Thông tin giao hàng</Table.HeadCell>
-                            <Table.HeadCell>
-                                <div
-                                    className='flex items-center justify-center gap-1 cursor-pointer'
-                                    onClick={() => handleSort('totalPrice')}
-                                >
-                                    Tổng tiền
-                                    {sortConfig.key === 'totalPrice' && (
-                                        <span>{sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}</span>
-                                    )}
-                                </div>
-                            </Table.HeadCell>
-                            <Table.HeadCell>Trạng thái</Table.HeadCell>
-                            <Table.HeadCell>Thao tác</Table.HeadCell>
-                        </Table.Head>
-                        <Table.Body>
-                            {sortedOrders.map((order) => (
-                                <Table.Row key={order.id}>
-                                    <Table.Cell align='center' className='font-medium'>
-                                        {order.id}
-                                    </Table.Cell>
-                                    <Table.Cell align='center'>{formatDate(order.createdAt)}</Table.Cell>
-                                    <Table.Cell>
-                                        <div className='max-w-xs'>{order.user.address.fullAddress}</div>
-                                    </Table.Cell>
-                                    <Table.Cell align='center' className='font-semibold'>
-                                        {order.totalPrice.toLocaleString()}đ
-                                    </Table.Cell>
-                                    <Table.Cell className='text-center'>
-                                        <Badge
-                                            color={getStatusColor(order.state)}
-                                            className='inline-flex justify-center min-w-[100px] rounded-full py-1'
+                    <div className='rounded-lg shadow-sm overflow-hidden'>
+                        <Table striped hoverable>
+                            <Table.Head className='bg-gray-50'>
+                                <Table.HeadCell className='font-semibold text-gray-700 dark:text-white'>
+                                    Mã đơn hàng
+                                </Table.HeadCell>
+                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
+                                    <div
+                                        className='flex items-center justify-center gap-1 cursor-pointer hover:text-gray-900 transition-colors'
+                                        onClick={() => handleSort('createdAt')}
+                                    >
+                                        Ngày đặt
+                                        {sortConfig.key === 'createdAt' && (
+                                            <span>
+                                                {sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}
+                                            </span>
+                                        )}
+                                    </div>
+                                </Table.HeadCell>
+                                <Table.HeadCell className='font-semibold text-gray-700 dark:text-white'>
+                                    Thông tin giao hàng
+                                </Table.HeadCell>
+                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
+                                    <div
+                                        className='flex items-center justify-center gap-1 cursor-pointer hover:text-gray-900 transition-colors'
+                                        onClick={() => handleSort('totalPrice')}
+                                    >
+                                        Tổng tiền
+                                        {sortConfig.key === 'totalPrice' && (
+                                            <span>
+                                                {sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}
+                                            </span>
+                                        )}
+                                    </div>
+                                </Table.HeadCell>
+                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
+                                    Trạng thái
+                                </Table.HeadCell>
+                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
+                                    Thao tác
+                                </Table.HeadCell>
+                            </Table.Head>
+                            <Table.Body className='divide-y divide-gray-200'>
+                                {sortedOrders.map((order) => (
+                                    <Table.Row key={order.id} className='hover:bg-gray-50 transition-colors'>
+                                        <Table.Cell className='font-medium text-gray-900 dark:text-white'>
+                                            {order.id}
+                                        </Table.Cell>
+                                        <Table.Cell align='center'>{formatDate(order.createdAt)}</Table.Cell>
+                                        <Table.Cell>
+                                            <div className='max-w-xs text-gray-600 dark:text-white'>
+                                                {order.user?.address?.fullAddress}
+                                            </div>
+                                        </Table.Cell>
+                                        <Table.Cell
+                                            align='center'
+                                            className='font-semibold text-gray-900 dark:text-white'
                                         >
-                                            {getStatusText(order.state)}
-                                        </Badge>
-                                    </Table.Cell>
-                                    <Table.Cell align='center'>{renderActionButton(order)}</Table.Cell>
-                                </Table.Row>
-                            ))}
-                        </Table.Body>
-                    </Table>
-                    <Modal show={showConfirmModal} onClose={() => setShowConfirmModal(false)} size='md' popup>
-                        <Modal.Header />
+                                            {order.totalPrice.toLocaleString()}đ
+                                        </Table.Cell>
+                                        <Table.Cell className='text-center'>
+                                            <Badge
+                                                color={getStatusColor(order.state)}
+                                                className='inline-flex justify-center min-w-[120px] rounded-full py-1.5 text-sm font-medium'
+                                            >
+                                                {getStatusText(order.state)}
+                                            </Badge>
+                                        </Table.Cell>
+                                        <Table.Cell align='center'>
+                                            <div className='flex justify-center gap-2'>
+                                                {order.state === 'delivered' ? (
+                                                    <>
+                                                        <Button
+                                                            className='focus:!ring-0 hover:bg-blue-700 transition-colors'
+                                                            size='sm'
+                                                            color='blue'
+                                                            onClick={() => {
+                                                                setConfirmingOrder(order);
+                                                                setShowConfirmModal(true);
+                                                            }}
+                                                        >
+                                                            <div className='flex justify-center items-center gap-x-2'>
+                                                                <HiCheck className='h-4 w-4' />
+                                                                <span>Nhận hàng</span>
+                                                            </div>
+                                                        </Button>
+                                                        <Button
+                                                            className='focus:!ring-0 hover:bg-gray-700 transition-colors'
+                                                            onClick={() => setOrderDetail(order)}
+                                                            size='sm'
+                                                            color='gray'
+                                                        >
+                                                            Chi tiết
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <Button
+                                                        className='focus:!ring-0 hover:bg-gray-700 transition-colors'
+                                                        onClick={() => setOrderDetail(order)}
+                                                        size='sm'
+                                                        color='gray'
+                                                    >
+                                                        Chi tiết
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </Table.Cell>
+                                    </Table.Row>
+                                ))}
+                            </Table.Body>
+                        </Table>
+                    </div>
+
+                    <Modal
+                        show={showConfirmModal}
+                        onClose={() => setShowConfirmModal(false)}
+                        size='md'
+                        popup
+                        className='backdrop-blur-sm'
+                    >
+                        <Modal.Header className='border-b' />
                         <Modal.Body>
-                            <div className='text-center'>
-                                <h3 className='mb-5 text-lg font-normal text-gray-500 dark:text-gray-400'>
-                                    Bạn xác nhận đã nhận được đơn hàng?
+                            <div className='text-center p-4'>
+                                <h3 className='mb-6 text-xl font-medium text-gray-900'>
+                                    Xác nhận đã nhận được đơn hàng?
                                 </h3>
                                 <div className='flex justify-center gap-4'>
                                     <Button
-                                        className='focus:!ring-0'
+                                        className='focus:!ring-0 hover:bg-green-700 transition-colors px-6'
                                         color='success'
                                         onClick={() => handleConfirmDelivery(confirmingOrder?.id)}
                                     >
                                         Xác nhận
                                     </Button>
                                     <Button
-                                        className='focus:!ring-0'
+                                        className='focus:!ring-0 hover:bg-gray-700 transition-colors px-6'
                                         color='gray'
                                         onClick={() => setShowConfirmModal(false)}
                                     >

@@ -1,5 +1,5 @@
 import { Alert, Button, Card, Modal, Spinner, TextInput } from 'flowbite-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../../services/firebase';
@@ -84,6 +84,16 @@ export default function Profile_Component() {
         setTimeout(() => {
             setLoading(false);
         }, 1000);
+    }, []);
+
+    // get strength of password
+    const getStrength = useCallback((pass) => {
+        let strength = 0;
+        if (pass.length >= 6) strength++;
+        if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
+        if (pass.match(/\d/)) strength++;
+        if (pass.match(/[^a-zA-Z\d]/)) strength++;
+        return strength;
     }, []);
 
     // ======================================== Fetch API ========================================
@@ -188,13 +198,13 @@ export default function Profile_Component() {
 
     // ======================================== Update user ========================================
     // handle change avatar function
-    const handleChangeAvatar = (e) => {
+    const handleChangeAvatar = useCallback((e) => {
         const file = e.target.files[0];
         if (file) {
             setImgFile(file);
             setImgURL(URL.createObjectURL(file));
         }
-    };
+    }, []);
 
     // update user profile function
     const handleSubmitForm = async (e) => {
@@ -266,16 +276,6 @@ export default function Profile_Component() {
     }
 
     // ======================================== Reset password user ========================================
-    // get strength of password
-    const getStrength = (pass) => {
-        let strength = 0;
-        if (pass.length >= 6) strength++;
-        if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
-        if (pass.match(/\d/)) strength++;
-        if (pass.match(/[^a-zA-Z\d]/)) strength++;
-        return strength;
-    };
-
     // verify password function
     const handleVerifyResetPassword = async () => {
         if (!formPassword.oldPassword) {

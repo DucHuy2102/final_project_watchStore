@@ -392,7 +392,14 @@ export default function ProductDetail() {
                                         <Image
                                             src={item}
                                             preview={{
-                                                mask: <div className='text-xs'>Xem</div>,
+                                                mask: (
+                                                    <div
+                                                        className='text-sm font-medium bg-black/50 backdrop-blur-sm 
+                                                    text-white px-3 py-1 rounded-full'
+                                                    >
+                                                        Xem ảnh
+                                                    </div>
+                                                ),
                                             }}
                                             alt='Image'
                                             className='w-full h-full object-contain'
@@ -412,7 +419,14 @@ export default function ProductDetail() {
                                         <Image
                                             src={item}
                                             preview={{
-                                                mask: <div className='text-xs'>Xem</div>,
+                                                mask: (
+                                                    <div
+                                                        className='text-sm font-medium bg-black/50 backdrop-blur-sm 
+                                                    text-white px-3 py-1 rounded-full'
+                                                    >
+                                                        Xem ảnh
+                                                    </div>
+                                                ),
                                             }}
                                             alt='Thumbnail'
                                             className='w-full h-full object-contain p-2'
