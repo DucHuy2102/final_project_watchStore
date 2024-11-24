@@ -1,4 +1,4 @@
-import { Avatar, Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
+import { Button, Dropdown, Navbar, TextInput } from 'flowbite-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
@@ -13,18 +13,14 @@ import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
 
 export default function Header_Component() {
-    // states
-    const { pathname } = useLocation();
+    const { theme } = useSelector((state) => state.theme);
+    const { access_token: tokenUser, user: currentUser } = useSelector((state) => state.user);
+    const avatarUser = currentUser?.avatarImg ?? '../assets/default_Avatar.jpg';
+    const { cartItem: cartInRedux } = useSelector((state) => state.cart);
+    const cartTotalQuantity = cartInRedux.length;
+    const { pathname, search } = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation();
-    const pathURL = location.pathname;
-    const theme = useSelector((state) => state.theme.theme);
-    const tokenUser = useSelector((state) => state.user.access_token || state.user.user?.access_token);
-    const currentUser = useSelector((state) => state.user.user);
-    const avatarUser = currentUser?.avatarImg ?? '../assets/default_Avatar.jpg';
-    const cartInRedux = useSelector((state) => state.cart.cartItem);
-    const cartTotalQuantity = cartInRedux.length;
     const [searchTerm, setSearchTerm] = useState('');
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const searchRef = useRef(null);
@@ -42,7 +38,7 @@ export default function Header_Component() {
         const urlParams = new URLSearchParams(location.search);
         const searchURL = urlParams.get('q');
         setSearchTerm(searchURL ?? '');
-    }, [location.search]);
+    }, [search]);
 
     // handle submit search form
     const handleSearch = (e) => {
@@ -80,7 +76,7 @@ export default function Header_Component() {
                 pathname.startsWith('/admin')
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
-            } border-b border-gray-200 dark:border-gray-700 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-sm`}
+            } border-b border-gray-200 dark:border-gray-700 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-sm relative z-[9999]`}
         >
             <Link
                 to='/'
@@ -167,44 +163,54 @@ export default function Header_Component() {
 
                     {tokenUser ? (
                         <Dropdown
-                            className='mt-[2px]'
+                            className='mt-[2px] relative z-[9999]'
                             inline
                             arrowIcon={false}
                             label={
-                                <div className='w-10 h-10 ring-2 ring-gray-200 dark:ring-gray-700 rounded-full hover:ring-amber-500 dark:hover:ring-blue-500 transition-all duration-300'>
+                                <div className='w-10 h-10 ring-1 ring-gray-200 dark:ring-gray-700 rounded-full hover:ring-amber-500 dark:hover:ring-blue-500 transition-all duration-300 hover:scale-105'>
                                     <img
                                         src={avatarUser}
                                         alt='Avatar_User'
-                                        className='object-cover w-full h-full rounded-full'
+                                        className='object-cover w-full h-full rounded-full shadow-sm'
                                     />
                                 </div>
                             }
                         >
-                            <Dropdown.Header className='cursor-pointer'>
+                            <Dropdown.Header className='cursor-pointer bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 p-2'>
                                 <Link
                                     to={'/dashboard?tab=dashboard'}
-                                    className='block text-center text-sm font-medium truncate text-blue-500 '
+                                    className='block text-center text-xs font-semibold tracking-wide text-amber-800 dark:text-blue-400 hover:text-amber-600 dark:hover:text-blue-300 transition-colors duration-300'
                                 >
                                     {currentUser?.username}
                                 </Link>
                             </Dropdown.Header>
-                            <Dropdown.Item className='flex justify-center items-center'>
-                                <Link to={'/dashboard?tab=profile'} className='font-medium'>
-                                    Trang cá nhân
-                                </Link>
-                            </Dropdown.Item>
-                            <Dropdown.Item className='flex justify-center items-center'>
-                                <Link to={'/dashboard?tab=order'} className='font-medium'>
-                                    Đơn hàng
-                                </Link>
-                            </Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item
-                                className='flex justify-center items-center font-semibold text-red-500'
-                                onClick={handleSignOutAccount}
-                            >
-                                Đăng xuất
-                            </Dropdown.Item>
+                            <div className='p-1 bg-white dark:bg-gray-900'>
+                                <Dropdown.Item className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
+                                    <Link
+                                        to={'/dashboard?tab=profile'}
+                                        className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
+                                    >
+                                        Trang cá nhân
+                                    </Link>
+                                </Dropdown.Item>
+                                <Dropdown.Item className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
+                                    <Link
+                                        to={'/dashboard?tab=order'}
+                                        className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
+                                    >
+                                        Đơn hàng
+                                    </Link>
+                                </Dropdown.Item>
+                                <Dropdown.Divider className='my-1 border-amber-200/50 dark:border-gray-700' />
+                                <Dropdown.Item
+                                    className='flex justify-center items-center hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all duration-300'
+                                    onClick={handleSignOutAccount}
+                                >
+                                    <span className='font-medium py-1.5 px-3 w-full text-xs text-center text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300'>
+                                        Đăng xuất
+                                    </span>
+                                </Dropdown.Item>
+                            </div>
                         </Dropdown>
                     ) : (
                         <Link to='/login' className='ml-2'>
@@ -219,7 +225,7 @@ export default function Header_Component() {
 
             <Navbar.Collapse className='md:inline-block'>
                 <Navbar.Link
-                    active={pathURL === '/'}
+                    active={pathname === '/'}
                     to={'/'}
                     as={Link}
                     className='hover:!text-amber-500 dark:hover:!text-blue-500 transition-colors duration-300 cursor-pointer flex justify-start items-center gap-x-2 md:gap-x-1'
@@ -228,7 +234,7 @@ export default function Header_Component() {
                     Trang chủ
                 </Navbar.Link>
                 <Navbar.Link
-                    active={pathURL === '/products'}
+                    active={pathname === '/products'}
                     to={'/products'}
                     as={Link}
                     className='hover:!text-amber-500 dark:hover:!text-blue-500 transition-colors duration-300 cursor-pointer flex justify-start items-center gap-x-2 md:gap-x-1'
@@ -237,17 +243,17 @@ export default function Header_Component() {
                     Sản phẩm
                 </Navbar.Link>
                 <Navbar.Link
-                    active={pathURL === '/cart'}
+                    active={pathname === '/cart'}
                     to={'/cart'}
                     as={Link}
                     className={`group cursor-pointer flex justify-start items-center gap-x-2 md:gap-x-1 hover:!text-amber-500 dark:hover:!text-blue-500 transition-colors duration-300 ${
-                        pathURL === '/cart' ? '!text-[#0e7490] dark:!text-white' : ''
+                        pathname === '/cart' ? '!text-[#0e7490] dark:!text-white' : ''
                     }`}
                 >
                     <Badge count={tokenUser ? cartTotalQuantity : 0}>
                         <IoIosCart
                             className={`group-hover:text-amber-500 dark:group-hover:text-blue-500 transition-colors duration-300 ${
-                                pathURL === '/cart'
+                                pathname === '/cart'
                                     ? 'text-[#0e7490] dark:text-white'
                                     : 'text-gray-700 dark:text-gray-400'
                             }`}
@@ -257,7 +263,7 @@ export default function Header_Component() {
                     Giỏ hàng
                 </Navbar.Link>
                 <Navbar.Link
-                    active={pathURL === '/services'}
+                    active={pathname === '/services'}
                     to={'/services'}
                     as={Link}
                     className='hover:!text-amber-500 dark:hover:!text-blue-500 transition-colors duration-300 cursor-pointer flex justify-start items-center gap-x-2 md:gap-x-1'

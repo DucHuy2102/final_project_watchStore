@@ -5,18 +5,12 @@ const initialState = {
 
     cartItems: {
         productItems: [],
-        totalPrice: 0,
         totalQuantity: 0,
-        totalDiscountPrice: 0,
-        totalAmountToPay: 0,
     },
 
     buyNowItem: {
         productItems: null,
-        totalPrice: 0,
         totalQuantity: 0,
-        totalDiscountPrice: 0,
-        totalAmountToPay: 0,
     },
 
     orderDetail: null,
@@ -27,23 +21,16 @@ export const checkoutSlice = createSlice({
     initialState,
     reducers: {
         setProductToCheckout: (state, action) => {
-            const { productItems, totalPrice, totalQuantity, totalDiscountPrice, totalAmountToPay, isBuyNow } =
-                action.payload;
+            const { productItems, totalQuantity, isBuyNow } = action.payload;
             if (isBuyNow) {
                 state.buyNowItem = {
                     productItems,
-                    totalPrice,
                     totalQuantity,
-                    totalDiscountPrice,
-                    totalAmountToPay,
                 };
             } else {
                 state.cartItems = {
                     productItems,
-                    totalPrice,
                     totalQuantity,
-                    totalDiscountPrice,
-                    totalAmountToPay,
                 };
             }
             state.isBuyNow = isBuyNow;
@@ -51,17 +38,11 @@ export const checkoutSlice = createSlice({
         resetCheckout: (state) => {
             state.cartItems = {
                 productItems: [],
-                totalPrice: 0,
                 totalQuantity: 0,
-                totalDiscountPrice: 0,
-                totalAmountToPay: 0,
             };
             state.buyNowItem = {
                 pproductItems: null,
-                totalPrice: 0,
                 totalQuantity: 0,
-                totalDiscountPrice: 0,
-                totalAmountToPay: 0,
             };
             state.isBuyNow = false;
         },

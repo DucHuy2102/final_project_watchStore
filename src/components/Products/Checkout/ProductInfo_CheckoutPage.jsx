@@ -1,7 +1,7 @@
+import { Image } from 'antd';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// format price to VND
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -26,9 +26,11 @@ const PriceDisplay = ({ originalPrice, discountedPrice }) => (
 export default function ProductInfo_CheckoutPage({ dataProduct }) {
     const navigate = useNavigate();
 
-    const { productItem, quantity } = dataProduct;
-    const discountedPrice = productItem.price - productItem.discount;
-    const discountPercentage = Math.round((productItem.discount / productItem.price) * 100);
+    const { productItem, quantity, selectedOption } = dataProduct;
+    const price = selectedOption?.price || productItem.price;
+    const discount = selectedOption?.discount || productItem.discount;
+    const discountedPrice = price - discount;
+    const discountPercentage = Math.round((discount / price) * 100);
     const sizeProduct =
         productItem.height === productItem.width
             ? ` ${productItem.height} mm`
@@ -39,24 +41,28 @@ export default function ProductInfo_CheckoutPage({ dataProduct }) {
     }, [dataProduct.idProduct, productItem.id]);
 
     return (
-        <div className='cursor-pointer relative flex items-center space-x-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg transition-all hover:shadow-md'>
+        <div className='cursor-pointer relative flex items-center space-x-3 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg transition-all hover:shadow-md'>
             {discountPercentage > 0 && <DiscountBadge discount={discountPercentage} />}
-            <img
+            <Image
                 src={productItem.img[0]}
                 alt={productItem.productName}
-                className='w-20 h-auto object-cover rounded-md'
+                className='!w-20 !h-auto object-cover'
+                preview={{
+                    mask: <div className='text-xs font-medium'>Xem</div>,
+                }}
             />
 
             <div className='flex-grow'>
                 <h3
                     onClick={() => navigate(`/product-detail/${idProduct}`)}
-                    className='font-semibold text-lg text-gray-800 hover:text-blue-500 transition-colors duration-200 dark:text-gray-200 mb-2'
+                    className='font-semibold text-lg text-gray-800 hover:text-blue-500 transition-colors duration-200 dark:text-gray-200 mb-2 min-w-0 truncate'
                 >
                     {productItem.productName}
                 </h3>
+
                 <div className='flex flex-wrap gap-2 mb-2'>
                     <span className='text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full'>
-                        {productItem.color}
+                        {selectedOption?.color || productItem.color}
                     </span>
                     <span className='text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full'>
                         Size: {sizeProduct}
@@ -67,7 +73,7 @@ export default function ProductInfo_CheckoutPage({ dataProduct }) {
                 </div>
             </div>
 
-            <PriceDisplay originalPrice={productItem.price} discountedPrice={discountedPrice} />
+            <PriceDisplay originalPrice={price} discountedPrice={discountedPrice} />
         </div>
     );
 }

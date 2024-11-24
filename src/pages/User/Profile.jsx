@@ -18,6 +18,7 @@ import { PiHouseLineLight } from 'react-icons/pi';
 import { Select } from 'antd';
 import { FaBan } from 'react-icons/fa';
 import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
+import { resetCart } from '../../services/redux/slices/cartSlice';
 
 export default function Profile_Component() {
     // get token user from redux store
@@ -248,6 +249,7 @@ export default function Profile_Component() {
     // sign out function
     const handleSignOutAccount = async () => {
         dispatch(user_SignOut());
+        dispatch(resetCart());
         dispatch(resetCheckout());
     };
 

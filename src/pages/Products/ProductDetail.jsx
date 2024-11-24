@@ -41,8 +41,8 @@ export default function ProductDetail() {
     const { pathname } = useLocation();
     const { id } = useParams();
     const [product, setProduct] = useState({});
-    console.log(product);
     const [loading, setLoading] = useState(true);
+    const [loadingEffect, setLoadingEffect] = useState(false);
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [moreProduct, setMoreProduct] = useState([]);
@@ -252,6 +252,7 @@ export default function ProductDetail() {
             return;
         }
         try {
+            setLoadingEffect(true);
             const res = await axios.post(
                 `${import.meta.env.VITE_API_URL}/api/cart/add-product-to-cart`,
                 {
@@ -283,6 +284,7 @@ export default function ProductDetail() {
             toast.error('Đã xảy ra lỗi, vui lòng thử lại sau');
         } finally {
             setQuantityProduct(0);
+            setLoadingEffect(false);
         }
     }, [tokenUser, selectedColor, id, quantityProduct, dispatch, product]);
 
@@ -548,19 +550,35 @@ export default function ProductDetail() {
                             {/* Action buttons */}
                             <div className='grid grid-cols-2 gap-6'>
                                 <Button
+                                    disabled={loadingEffect}
                                     onClick={handleAddProductToCart}
                                     className='w-full font-semibold text-base py-3 !ring-0
-                                    transition-all duration-300 transform hover:scale-105'
+        transition-all duration-300 transform hover:scale-105'
                                 >
-                                    Thêm vào giỏ hàng
+                                    {loadingEffect ? (
+                                        <div className='flex items-center justify-center gap-2'>
+                                            <Spinner size='sm' />
+                                            <span>Đang thêm...</span>
+                                        </div>
+                                    ) : (
+                                        'Thêm vào giỏ hàng'
+                                    )}
                                 </Button>
                                 <Button
+                                    disabled={loadingEffect}
                                     onClick={handleVerifyUser}
                                     className='w-full font-semibold text-base py-3 !ring-0
-                                    bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 
-                                    hover:to-gray-700 transition-all duration-300 transform hover:scale-105'
+        bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 
+        hover:to-gray-700 transition-all duration-300 transform hover:scale-105'
                                 >
-                                    Mua ngay
+                                    {loadingEffect ? (
+                                        <div className='flex items-center justify-center gap-2'>
+                                            <Spinner size='sm' />
+                                            <span>Đang xử lý...</span>
+                                        </div>
+                                    ) : (
+                                        'Mua ngay'
+                                    )}
                                 </Button>
                             </div>
 

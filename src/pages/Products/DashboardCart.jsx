@@ -3,7 +3,6 @@ import {
     InputNumber,
     Button,
     Card,
-    Divider,
     Badge,
     Typography,
     Space,
@@ -11,21 +10,33 @@ import {
     Image,
     Select,
     Tag,
+    Modal,
 } from 'antd';
-import { DeleteOutlined, ShoppingCartOutlined, WarningOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import {
+    DeleteOutlined,
+    ShoppingCartOutlined,
+    WarningOutlined,
+    MinusOutlined,
+    PlusOutlined,
+    ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
     changeColorProduct,
     changeProductQuantity,
     deleteProductFromCart,
+    resetCart,
 } from '../../services/redux/slices/cartSlice';
 import { FaClock } from 'react-icons/fa';
 import axios from 'axios';
+import EmptyCart from '../../components/Products/EmptyCart';
+import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
+import { toast } from 'react-toastify';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
@@ -34,7 +45,6 @@ export default function DashboardCart() {
     const { cartItem, cartTotalQuantity } = useSelector((state) => state.cart);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { pathname } = useLocation();
     const [loading, setLoading] = useState(false);
 
     // Calculate cart summary
@@ -206,7 +216,7 @@ export default function DashboardCart() {
                 <Popconfirm
                     title='Xóa sản phẩm'
                     description='Bạn có chắc chắn muốn xóa sản phẩm này?'
-                    onConfirm={() => handleDeleteProductFromCart(item.productItem.id)}
+                    onConfirm={() => handleDeleteProductFromCart(item.idCart)}
                     okText='Xóa'
                     cancelText='Hủy'
                     icon={<WarningOutlined className='text-red-500' />}
@@ -241,18 +251,6 @@ export default function DashboardCart() {
             updateCartItem(updatedCartItem);
         }, 500),
     ).current;
-
-    // const handleColorChange = (item, newColor) => {
-    //     dispatch(changeColorProduct({ productId: item.productItem.id, option: newColor }));
-
-    //     const updateData = cartItem.map((item) => ({
-    //         itemId: item.idCart,
-    //         quantity: item.quantity,
-    //         option: newColor,
-    //     }));
-
-    //     debouncedUpdateCart(updateData);
-    // };
 
     const handleChangeQuantity = (type, idCart) => {
         const checkItem = cartItem.find((item) => item.idCart === idCart);
@@ -303,119 +301,102 @@ export default function DashboardCart() {
         }
     };
 
-    const handleNavigateToLoginPage = () => {
-        navigate('/login', { state: { from: pathname } });
+    const handleDeleteProductFromCart = async (idCart) => {
+        try {
+            setLoading(true);
+            const itemIndex = cartItem.findIndex((item) => item.idCart === idCart);
+            if (itemIndex === -1) return;
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/delete-item`, {
+                params: {
+                    id: idCart,
+                },
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                },
+            });
+            if (res?.status === 200) {
+                toast.success('Đã xóa sản phẩm khỏi giỏ hàng');
+                dispatch(deleteProductFromCart(idCart));
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleDeleteProductFromCart = (idProduct) => {
-        dispatch(deleteProductFromCart(idProduct));
+    const showDeleteConfirm = () => {
+        Modal.confirm({
+            title: 'Xóa tất cả sản phẩm',
+            icon: <ExclamationCircleOutlined className='text-red-500' />,
+            content: 'Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?',
+            okText: 'Xóa tất cả',
+            cancelText: 'Hủy',
+            okButtonProps: {
+                className: 'bg-red-500 hover:!bg-red-600',
+            },
+            onOk: handleDeleteAllProducts,
+        });
+    };
+
+    const handleDeleteAllProducts = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/delete-all`, {
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                },
+            });
+            if (res?.status === 200) {
+                toast.success('Đã xóa tất cả sản phẩm khỏi giỏ hàng');
+                dispatch(resetCart());
+            }
+        } catch (error) {
+            console.log(error);
+            toast.error('Có lỗi xảy ra khi xóa giỏ hàng');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleNavigateToCheckoutPage = () => {
+        dispatch(
+            setProductToCheckout({
+                productItems: productCartItem,
+                totalQuantity: cartTotalQuantity,
+                isBuyNow: false,
+            }),
+        );
         navigate('/checkout');
     };
 
     return (
         <>
             {cartTotalQuantity === 0 ? (
-                <div className='min-h-screen flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden bg-white dark:bg-gray-900 transition-colors duration-300'>
-                    <div className='absolute inset-0 bg-[url("/assets/luxuryWatch.jpg")] bg-no-repeat bg-center bg-cover opacity-10 dark:opacity-10' />
-                    <div className='absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-amber-500/5 to-rose-500/5 dark:from-amber-500/10 dark:to-rose-500/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob' />
-                    <div className='absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-500/5 to-emerald-500/5 dark:from-blue-500/10 dark:to-emerald-500/10 rounded-full mix-blend-overlay filter blur-3xl animate-blob animation-delay-2000' />
-
-                    <div className='relative z-10 w-full max-w-5xl'>
-                        <div className='mb-5 text-center'>
-                            <h1 className='font-serif text-3xl md:text-4xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-700 to-amber-600 dark:from-amber-200 dark:via-yellow-400 dark:to-amber-200 animate-shimmer'>
-                                Giỏ Hàng Của Bạn
-                            </h1>
-                            <div className='w-16 h-0.5 mx-auto bg-gradient-to-r from-amber-400 to-amber-600 dark:from-amber-200 dark:to-amber-400'></div>
-                        </div>
-
-                        <div className='relative rounded-3xl p-8'>
-                            <div className='grid md:grid-cols-2 gap-8 items-center'>
-                                <div className='relative group perspective'>
-                                    <div className='relative transform transition-all duration-700 group-hover:rotate-y-12'>
-                                        <img
-                                            src='/assets/watchMiniCart.avif'
-                                            alt='Đồng Hồ Cao Cấp'
-                                            className='rounded-2xl shadow-2xl w-auto h-[60vh] object-cover'
-                                        />
-                                        <div className='absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent rounded-2xl'></div>
-                                    </div>
-                                </div>
-
-                                <div className='space-y-6'>
-                                    {tokenUser ? (
-                                        <div className='space-y-6 animate-fadeIn'>
-                                            <h2 className='text-2xl md:text-3xl font-serif text-amber-700 dark:text-amber-300 leading-tight'>
-                                                Giỏ Hàng Đang Chờ Kiệt Tác
-                                            </h2>
-                                            <p className='text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed'>
-                                                Khám phá bộ sưu tập đồng hồ tinh tế, nơi hội tụ những thiết kế độc đáo
-                                                và đẳng cấp nhất.
-                                            </p>
-                                            <Link to='/products'>
-                                                <button className='group relative w-full'>
-                                                    <div className='absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-amber-300 rounded-lg blur opacity-40 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt'></div>
-                                                    <div className='relative px-6 py-3 bg-white dark:bg-gray-900 rounded-lg leading-none flex items-center justify-center'>
-                                                        <span className='text-amber-700 dark:text-amber-300 group-hover:text-amber-800 dark:group-hover:text-amber-200 transition duration-200 text-sm font-medium'>
-                                                            Khám Phá Bộ Sưu Tập
-                                                        </span>
-                                                    </div>
-                                                </button>
-                                            </Link>
-                                        </div>
-                                    ) : (
-                                        <div className='space-y-6 animate-fadeIn'>
-                                            <h2 className='text-2xl md:text-3xl font-serif text-amber-700 dark:text-amber-300 leading-tight'>
-                                                Trải Nghiệm Giá Trị Vượt Trội
-                                            </h2>
-                                            <p className='text-base text-gray-600 dark:text-gray-300 font-light leading-relaxed'>
-                                                Đăng nhập để bắt đầu hành trình khám phá thế giới đồng hồ cao cấp và
-                                                những trải nghiệm xa xỉ được tuyển chọn đặc biệt kỹ lưỡng.
-                                            </p>
-                                            <button
-                                                onClick={handleNavigateToLoginPage}
-                                                className='group relative w-full overflow-hidden rounded-lg p-[2px] focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2'
-                                            >
-                                                <div className='absolute inset-0 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 animate-gradient-x'></div>
-
-                                                <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000'></div>
-
-                                                <div className='relative px-6 py-3.5 rounded-lg leading-none flex items-center justify-center'>
-                                                    <div className='absolute inset-0 bg-black rounded-lg transition-opacity duration-500 group-hover:opacity-0'></div>
-
-                                                    <span className='flex items-center gap-2 text-amber-300 group-hover:text-amber-200 transition-colors duration-200 text-base font-medium relative z-10'>
-                                                        <span className='tracking-wide'>ĐĂNG NHẬP NGAY</span>
-                                                        <svg
-                                                            className='w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200'
-                                                            fill='none'
-                                                            stroke='currentColor'
-                                                            viewBox='0 0 24 24'
-                                                        >
-                                                            <path
-                                                                strokeLinecap='round'
-                                                                strokeLinejoin='round'
-                                                                strokeWidth='2'
-                                                                d='M14 5l7 7m0 0l-7 7m7-7H3'
-                                                            />
-                                                        </svg>
-                                                    </span>
-                                                </div>
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <EmptyCart />
             ) : (
-                <div className='px-20 mx-auto py-8'>
-                    <Title level={2} className='mb-6 flex items-center justify-center gap-2 dark:text-gray-100'>
-                        <ShoppingCartOutlined className='text-blue-600' />
-                        Giỏ hàng của bạn
-                    </Title>
+                <div className='px-20 mx-auto py-8 min-h-screen'>
+                    <div className='mb-5 text-center'>
+                        <h1 className='font-serif text-3xl md:text-4xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-700 to-amber-600 dark:from-amber-200 dark:via-yellow-400 dark:to-amber-200 animate-shimmer'>
+                            Giỏ Hàng Của Bạn
+                        </h1>
+                        <div className='w-16 h-0.5 mx-auto bg-gradient-to-r from-amber-400 to-amber-600 dark:from-amber-200 dark:to-amber-400'></div>
+                    </div>
+
+                    <div className='flex justify-between items-center mb-4'>
+                        <div className='flex items-center gap-2'>
+                            <ShoppingCartOutlined className='text-xl text-amber-600' />
+                            <span className='text-lg font-medium'>{cartTotalQuantity} sản phẩm trong giỏ hàng</span>
+                        </div>
+                        <Button
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={showDeleteConfirm}
+                            className='hover:bg-red-50'
+                        >
+                            Xóa tất cả
+                        </Button>
+                    </div>
 
                     <div className='flex flex-col lg:flex-row gap-x-3'>
                         <div className='lg:w-3/4'>
@@ -431,44 +412,109 @@ export default function DashboardCart() {
 
                         <div className='lg:w-1/4'>
                             <Card
-                                className='sticky top-4 border border-gray-100 shadow-md hover:shadow-lg transition-shadow'
-                                bordered={false}
+                                className='relative border-none rounded-2xl overflow-hidden
+        bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-50 via-white to-gray-50
+        shadow-[0_8px_40px_rgb(0,0,0,0.12)] backdrop-blur-sm z-10'
                             >
-                                <Space direction='vertical' className='w-full' size='large'>
-                                    <div className='flex justify-between items-center'>
-                                        <Text>Tạm tính</Text>
-                                        <Text delete type='secondary'>
-                                            {formatPrice(totalPrice)}
-                                        </Text>
+                                <div className='relative'>
+                                    <div
+                                        className='absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-amber-200/20 via-yellow-100/10 to-transparent 
+                rounded-full blur-3xl transform translate-x-20 -translate-y-20'
+                                    />
+                                    <div
+                                        className='absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-blue-100/20 via-amber-100/10 to-transparent 
+                rounded-full blur-3xl transform -translate-x-20 translate-y-20'
+                                    />
+                                    <div className='absolute inset-0 bg-white/40 backdrop-blur-sm rounded-2xl' />
+                                    <div className='absolute inset-0 border border-amber-200/20 rounded-2xl' />
+                                    <div className='absolute -inset-[1px] border border-amber-100/20 rounded-2xl blur-sm' />
+
+                                    <div className='relative space-y-6 p-2'>
+                                        <div className='text-center'>
+                                            <h3
+                                                className='font-serif text-xl text-transparent bg-clip-text bg-gradient-to-r 
+                        from-amber-700 via-yellow-600 to-amber-700 animate-shimmer'
+                                            >
+                                                Giá Trị Đơn Hàng
+                                            </h3>
+                                            <div className='w-20 h-0.5 mx-auto mt-2 bg-gradient-to-r from-transparent via-amber-400 to-transparent' />
+                                        </div>
+
+                                        <div className='space-y-2 px-2'>
+                                            <div className='flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/80 transition-colors'>
+                                                <Text className='text-gray-600 font-medium'>Tạm tính</Text>
+                                                <Text delete className='text-gray-400 font-light'>
+                                                    {formatPrice(totalPrice)}
+                                                </Text>
+                                            </div>
+
+                                            <div className='flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/80 transition-colors'>
+                                                <Text className='text-gray-600 font-medium'>Giảm giá</Text>
+                                                <div className='flex items-center justify-center gap-x-1'>
+                                                    <Tag className='border-none bg-emerald-50 text-emerald-600'>
+                                                        -{Math.round((totalDiscountPrice / totalPrice) * 100)}%
+                                                    </Tag>
+                                                    <Text className='text-emerald-600 font-medium'>
+                                                        -{formatPrice(totalDiscountPrice)}
+                                                    </Text>
+                                                </div>
+                                            </div>
+
+                                            <div
+                                                className='w-full h-0.5 mt-1
+                                                bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-shimmer'
+                                            />
+
+                                            <div className='flex flex-col items-center p-3'>
+                                                <div
+                                                    className='font-serif text-xl font-medium tracking-wide text-gray-700 
+                                                bg-gradient-to-r from-transparent via-gray-800 to-transparent bg-clip-text'
+                                                >
+                                                    Tổng cộng
+                                                </div>
+
+                                                <div className='flex flex-col items-center'>
+                                                    <span
+                                                        className='font-cormorant text-4xl font-semibold bg-gradient-to-br from-amber-800 via-yellow-700 to-amber-900
+                                                    bg-clip-text text-transparent drop-shadow-lg'
+                                                    >
+                                                        {formatPrice(totalAmountToPay)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            type='primary'
+                                            size='large'
+                                            block
+                                            onClick={handleNavigateToCheckoutPage}
+                                            className='h-16 border-none rounded-xl font-medium tracking-wide
+                                            bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 
+                                            hover:from-amber-700 hover:via-yellow-600 hover:to-amber-700
+                                            shadow-lg hover:shadow-amber-200/50 transition-all duration-300
+                                            relative overflow-hidden group'
+                                        >
+                                            <div
+                                                className='absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.3)_50%,transparent_75%)] 
+                                                bg-[length:250%_250%,100%_100%] animate-shine'
+                                            />
+                                            <span className='relative z-10 flex items-center justify-center gap-2 text-base'>
+                                                <ShoppingCartOutlined className='text-xl pr-2' />
+                                                Tiến hành thanh toán
+                                            </span>
+                                        </Button>
+
+                                        <div className='flex items-center justify-center gap-2 text-gray-400'>
+                                            <div className='flex items-center gap-1.5 px-3 py-1.5'>
+                                                <FaClock className='text-amber-600' />
+                                                <span className='text-sm font-medium'>
+                                                    Thanh toán an toàn & bảo mật
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div className='flex justify-between items-center'>
-                                        <Text>Giảm giá</Text>
-                                        <Text type='success'>-{formatPrice(totalDiscountPrice)}</Text>
-                                    </div>
-
-                                    <Divider className='my-2' />
-
-                                    <div className='flex justify-between items-center'>
-                                        <Title level={4} className='!mb-0'>
-                                            Tổng cộng
-                                        </Title>
-                                        <Title level={4} className='!mb-0 text-blue-600'>
-                                            {formatPrice(totalAmountToPay)}
-                                        </Title>
-                                    </div>
-
-                                    <Button
-                                        type='primary'
-                                        size='large'
-                                        block
-                                        onClick={handleNavigateToCheckoutPage}
-                                        className='h-12 text-lg font-medium bg-gradient-to-r from-blue-500 to-blue-600 
-                                    hover:from-blue-600 hover:to-blue-700 border-none shadow-md'
-                                    >
-                                        Tiến hành thanh toán
-                                    </Button>
-                                </Space>
+                                </div>
                             </Card>
                         </div>
                     </div>

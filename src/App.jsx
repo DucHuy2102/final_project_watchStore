@@ -27,10 +27,9 @@ import { getCartUser } from './services/redux/slices/cartSlice';
 export default function App() {
     // state
     const dispatch = useDispatch();
-    const tokenUser = useSelector((state) => state.user.access_token);
-    const cartTotalQuantity = useSelector((state) => state.cart.cartTotalQuantity);
+    const { access_token: tokenUser } = useSelector((state) => state.user);
+    const { cartTotalQuantity } = useSelector((state) => state.cart);
 
-    // Get product in cart when user login
     useEffect(() => {
         const getProductInCart = async () => {
             if (tokenUser && cartTotalQuantity === 0) {
@@ -82,6 +81,8 @@ export default function App() {
                 </Routes>
                 <Footer_Component />
             </Router>
+
+            {/* toast */}
             <ToastContainer
                 className={'w-fit'}
                 position='bottom-right'

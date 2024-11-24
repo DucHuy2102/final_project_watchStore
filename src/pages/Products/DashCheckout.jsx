@@ -3,9 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaUserEdit } from 'react-icons/fa';
-import { FiCalendar, FiClock, FiTruck } from 'react-icons/fi';
+import { FiCalendar, FiClock, FiHome, FiMail, FiPhone, FiTruck, FiUser } from 'react-icons/fi';
 import { Button, Label, Modal, Radio, Spinner, TextInput } from 'flowbite-react';
 import {
+    EmptyCheckout,
     ProductInfo_CheckoutPage_Component,
     SelectedVoucher_Component,
     VoucherModal_Component,
@@ -18,53 +19,84 @@ import { RiCoupon3Fill } from 'react-icons/ri';
 import { user_UpdateProfile } from '../../services/redux/slices/userSlice';
 import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../services/redux/slices/checkoutSlice';
-import { IoCartOutline } from 'react-icons/io5';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-const PaymentMethod = ({ id, label, imageSrc, name, selectedPayment, onSelect }) => (
-    <div
-        onClick={() => onSelect(id)}
-        className={`cursor-pointer flex items-center gap-3 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ${
-            selectedPayment === id ? 'ring-2 ring-blue-500' : ''
-        }`}
-    >
-        <Radio id={id} name={name} checked={selectedPayment === id} onChange={() => onSelect(id)} />
-        <Label htmlFor={id} className='flex items-center gap-x-3 text-lg cursor-pointer w-full'>
-            <div className='flex items-center gap-x-3 w-full'>
-                <img src={imageSrc} alt={label} className='w-10 h-10 object-contain' />
-                <span className='font-medium text-gray-800 dark:text-gray-200'>{label}</span>
+const PaymentMethod = ({ id, label, imageSrc, selectedPayment, onSelect, className }) => (
+    <div onClick={() => onSelect(id)} className={`cursor-pointer ${className}`}>
+        <div
+            className={`
+            p-4 rounded-lg bg-gradient-to-br from-white via-gray-50 to-gray-100
+            dark:from-gray-800 dark:via-gray-750 dark:to-gray-700 
+            shadow-sm hover:shadow-lg transition-all duration-300
+            ${selectedPayment === id ? 'ring-1 ring-amber-500 shadow-amber-500/20' : ''}
+            transform hover:scale-[1.01]
+        `}
+        >
+            <div className='flex items-center gap-3'>
+                <div className='relative w-12 h-12'>
+                    <div className='absolute inset-0 rounded-lg' />
+                    <img
+                        src={imageSrc}
+                        alt={label}
+                        className='relative w-full h-full object-contain rounded-lg p-1.5'
+                    />
+                </div>
+                <div className='flex-1'>
+                    <p className='text-sm font-medium bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent'>
+                        {label}
+                    </p>
+                </div>
+                <div
+                    className={`
+                    w-5 h-5 rounded-full border-2 flex items-center justify-center
+                    ${selectedPayment === id ? 'border-amber-500' : 'border-gray-300 dark:border-gray-600'}
+                    transition-colors duration-300
+                `}
+                >
+                    {selectedPayment === id && <div className='w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse' />}
+                </div>
             </div>
-        </Label>
+        </div>
     </div>
 );
 
-const InfoItem = ({ icon: Icon, label, value }) => (
-    <div className='cursor-pointer flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg transition-all duration-300 hover:shadow-md'>
-        <div className='flex-shrink-0'>
-            <div className='p-3 bg-blue-100 dark:bg-blue-900 rounded-full'>
-                <Icon className='w-6 h-6 text-blue-600 dark:text-blue-300' />
+const InfoItem = ({ icon: Icon, label, value, iconColor, iconBg }) => (
+    <div className='group cursor-pointer transition-all duration-300'>
+        <div className='relative'>
+            <div className='absolute inset-0 bg-gray-50/50 dark:bg-gray-900/50 rounded-lg blur-sm transition-all duration-300'></div>
+            <div className='relative p-3.5 bg-white dark:bg-gray-800 rounded-lg shadow-sm dark:hover:shadow-gray-700 border border-gray-50 dark:border-gray-800 transition-all duration-300 group-hover:shadow-md'>
+                <div className='flex items-center space-x-3'>
+                    <div className='flex-shrink-0'>
+                        <div
+                            className={`p-2 ${iconBg} rounded-lg group-hover:scale-105 transition-transform duration-300`}
+                        >
+                            <Icon className={`w-4 h-4 ${iconColor} stroke-[1.5]`} />
+                        </div>
+                    </div>
+                    <div className='flex-grow min-w-0'>
+                        <p className='text-xs font-medium text-gray-500 dark:text-gray-400'>{label}</p>
+                        <p className='text-sm font-semibold text-gray-800 dark:text-gray-200 truncate'>{value}</p>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div className='flex-grow'>
-            <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>{label}</p>
-            <p className='text-lg font-semibold text-gray-900 dark:text-white'>{value}</p>
         </div>
     </div>
 );
+
 const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className='bg-gradient-to-r from-blue-400 to-indigo-500 rounded-xl p-6 mb-1 w-full shadow-lg'
+        className='bg-gradient-to-r from-amber-500 to-amber-400 rounded-lg p-5 mb-1 w-full shadow-md'
     >
-        <div className='flex items-center justify-between mb-4'>
-            <div className='flex items-center space-x-4'>
-                <div className='bg-white rounded-full p-2'>
-                    <FiTruck className='text-indigo-500 text-lg' />
+        <div className='flex items-center justify-between mb-3'>
+            <div className='flex items-center space-x-3'>
+                <div className='bg-white/90 rounded-lg p-1.5'>
+                    <FiTruck className='text-indigo-500 text-base' />
                 </div>
-                <h3 className='text-xl font-bold text-white'>Đơn vị vận chuyển</h3>
+                <h3 className='text-lg font-semibold text-white'>Đơn vị vận chuyển</h3>
             </div>
             <a
                 href='https://ghn.vn/'
@@ -72,30 +104,24 @@ const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
                 rel='noreferrer'
                 className='flex items-center space-x-2 cursor-pointer'
             >
-                <img
-                    src={'../assets/ghn_logo.webp'}
-                    alt='GiaoHangNhanh Logo'
-                    width={30}
-                    height={30}
-                    className='rounded-full'
-                />
-                <span className='text-white font-medium'>GiaoHangNhanh</span>
+                <img src={'../assets/ghn_logo.webp'} alt='GiaoHangNhanh Logo' className='w-6 h-6 rounded-full' />
+                <span className='text-base text-white font-medium'>GiaoHangNhanh</span>
             </a>
         </div>
-        <div className='bg-white bg-opacity-20 rounded-lg p-4'>
-            <div className='flex items-center space-x-3 mb-2'>
-                <FiCalendar className='text-white text-xl' />
-                <p className='text-white font-medium'>Ngày giao dự kiến: {dayOfWeek}</p>
+        <div className='bg-white/10 rounded-lg p-3'>
+            <div className='flex items-center space-x-2 mb-1.5'>
+                <FiCalendar className='text-white text-base' />
+                <p className='text-base text-white font-medium'>Ngày giao dự kiến: {dayOfWeek}</p>
             </div>
-            <div className='flex items-center space-x-3 mb-2'>
-                <FiClock className='text-white text-xl' />
-                <p className='text-white font-medium'>Thời gian: {formattedDate}</p>
+            <div className='flex items-center space-x-2 mb-1.5'>
+                <FiClock className='text-white text-base' />
+                <p className='text-base text-white font-medium'>Thời gian: {formattedDate}</p>
             </div>
-            <div className='mt-3 text-white text-sm'>
+            <div className='mt-2 text-white/90 text-sm'>
                 <p>Ước tính thời gian giao hàng: 2-3 ngày làm việc</p>
                 <p className='mt-1'>
-                    <span className='font-bold'>Lưu ý</span>: Thời gian giao hàng có thể thay đổi tùy theo địa chỉ nhận
-                    hàng và tình hình giao thông thực tế.
+                    <span className='font-medium'>Lưu ý</span>: Thời gian giao hàng có thể thay đổi tùy theo địa chỉ
+                    nhận hàng và tình hình giao thông thực tế.
                 </p>
             </div>
         </div>
@@ -104,29 +130,32 @@ const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
 
 export default function DashCheckout() {
     // ==================================== Redux ====================================
-    const selectCheckoutData = (state) => {
-        const { isBuyNow, cartItems, buyNowItem } = state.checkout;
-        return isBuyNow ? buyNowItem : cartItems;
-    };
-    const isBuyNow = useSelector((state) => state.checkout.isBuyNow);
-    const { productItems, totalPrice, totalDiscountPrice, totalQuantity } = useSelector(selectCheckoutData);
-    const productInfo = useMemo(() => {
-        if (Array.isArray(productItems) && totalPrice > 0) {
-            return productItems.map((item) => ({
-                ...item.productItem,
-            }));
+    const { access_token: tokenUser, user: currentUser } = useSelector((state) => state.user);
+    const { cartItem: cartRedux } = useSelector((state) => state.cart);
+    const { isBuyNow, cartItems, buyNowItem } = useSelector((state) => state.checkout);
+    const checkoutData = isBuyNow ? buyNowItem : cartItems;
+    const { productItems, totalQuantity } = checkoutData;
+    const totalPrice = useMemo(() => {
+        if (isBuyNow) {
+            const selectedOption = productItems?.option?.find((opt) => opt.key === checkoutData.option);
+            if (selectedOption) {
+                const { price, discount } = selectedOption.value;
+                const discountedPrice = price - discount;
+                return discountedPrice * totalQuantity;
+            }
+            return 0;
         } else {
-            const producBuyNow = {
-                productItem: productItems,
-                quantity: totalQuantity,
-            };
-            return { ...producBuyNow };
+            return productItems.reduce((total, item) => {
+                const selectedOption = item.productItem?.option?.find((opt) => opt.key === item.option);
+                if (selectedOption) {
+                    const { price, discount } = selectedOption.value;
+                    const discountedPrice = price - discount;
+                    return total + discountedPrice * item.quantity;
+                }
+                return total;
+            }, 0);
         }
-    }, [productItems, totalPrice, totalQuantity]);
-
-    const tokenUser = useSelector((state) => state.user.access_token);
-    const currentUser = useSelector((state) => state.user.user);
-    const cartRedux = useSelector((state) => state.cart.cartItem);
+    }, [isBuyNow, productItems, checkoutData, totalQuantity]);
 
     // ==================================== State ====================================
     const dispatch = useDispatch();
@@ -135,8 +164,6 @@ export default function DashCheckout() {
     const [isLoading, setIsLoading] = useState(false);
     const [formOrderResponse, setFormOrderResponse] = useState(null);
     const [countdown, setCountdown] = useState(5);
-    const [urlRedirect, setUrlRedirect] = useState('');
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     // voucher state
     const [allVouchers, setAllVouchers] = useState([]);
@@ -183,7 +210,7 @@ export default function DashCheckout() {
 
     // countdown to redirect to products page if no product
     useEffect(() => {
-        if (totalPrice === 0) {
+        if (totalQuantity === 0) {
             const countdownInterval = setInterval(() => {
                 setCountdown((prev) => {
                     if (prev <= 1) {
@@ -197,7 +224,7 @@ export default function DashCheckout() {
 
             return () => clearInterval(countdownInterval);
         }
-    }, [totalPrice, navigate]);
+    }, [totalQuantity, navigate]);
 
     // redirect to payment gateway after buy now success
     useEffect(() => {
@@ -264,7 +291,7 @@ export default function DashCheckout() {
 
     // get all vouchers from API
     useEffect(() => {
-        if (totalPrice === 0) return;
+        if (totalQuantity === 0) return;
         const getAllVouchers = async () => {
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-all-coupon`);
@@ -276,7 +303,7 @@ export default function DashCheckout() {
             }
         };
         getAllVouchers();
-    }, [totalPrice]);
+    }, [totalQuantity]);
 
     // handle input change
     const handleInputChange = (e) => {
@@ -291,7 +318,7 @@ export default function DashCheckout() {
 
     // get province from api
     useEffect(() => {
-        if (totalPrice === 0) return;
+        if (totalQuantity === 0) return;
         const getProvince = async () => {
             try {
                 const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/province', {
@@ -355,7 +382,7 @@ export default function DashCheckout() {
     }, [formData?.address.district?.value]);
 
     // handle confirm info
-    const handleConfirmInfo = () => {
+    const handleConfirmInfo = useCallback(() => {
         if (
             !formData.fullName ||
             !formData.email ||
@@ -429,41 +456,44 @@ export default function DashCheckout() {
             };
             handleSaveInfoUser();
         }
-    };
+    }, []);
 
     // ==================================== Call API GNH ====================================
     const totalWeight = useMemo(() => {
-        if (Array.isArray(productItems) && totalPrice > 0) {
+        if (Array.isArray(productItems) && totalQuantity > 0) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.weight, 0));
         } else {
             return Math.ceil(productItems.weight);
         }
-    }, [productItems, totalPrice]);
+    }, [productItems, totalQuantity]);
+
     const totalHeight = useMemo(() => {
-        if (Array.isArray(productItems) && totalPrice > 0) {
+        if (Array.isArray(productItems) && totalQuantity > 0) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.height, 0) / 10);
         } else {
             return Math.ceil(productItems.height);
         }
-    }, [productItems, totalPrice]);
+    }, [productItems, totalQuantity]);
+
     const totalLength = useMemo(() => {
-        if (Array.isArray(productItems) && totalPrice > 0) {
+        if (Array.isArray(productItems) && totalQuantity > 0) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.length, 0) / 10);
         } else {
             return Math.ceil(productItems.length);
         }
-    }, [productItems, totalPrice]);
+    }, [productItems, totalQuantity]);
+
     const totalWidth = useMemo(() => {
-        if (Array.isArray(productItems) && totalPrice > 0) {
+        if (Array.isArray(productItems) && totalQuantity > 0) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.width, 0) / 10);
         } else {
             return Math.ceil(productItems.width);
         }
-    }, [productItems, totalPrice]);
+    }, [productItems, totalQuantity]);
 
     // calculate fee ship
     useEffect(() => {
-        if (totalPrice === 0) return;
+        if (totalQuantity === 0) return;
         else {
             const calculateFeeShip = async () => {
                 try {
@@ -501,7 +531,7 @@ export default function DashCheckout() {
 
     // calculate the expected delivery time
     useEffect(() => {
-        if (totalPrice === 0) return;
+        if (totalQuantity === 0) return;
         const calculateExpectedDeliveryTime = async () => {
             try {
                 const res = await axios.get(
@@ -540,9 +570,9 @@ export default function DashCheckout() {
 
     // ==================================== Call API to create order ====================================
     // handle choose payment method
-    const handleChoosePaymentMethod = (idMethod) => {
+    const handleChoosePaymentMethod = useCallback((idMethod) => {
         setPaymentMethod(idMethod);
-    };
+    }, []);
 
     // handle select voucher in modal vouchers
     const handleApplyVoucher = useCallback(
@@ -550,7 +580,7 @@ export default function DashCheckout() {
             if (voucher) {
                 setSelectedVoucher(voucher);
                 setAppliedVoucher(voucher.couponCode);
-                const discountPrice = totalPrice * (voucher.discount / 100);
+                const discountPrice = (totalPrice + shippingFee) * (voucher.discount / 100);
                 setVoucherPrice(discountPrice);
             } else {
                 setSelectedVoucher(null);
@@ -558,7 +588,7 @@ export default function DashCheckout() {
                 setVoucherPrice(0);
             }
         },
-        [totalPrice],
+        [shippingFee, totalPrice],
     );
 
     // handle apply voucher code
@@ -607,10 +637,7 @@ export default function DashCheckout() {
     };
 
     // calculate total amount
-    const totalAmount = useMemo(
-        () => totalPrice + shippingFee - totalDiscountPrice - (appliedVoucher ? voucherPrice : 0),
-        [totalPrice, shippingFee, totalDiscountPrice, appliedVoucher, voucherPrice],
-    );
+    const totalAmount = totalPrice + shippingFee - (appliedVoucher ? voucherPrice : 0);
 
     // handle create order function
     const handleCreateOrder = async () => {
@@ -741,413 +768,543 @@ export default function DashCheckout() {
         );
     }
 
-    return (
-        <div className='w-full min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6 lg:p-8'>
-            <div className='max-w-7xl mx-auto'>
-                {totalPrice > 0 ? (
-                    <div className='flex flex-col lg:flex-row gap-8'>
-                        {/* Left Column */}
-                        <div className='w-full lg:w-3/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
-                            <div className='mb-6'>
-                                <div className='space-y-4 dark:bg-gray-800 p-6 rounded-xl'>
-                                    <div className='flex items-center justify-between'>
-                                        <h3 className='font-semibold text-xl text-gray-700 dark:text-gray-300 mb-4'>
-                                            Thông tin người nhận
-                                        </h3>
-                                        <Button
-                                            className='focus:!ring-0'
-                                            onClick={() => setShowModalEditAddress(true)}
-                                            size='sm'
-                                            outline
-                                        >
-                                            <CiEdit className='mr-2 mt-1' />
-                                            Chỉnh sửa thông tin
-                                        </Button>
-                                    </div>
-                                    <InfoItem icon={CiUser} label='Họ và Tên' value={infoItemData.fullName} />
-                                    <InfoItem icon={CiMail} label='Email' value={infoItemData.email} />
-                                    <InfoItem icon={CiPhone} label='Số điện thoại' value={infoItemData.phone} />
-                                    <InfoItem icon={CiHome} label='Địa chỉ nhận hàng' value={infoItemData.address} />
-                                </div>
-                            </div>
+    const ModalEditAddress = () => {
+        return (
+            <Modal
+                show={showModalEditAddress}
+                onClose={() => setShowModalEditAddress(false)}
+                size='md'
+                className='!p-0'
+            >
+                <div className='absolute inset-0 bg-gradient-to-br from-amber-50/90 via-white/90 to-purple-50/90 dark:from-gray-900/90 dark:via-gray-800/90 dark:to-purple-900/90 backdrop-blur-sm rounded-lg' />
 
-                            <div className='mb-8'>
-                                <h3 className='font-semibold text-xl text-gray-800 dark:text-gray-200 mb-6'>
-                                    Phương thức thanh toán
-                                </h3>
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                    <PaymentMethod
-                                        selectedPayment={paymentMethod}
-                                        onSelect={handleChoosePaymentMethod}
-                                        id='cash'
-                                        name='paymentMethod'
-                                        label='Tiền mặt'
-                                        imageSrc='../assets/payCash.png'
-                                    />
-                                    <PaymentMethod
-                                        selectedPayment={paymentMethod}
-                                        onSelect={handleChoosePaymentMethod}
-                                        id='vnpay'
-                                        name='paymentMethod'
-                                        label='VNPAY'
-                                        imageSrc='../assets/vnpayPayment.jpg'
-                                    />
-                                    <PaymentMethod
-                                        selectedPayment={paymentMethod}
-                                        onSelect={handleChoosePaymentMethod}
-                                        id='momo'
-                                        name='paymentMethod'
-                                        label='Ví Momo'
-                                        imageSrc='../assets/momoPayment.png'
-                                    />
-                                    <PaymentMethod
-                                        selectedPayment={paymentMethod}
-                                        onSelect={handleChoosePaymentMethod}
-                                        id='credit'
-                                        name='paymentMethod'
-                                        label='Thẻ tín dụng/Ghi nợ'
-                                        imageSrc='../assets/creditCard.png'
-                                    />
-                                </div>
-                            </div>
+                <Modal.Header className='relative border-b border-amber-200/30 dark:border-amber-700/30'>
+                    <div className='flex items-center gap-4'>
+                        <div className='p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg'>
+                            <FaUserEdit className='text-white text-xl animate-pulse' />
+                        </div>
+                        <div>
+                            <h3 className='text-xl font-serif font-bold bg-gradient-to-r from-amber-700 via-amber-600 to-purple-700 bg-clip-text text-transparent'>
+                                Thông tin giao hàng
+                            </h3>
+                            <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                Vui lòng điền đầy đủ thông tin bên dưới
+                            </p>
+                        </div>
+                    </div>
+                </Modal.Header>
 
-                            <Modal show={showModalEditAddress} onClose={() => setShowModalEditAddress(false)} size='md'>
-                                <Modal.Header className='flex items-center space-x-4'>
-                                    <div className='flex items-center space-x-4'>
-                                        <FaUserEdit className='text-blue-500 text-3xl' />
-                                        <h3 className='text-xl font-semibold text-gray-900 dark:text-white'>
-                                            Gửi hàng cho người khác
-                                        </h3>
-                                    </div>
-                                </Modal.Header>
-                                <Modal.Body className='space-y-5'>
-                                    <div className='flex justify-between items-center'>
-                                        <div className='flex items-center gap-x-2'>
-                                            <Radio
-                                                id='thisUser'
-                                                checked={selectedOption === 'thisUser'}
-                                                onChange={() => setSelectedOption('thisUser')}
-                                            />
-                                            <Label htmlFor='thisUser' className='text-gray-700 dark:text-gray-300'>
-                                                Thông tin của tôi
-                                            </Label>
-                                        </div>
-                                        <div className='flex items-center gap-x-2'>
-                                            <Radio
-                                                id='anotherUser'
-                                                checked={selectedOption === 'anotherUser'}
-                                                onChange={() => setSelectedOption('anotherUser')}
-                                            />
-                                            <Label htmlFor='anotherUser' className='text-gray-700 dark:text-gray-300'>
-                                                Gửi hàng cho người khác
-                                            </Label>
-                                        </div>
-                                    </div>
-                                    <>
-                                        <TextInput
-                                            icon={CiUser}
-                                            type='text'
-                                            name='fullName'
-                                            placeholder='Họ và Tên người nhận'
-                                            value={formData.fullName}
-                                            onChange={handleInputChange}
-                                        />
-                                        <TextInput
-                                            icon={CiMail}
-                                            type='email'
-                                            name='email'
-                                            placeholder='Email người nhận'
-                                            value={formData.email}
-                                            onChange={handleInputChange}
-                                        />
-                                        <TextInput
-                                            icon={CiPhone}
-                                            type='text'
-                                            name='phone'
-                                            placeholder='Số điện thoại người nhận'
-                                            value={formData.phone}
-                                            onChange={handleInputChange}
-                                        />
-                                        <Select
-                                            placeholder='Chọn Thành Phố'
-                                            className='w-full h-10'
-                                            options={
-                                                provinces?.map((province) => ({
-                                                    label: province.ProvinceName,
-                                                    value: province.ProvinceID,
-                                                })) ?? []
-                                            }
-                                            value={formData.address.province.label || null}
-                                            onChange={(value) => {
-                                                const selectedProvince = provinces.find(
-                                                    (province) => province.ProvinceID === value,
-                                                );
-                                                setFormData({
-                                                    ...formData,
-                                                    address: {
-                                                        ...formData.address,
-                                                        province: {
-                                                            label: selectedProvince.NameExtension[1],
-                                                            value: value,
-                                                        },
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                        <Select
-                                            placeholder='Chọn Quận/Huyện'
-                                            className='w-full h-10'
-                                            options={
-                                                districts?.map((district) => ({
-                                                    label: district.DistrictName,
-                                                    value: district.DistrictID,
-                                                })) ?? []
-                                            }
-                                            value={formData.address.district.label || null}
-                                            onChange={(value) => {
-                                                const selectedDistrict = districts.find(
-                                                    (district) => district.DistrictID === value,
-                                                );
-                                                setFormData({
-                                                    ...formData,
-                                                    address: {
-                                                        ...formData.address,
-                                                        district: {
-                                                            label: selectedDistrict.NameExtension[0],
-                                                            value: value,
-                                                        },
-                                                    },
-                                                });
-                                            }}
-                                        />
-                                        <Select
-                                            placeholder='Chọn Phường/Xã'
-                                            className='w-full h-10'
-                                            options={
-                                                wards?.map((ward) => ({
-                                                    label: ward.WardName,
-                                                    value: ward.WardCode,
-                                                })) ?? []
-                                            }
-                                            value={formData.address.ward.label || null}
-                                            onChange={(value) => {
-                                                const selectedWard = wards.find((ward) => ward.WardCode === value);
-                                                setFormData({
-                                                    ...formData,
-                                                    address: {
-                                                        ...formData.address,
-                                                        ward: {
-                                                            label: selectedWard.NameExtension[0],
-                                                            value: value,
-                                                        },
-                                                    },
-                                                });
-                                            }}
-                                        />
+                <Modal.Body className='relative space-y-4 px-6'>
+                    {/* Radio Options */}
+                    <div className='flex justify-between items-center p-4 bg-gradient-to-r from-amber-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-sm'>
+                        <div className='flex items-center gap-x-3'>
+                            <Radio
+                                id='thisUser'
+                                checked={selectedOption === 'thisUser'}
+                                onChange={() => setSelectedOption('thisUser')}
+                                className='text-amber-500 focus:ring-amber-500 cursor-pointer'
+                            />
+                            <Label
+                                htmlFor='thisUser'
+                                className='text-gray-700 dark:text-gray-300 font-medium cursor-pointer'
+                            >
+                                Thông tin của tôi
+                            </Label>
+                        </div>
+                        <div className='flex items-center gap-x-3'>
+                            <Radio
+                                id='anotherUser'
+                                checked={selectedOption === 'anotherUser'}
+                                onChange={() => setSelectedOption('anotherUser')}
+                                className='text-amber-500 focus:ring-amber-500 cursor-pointer'
+                            />
+                            <Label
+                                htmlFor='anotherUser'
+                                className='text-gray-700 dark:text-gray-300 font-medium cursor-pointer'
+                            >
+                                Gửi cho người khác
+                            </Label>
+                        </div>
+                    </div>
 
-                                        <TextInput
-                                            type='text'
-                                            className='w-full'
-                                            placeholder='Số nhà, tên đường'
-                                            onChange={(e) =>
-                                                setFormData({
-                                                    ...formData,
-                                                    address: {
-                                                        ...formData.address,
-                                                        street: e.target.value,
-                                                    },
-                                                })
-                                            }
-                                        />
-                                    </>
-                                </Modal.Body>
-                                <Modal.Footer className='flex justify-between h-16'>
-                                    <Button
-                                        className='focus:!ring-0'
-                                        color='gray'
-                                        onClick={() => setShowModalEditAddress(false)}
-                                    >
-                                        Hủy
-                                    </Button>
-                                    <Button className='focus:!ring-0' color='blue' onClick={handleConfirmInfo}>
-                                        Xác nhận
-                                    </Button>
-                                </Modal.Footer>
-                            </Modal>
+                    {/* Form Fields */}
+                    <div className='space-y-4'>
+                        <h4 className='text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2'>
+                            <span className='w-[30%] h-[1px] bg-gradient-to-r from-amber-500 to-transparent' />
+                            Thông tin cá nhân
+                        </h4>
+                        <div className='group'>
+                            <TextInput
+                                icon={CiUser}
+                                type='text'
+                                name='fullName'
+                                placeholder='Họ và Tên người nhận'
+                                value={formData.fullName}
+                                onChange={handleInputChange}
+                                className='focus:border-amber-500 focus:ring-amber-500'
+                            />
                         </div>
 
-                        {/* Right Column */}
-                        <div className='w-full lg:w-2/5 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6'>
-                            <div className='flex flex-col justify-start items-start mb-1'>
-                                <h2 className='text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-5'>
-                                    Thông tin đơn hàng
-                                </h2>
+                        <div className='grid grid-cols-2 gap-4'>
+                            <TextInput
+                                icon={CiMail}
+                                type='email'
+                                name='email'
+                                placeholder='Email người nhận'
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className='focus:border-amber-500 focus:ring-amber-500'
+                            />
+                            <TextInput
+                                icon={CiPhone}
+                                type='text'
+                                name='phone'
+                                placeholder='Số điện thoại'
+                                value={formData.phone}
+                                onChange={handleInputChange}
+                                className='focus:border-amber-500 focus:ring-amber-500'
+                            />
+                        </div>
+
+                        <h4 className='text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2'>
+                            <span className='w-[30%] h-[1px] bg-gradient-to-r from-amber-500 to-transparent'></span>
+                            Địa chỉ giao hàng
+                        </h4>
+
+                        <div className='space-y-4'>
+                            <Select
+                                placeholder='Chọn Thành Phố'
+                                className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
+                                options={
+                                    provinces?.map((province) => ({
+                                        label: province.ProvinceName,
+                                        value: province.ProvinceID,
+                                    })) ?? []
+                                }
+                                value={formData.address.province.label || null}
+                                onChange={(value) => {
+                                    const selectedProvince = provinces.find(
+                                        (province) => province.ProvinceID === value,
+                                    );
+                                    setFormData({
+                                        ...formData,
+                                        address: {
+                                            ...formData.address,
+                                            province: {
+                                                label: selectedProvince.NameExtension[1],
+                                                value: value,
+                                            },
+                                            district: {
+                                                label: '',
+                                                value: null,
+                                            },
+                                            ward: {
+                                                label: '',
+                                                value: null,
+                                            },
+                                        },
+                                    });
+                                }}
+                            />
+
+                            <div className='grid grid-cols-2 gap-4'>
+                                <Select
+                                    placeholder='Quận/Huyện'
+                                    className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
+                                    options={
+                                        districts?.map((district) => ({
+                                            label: district.DistrictName,
+                                            value: district.DistrictID,
+                                        })) ?? []
+                                    }
+                                    value={formData.address.district.label || null}
+                                    onChange={(value) => {
+                                        const selectedDistrict = districts.find(
+                                            (district) => district.DistrictID === value,
+                                        );
+                                        setFormData({
+                                            ...formData,
+                                            address: {
+                                                ...formData.address,
+                                                district: {
+                                                    label: selectedDistrict.NameExtension[0],
+                                                    value: value,
+                                                },
+                                            },
+                                        });
+                                    }}
+                                />
+                                <Select
+                                    placeholder='Phường/Xã'
+                                    className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
+                                    options={
+                                        wards?.map((ward) => ({
+                                            label: ward.WardName,
+                                            value: ward.WardCode,
+                                        })) ?? []
+                                    }
+                                    value={formData.address.ward.label || null}
+                                    onChange={(value) => {
+                                        const selectedWard = wards.find((ward) => ward.WardCode === value);
+                                        setFormData({
+                                            ...formData,
+                                            address: {
+                                                ...formData.address,
+                                                ward: {
+                                                    label: selectedWard.NameExtension[0],
+                                                    value: value,
+                                                },
+                                            },
+                                        });
+                                    }}
+                                />
+                            </div>
+
+                            <TextInput
+                                type='text'
+                                icon={CiHome}
+                                className='w-full focus:border-amber-500 focus:ring-amber-500'
+                                placeholder='Số nhà, tên đường'
+                                onChange={(e) =>
+                                    setFormData({
+                                        ...formData,
+                                        address: {
+                                            ...formData.address,
+                                            street: e.target.value,
+                                        },
+                                    })
+                                }
+                            />
+                        </div>
+                    </div>
+                </Modal.Body>
+
+                <Modal.Footer className='relative border-t border-amber-200/30 dark:border-amber-700/30'>
+                    <div className='flex items-center justify-between w-full'>
+                        <Button
+                            color='gray'
+                            onClick={() => setShowModalEditAddress(false)}
+                            className='!ring-0 hover:bg-gray-100 dark:hover:bg-gray-600'
+                        >
+                            Hủy
+                        </Button>
+                        <Button
+                            onClick={handleConfirmInfo}
+                            className='!ring-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
+                        >
+                            <span className='flex items-center justify-center gap-x-2'>
+                                Xác nhận
+                                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                                    <path
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                        strokeWidth={2}
+                                        d='M5 13l4 4L19 7'
+                                    />
+                                </svg>
+                            </span>
+                        </Button>
+                    </div>
+                </Modal.Footer>
+            </Modal>
+        );
+    };
+
+    return (
+        <div className='min-h-screen py-10'>
+            {isLoading && (
+                <div className='fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50'>
+                    <div className='relative bg-white/90 dark:bg-gray-800/90 p-8 rounded-2xl shadow-2xl'>
+                        <div className='absolute inset-0 bg-gradient-to-r from-amber-100/20 to-purple-100/20 rounded-2xl blur-xl' />
+                        <div className='relative flex flex-col items-center'>
+                            <div className='w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-4' />
+                            <p className='text-lg font-medium bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent'>
+                                Đang xử lý đơn hàng...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className='max-w-8xl mx-auto px-4 sm:px-6 lg:px-10'>
+                {/* Header */}
+                <div className='text-center mb-7'>
+                    <h1 className='font-serif text-4xl font-bold bg-gradient-to-r from-amber-700 via-amber-600 to-purple-700 bg-clip-text text-transparent mb-2'>
+                        Thanh toán đơn hàng
+                    </h1>
+                    <div className='w-[20rem] h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent mx-auto rounded-full'></div>
+                </div>
+
+                {totalQuantity > 0 ? (
+                    <div className='space-y-8'>
+                        {/* Banner */}
+                        <div className='relative overflow-hidden'>
+                            <div className='px-1'>
                                 <ExpectedDeliveryTime dayOfWeek={dayOfWeek} formattedDate={formattedDate} />
                             </div>
-                            <div className='space-y-4 rounded-lg my-5'>
-                                {Array.isArray(productItems) ? (
-                                    productInfo.map((_, index) => {
-                                        return (
-                                            <ProductInfo_CheckoutPage_Component
-                                                key={index}
-                                                dataProduct={productItems[index]}
-                                            />
-                                        );
-                                    })
-                                ) : (
-                                    <ProductInfo_CheckoutPage_Component dataProduct={productInfo} />
-                                )}
-                            </div>
-                            <div className='mb-5'>
-                                {selectedVoucher ? (
-                                    <SelectedVoucher_Component
-                                        voucher={selectedVoucher}
-                                        onRemove={() => setSelectedVoucher(null)}
-                                    />
-                                ) : (
-                                    <>
-                                        <div className='flex items-center mb-2'>
-                                            <TextInput
-                                                type='text'
-                                                placeholder='Nhập mã khuyến mãi'
-                                                className='flex-grow mr-2'
-                                                value={voucherCode}
-                                                onChange={(e) => setVoucherCode(e.target.value)}
-                                            />
-                                            <Button
-                                                className='focus:!ring-0'
-                                                onClick={handleApplyVoucherCode}
-                                                color='blue'
-                                            >
-                                                Áp dụng
-                                            </Button>
+                        </div>
+
+                        <div className='flex flex-col lg:flex-row gap-8'>
+                            {/* Left Column */}
+                            <div className='w-full lg:w-3/5 space-y-8'>
+                                {/* User Information Card */}
+                                <div className='relative'>
+                                    <div className='absolute inset-0 bg-gradient-to-tr from-amber-100/20 via-purple-100/10 to-transparent rounded-3xl blur-xl' />
+                                    <div className='relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-amber-200/50 dark:border-amber-700/50 overflow-hidden'>
+                                        <div className='px-8 py-6'>
+                                            <div className='flex justify-between items-center mb-3'>
+                                                <div className='flex items-center gap-4'>
+                                                    <div className='p-3 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl'>
+                                                        <CiUser className='w-5 h-5 text-white' />
+                                                    </div>
+                                                    <h2 className='font-serif text-2xl font-bold text-gray-800 dark:text-gray-200'>
+                                                        Thông tin người nhận
+                                                    </h2>
+                                                </div>
+                                                <Button
+                                                    onClick={() => setShowModalEditAddress(true)}
+                                                    className='!ring-0 flex items-center justify-center bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 
+                                                    hover:to-amber-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-amber-200/50'
+                                                >
+                                                    <CiEdit className='w-5 h-5' />
+                                                    Chỉnh sửa
+                                                </Button>
+                                            </div>
+
+                                            <div className='grid grid-cols-1 md:grid-cols-3 gap-2'>
+                                                <InfoItem
+                                                    icon={FiUser}
+                                                    label='Họ và Tên'
+                                                    value={infoItemData.fullName}
+                                                    iconColor='text-blue-600 dark:text-blue-400'
+                                                    iconBg='bg-blue-50 dark:bg-blue-900/30'
+                                                />
+                                                <InfoItem
+                                                    icon={FiPhone}
+                                                    label='Số điện thoại'
+                                                    value={infoItemData.phone}
+                                                    iconColor='text-green-600 dark:text-green-400'
+                                                    iconBg='bg-green-50 dark:bg-green-900/30'
+                                                />
+                                                <InfoItem
+                                                    icon={FiMail}
+                                                    label='Email'
+                                                    value={infoItemData.email}
+                                                    iconColor='text-purple-600 dark:text-purple-400'
+                                                    iconBg='bg-purple-50 dark:bg-purple-900/30'
+                                                />
+                                                <div className='col-span-3'>
+                                                    <InfoItem
+                                                        icon={FiHome}
+                                                        label='Địa chỉ'
+                                                        value={infoItemData.address}
+                                                        iconColor='text-rose-600 dark:text-rose-400'
+                                                        iconBg='bg-rose-50 dark:bg-rose-900/30'
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div
-                                            onClick={() => setOpenModalVoucher(true)}
-                                            className='flex items-center gap-x-1 cursor-pointer'
-                                        >
-                                            <RiCoupon3Fill className='text-blue-600 text-sm' />
-                                            <button
-                                                className='text-blue-600 hover:text-blue-800 
-                                dark:text-blue-400 dark:hover:text-blue-300 text-sm'
-                                            >
-                                                Chọn mã khuyến mãi khác
+                                    </div>
+                                </div>
+
+                                <ModalEditAddress />
+
+                                {/* Payment Methods Card */}
+                                <div className='relative'>
+                                    <div className='absolute inset-0 bg-gradient-to-tr from-purple-100/20 via-amber-100/10 to-transparent rounded-3xl blur-xl' />
+                                    <div className='relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-amber-200/50 dark:border-amber-700/50 overflow-hidden'>
+                                        <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200/50 dark:border-gray-700/50'>
+                                            <div className='flex items-center gap-3 mb-6'>
+                                                <div className='p-2 bg-green-100 dark:bg-green-900 rounded-lg'>
+                                                    <RiCoupon3Fill className='w-6 h-6 text-green-600 dark:text-green-300' />
+                                                </div>
+                                                <h2 className='text-xl font-semibold text-gray-800 dark:text-gray-200'>
+                                                    Phương thức thanh toán
+                                                </h2>
+                                            </div>
+
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                                <PaymentMethod
+                                                    id='cash'
+                                                    label='Tiền mặt'
+                                                    imageSrc='../assets/payCash.png'
+                                                    selectedPayment={paymentMethod}
+                                                    onSelect={handleChoosePaymentMethod}
+                                                />
+                                                <PaymentMethod
+                                                    id='vnpay'
+                                                    label='VNPAY'
+                                                    imageSrc='../assets/vnpayPayment.jpg'
+                                                    selectedPayment={paymentMethod}
+                                                    onSelect={handleChoosePaymentMethod}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Column - Order Summary */}
+                            <div className='w-full lg:w-2/5'>
+                                <div className='relative'>
+                                    <div className='absolute inset-0 bg-gradient-to-tr from-amber-100/20 via-purple-100/10 to-transparent rounded-3xl blur-xl' />
+                                    <div className='relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-amber-200/50 dark:border-amber-700/50'>
+                                        <div className='px-8 py-6'>
+                                            {/* Order Summary Header */}
+                                            <div className='text-center mb-6'>
+                                                <h3 className='font-serif text-xl text-transparent bg-clip-text bg-gradient-to-r from-amber-700 via-amber-600 to-amber-700 animate-shimmer'>
+                                                    Thông tin đơn hàng
+                                                </h3>
+                                                <div className='w-28 h-0.5 mx-auto mt-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent' />
+                                            </div>
+
+                                            {/* Products List */}
+                                            <div className='space-y-6 mb-8'>
+                                                {!isBuyNow ? (
+                                                    productItems.map((item, index) => (
+                                                        <ProductInfo_CheckoutPage_Component
+                                                            key={index}
+                                                            dataProduct={{
+                                                                ...item,
+                                                                selectedOption: item.productItem?.option?.find(
+                                                                    (opt) => opt.key === item.option,
+                                                                )?.value,
+                                                            }}
+                                                        />
+                                                    ))
+                                                ) : (
+                                                    <ProductInfo_CheckoutPage_Component
+                                                        dataProduct={{
+                                                            ...productItems,
+                                                            selectedOption: productItems?.option?.find(
+                                                                (opt) => opt.key === checkoutData.option,
+                                                            )?.value,
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+
+                                            <div className='space-y-4 border-t border-amber-200/50 dark:border-amber-700/50 py-5'>
+                                                {appliedVoucher ? (
+                                                    <SelectedVoucher_Component
+                                                        voucher={selectedVoucher}
+                                                        onRemove={() => {
+                                                            setSelectedVoucher(null);
+                                                            setAppliedVoucher(null);
+                                                            setVoucherPrice(0);
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className='flex gap-2'>
+                                                        <TextInput
+                                                            type='text'
+                                                            placeholder='Nhập mã giảm giá'
+                                                            value={voucherCode}
+                                                            onChange={(e) => setVoucherCode(e.target.value)}
+                                                            className='flex-1'
+                                                        />
+                                                        <Button
+                                                            onClick={handleApplyVoucherCode}
+                                                            className='!ring-0 bg-amber-500 hover:bg-amber-600'
+                                                        >
+                                                            Áp dụng
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setOpenModalVoucher(true)}
+                                                            className='!ring-0 bg-blue-500 hover:bg-blue-600'
+                                                        >
+                                                            Chọn voucher
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                                <VoucherModal_Component
+                                                    vouchers={allVouchers}
+                                                    isOpen={openModalVoucher}
+                                                    onClose={() => setOpenModalVoucher(false)}
+                                                    onApplyVoucher={handleApplyVoucher}
+                                                    totalAmount={totalPrice}
+                                                    selectedVoucher={selectedVoucher}
+                                                />
+                                            </div>
+
+                                            {/* Price Summary */}
+                                            <div className='space-y-4 border-t border-amber-200/50 dark:border-amber-700/50 pt-6'>
+                                                <div className='flex justify-between text-gray-600 dark:text-gray-400'>
+                                                    <span>Tạm tính</span>
+                                                    <span className='font-medium'>{formatPrice(totalPrice)}</span>
+                                                </div>
+                                                <div className='flex justify-between text-gray-600 dark:text-gray-400'>
+                                                    <span>Phí vận chuyển</span>
+                                                    <span>{formatPrice(shippingFee)}</span>
+                                                </div>
+                                                {appliedVoucher && voucherPrice > 0 && (
+                                                    <div className='flex justify-between text-green-600'>
+                                                        <span>Giảm giá</span>
+                                                        <span>- {formatPrice(voucherPrice)}</span>
+                                                    </div>
+                                                )}
+                                                <div className='flex justify-between items-center text-xl pt-3 border-t border-amber-200/30 dark:border-amber-800/30'>
+                                                    <span className='font-serif text-gray-800 dark:text-gray-200 tracking-wide'>
+                                                        Tổng thanh toán
+                                                    </span>
+                                                    <span
+                                                        className='font-montserrat font-medium tracking-wide 
+                                                    bg-gradient-to-r from-amber-900 via-amber-800 to-amber-900 
+                                                    dark:from-amber-400 dark:via-amber-300 dark:to-amber-400 
+                                                    bg-clip-text text-transparent text-2xl'
+                                                    >
+                                                        {formatPrice(totalAmount)}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Checkout Button */}
+                                            <button onClick={handleCreateOrder} className='w-full mt-8 relative group'>
+                                                <div
+                                                    className='relative px-6 py-3.5 bg-amber-500 rounded-lg 
+                                                    transform transition-all duration-300 
+                                                    group-hover:-translate-y-0.5 group-hover:shadow-lg
+                                                    group-active:translate-y-0'
+                                                >
+                                                    <div className='absolute inset-0 rounded-lg bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300'></div>
+
+                                                    <div className='absolute inset-0 rounded-lg overflow-hidden'>
+                                                        <div
+                                                            className='absolute top-0 left-0 w-full h-full 
+                                                        bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] 
+                                                    bg-[length:250%_250%,100%_100%] 
+                                                    group-hover:animate-shine'
+                                                        />
+                                                    </div>
+
+                                                    <div className='flex items-center justify-center gap-2'>
+                                                        <span className='relative text-sm font-medium text-white tracking-wide'>
+                                                            Xác nhận đặt hàng
+                                                        </span>
+                                                        <svg
+                                                            className='w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-0.5'
+                                                            fill='none'
+                                                            stroke='currentColor'
+                                                            viewBox='0 0 24 24'
+                                                        >
+                                                            <path
+                                                                strokeLinecap='round'
+                                                                strokeLinejoin='round'
+                                                                strokeWidth={2}
+                                                                d='M5 13l4 4L19 7'
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                </div>
                                             </button>
                                         </div>
-                                    </>
-                                )}
-                            </div>
-                            <VoucherModal_Component
-                                isOpen={openModalVoucher}
-                                onClose={() => setOpenModalVoucher(false)}
-                                onApplyVoucher={handleApplyVoucher}
-                                totalAmount={totalAmount}
-                                vouchers={allVouchers}
-                            />
-                            <div className='space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4'>
-                                <div className='flex justify-between'>
-                                    <span className='text-gray-600 dark:text-gray-400'>Tạm tính</span>
-                                    <span className='font-semibold text-gray-800 dark:text-gray-200'>
-                                        {formatPrice(totalPrice)}
-                                    </span>
-                                </div>
-                                <div className='flex justify-between'>
-                                    <span className='text-gray-600 dark:text-gray-400'>Phí vận chuyển</span>
-                                    <span className='font-semibold text-gray-800 dark:text-gray-200'>
-                                        {formatPrice(shippingFee)}
-                                    </span>
-                                </div>
-                                {appliedVoucher && voucherPrice !== 0 && (
-                                    <div className='flex justify-between'>
-                                        <span className='text-gray-600 dark:text-gray-400'>
-                                            Giảm giá phí vận chuyển
-                                        </span>
-                                        <span className='font-semibold text-green-500'>
-                                            - {formatPrice(voucherPrice)}
-                                        </span>
                                     </div>
-                                )}
-                                {totalDiscountPrice > 0 && (
-                                    <div className='flex justify-between'>
-                                        <span className='text-gray-600 dark:text-gray-400'>Giảm giá từ Deal</span>
-                                        <span className='font-semibold text-green-500'>
-                                            - {formatPrice(totalDiscountPrice)}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className='border-t border-gray-200 dark:border-gray-700 pt-4 mt-4'>
-                                <div className='flex justify-between items-center'>
-                                    <span className='text-lg font-semibold text-gray-800 dark:text-gray-200'>
-                                        Tổng cộng
-                                    </span>
-                                    <span className='text-2xl font-bold text-blue-600 dark:text-blue-400'>
-                                        {formatPrice(totalAmount)}
-                                    </span>
                                 </div>
-                                <p className='text-sm text-gray-500 dark:text-gray-400 mb-3 text-end mt-1'>
-                                    (Đã bao gồm thuế VAT)
-                                </p>
-                                <Button
-                                    onClick={handleCreateOrder}
-                                    color='blue'
-                                    size='lg'
-                                    className='w-full focus:!ring-0'
-                                >
-                                    Đặt hàng
-                                </Button>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className='min-h-[60vh] flex flex-col items-center justify-center p-8'>
-                        <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className='relative'
-                        >
-                            <div className='absolute -top-2 -right-2'>
-                                <span className='relative flex h-4 w-4'>
-                                    <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75'></span>
-                                    <span className='relative inline-flex rounded-full h-4 w-4 bg-blue-500'></span>
-                                </span>
-                            </div>
-                            <IoCartOutline className='w-32 h-32 text-gray-400 mb-4' />
-                        </motion.div>
-
-                        <motion.h2
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className='text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4 text-center'
-                        >
-                            Giỏ hàng của bạn đang trống
-                        </motion.h2>
-
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.3 }}
-                            className='text-gray-500 dark:text-gray-400 text-center mb-8 flex items-center gap-2'
-                        >
-                            Đang chuyển hướng đến trang sản phẩm... <span>({countdown}s)</span>
-                        </motion.p>
-
-                        <motion.div
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.4 }}
-                            className='w-32 h-1 bg-gray-200 rounded-full'
-                        >
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: '100%' }}
-                                transition={{ duration: 5 }}
-                                className='h-full bg-blue-500 rounded-full'
-                            />
-                        </motion.div>
-                    </div>
+                    <EmptyCheckout countdown={countdown} />
                 )}
             </div>
         </div>

@@ -20,7 +20,7 @@ export default function Footer_Component() {
                 pathname.startsWith('/admin')
                     ? 'hidden'
                     : 'block'
-            } border-t-8 border-gray-300 bg-gradient-to-b from-gray-50 to-white`}
+            } border-t-8 border-gray-300 dark:border-gray-700 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800`}
         >
             <div className='w-full px-4 md:px-8'>
                 <div className='grid w-full grid-cols-1 gap-8 py-5 px-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>

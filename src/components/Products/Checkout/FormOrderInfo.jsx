@@ -1,21 +1,21 @@
-import { useMemo } from 'react';
+import { Image } from 'antd';
+import { useCallback } from 'react';
 import { FaShoppingCart } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const OrderDetails = () => {
-    const orderData = useSelector((state) => state.checkout.orderDetail);
-    console.log(orderData);
+    const { orderDetail: orderData } = useSelector((state) => state.checkout);
     const navigate = useNavigate();
 
-    const formatPrice = (price) => {
+    const formatPrice = useCallback((price) => {
         return new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND',
         }).format(price);
-    };
+    }, []);
 
-    const formatDate = (dateString) => {
+    const formatDate = useCallback((dateString) => {
         return new Date(dateString).toLocaleDateString('vi-VN', {
             year: 'numeric',
             month: '2-digit',
@@ -25,60 +25,116 @@ const OrderDetails = () => {
             second: '2-digit',
             hour12: false,
         });
-    };
+    }, []);
 
-    const priceProduct = useMemo(() => {
-        return orderData.products.reduce((total, product) => {
-            return total + (product.product.price - product.product.discount) * product.quantity;
-        }, 0);
-    }, [orderData.products]);
+    const calculateProductPrice = useCallback((product) => {
+        const basePrice = product.product.option.value.price;
+        const discount = product.product.option.value.discount;
+        const quantity = product.quantity;
+        return (basePrice - discount) * quantity;
+    }, []);
+
+    const calculateTotalDiscount = useCallback((product) => {
+        return product.product.option.value.discount * product.quantity;
+    }, []);
 
     return (
-        <div className='min-h-screen bg-gray-50 py-8 px-4'>
+        <div className='min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-10 px-4'>
             <div className='max-w-7xl mx-auto'>
                 {/* Main Content */}
-                <div className='bg-white rounded-xl shadow-lg overflow-hidden'>
+                <div className='bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100'>
                     {/* Order Header */}
-                    <div className='bg-gray-800 text-white px-6 py-4'>
+                    <div className='bg-gradient-to-r from-gray-900 to-gray-800 text-white px-8 py-6'>
                         <div className='flex justify-between items-center'>
                             <div>
-                                <h1 className='text-xl font-semibold'>Chi tiết đơn hàng</h1>
-                                <p className='text-gray-300 text-sm'>Mã đơn: {orderData.id}</p>
+                                <h1 className='text-2xl font-bold tracking-tight'>Chi tiết đơn hàng</h1>
+                                <p className='text-gray-300 mt-1'>
+                                    Mã đơn: <span className='font-medium'>{orderData.id}</span>
+                                </p>
                             </div>
                             <div className='flex gap-4'>
                                 <button
                                     onClick={() => navigate('/dashboard?tab=order')}
-                                    className='flex items-center gap-2 px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition'
+                                    className='flex items-center gap-2 px-6 py-2.5 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition duration-200'
                                 >
-                                    <FaShoppingCart size={20} />
-                                    <span>Giỏ hàng của tôi</span>
+                                    <FaShoppingCart size={18} />
+                                    <span className='font-medium'>Đơn hàng của tôi</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     {/* Two Columns Layout */}
-                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 p-6'>
+                    <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 p-8'>
                         {/* Left Column - Products */}
+
                         <div className='space-y-6'>
-                            <h2 className='text-lg font-semibold'>Sản phẩm đã đặt</h2>
-                            <div className='bg-gray-50 rounded-lg p-4 space-y-4'>
+                            <div className='flex items-center justify-between'>
+                                <h2 className='text-2xl font-semibold text-gray-800'>Sản phẩm đã đặt</h2>
+                                <span className='text-gray-500'>{orderData?.products?.length} sản phẩm</span>
+                            </div>
+
+                            <div className='space-y-4'>
                                 {orderData?.products?.map((product, index) => (
                                     <div
                                         key={index}
-                                        className='flex items-center space-x-4 p-4 bg-white rounded-lg shadow-sm'
+                                        className='bg-white rounded-xl border border-gray-100 p-4 hover:shadow-lg transition-all duration-300'
                                     >
-                                        <div className='w-20 h-20 bg-gray-200 rounded-lg'>
-                                            <img
-                                                src={product.product.img[0]}
-                                                alt={product.product.productName}
-                                                className='w-full h-full object-cover rounded-lg'
-                                            />
-                                        </div>
-                                        <div className='flex-1'>
-                                            <h3 className='font-medium'>{product.product.productName}</h3>
-                                            <p className='text-gray-500'>Số lượng: {product.quantity}</p>
-                                            <p className='font-medium text-gray-800'>{formatPrice(priceProduct)}</p>
+                                        <div className='flex gap-4'>
+                                            {/* Product Image */}
+                                            <div className='w-32 h-32 rounded-lg overflow-hidden bg-gray-50'>
+                                                <Image
+                                                    src={product.product.img[0]}
+                                                    alt={product.product.productName}
+                                                    preview={{
+                                                        mask: <div className='text-xs font-medium'>Xem</div>,
+                                                    }}
+                                                    className='w-full h-full object-cover hover:scale-105 transition duration-300'
+                                                />
+                                            </div>
+
+                                            {/* Product Details */}
+                                            <div className='flex-1 flex flex-col justify-center gap-y-2'>
+                                                <div>
+                                                    <h3
+                                                        className='text-lg font-bold text-gray-800 mb-1 cursor-pointer hover:text-blue-500 transition-colors duration-200'
+                                                        onClick={() =>
+                                                            navigate(`/product-detail/${product.product.id}`)
+                                                        }
+                                                    >
+                                                        {product.product.productName}
+                                                    </h3>
+                                                    <div className='flex items-center gap-4 text-sm text-gray-500'>
+                                                        <span>{product.product.brand}</span>
+                                                        <span>•</span>
+                                                        <span>Màu: {product.product.option.value.color}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className='flex items-end justify-between'>
+                                                    <div className='space-y-1'>
+                                                        <div className='flex items-center gap-2'>
+                                                            <span className='text-gray-400 line-through text-sm'>
+                                                                {formatPrice(
+                                                                    product.product.option.value.price *
+                                                                        product.quantity,
+                                                                )}
+                                                            </span>
+                                                            <span className='text-red-500 text-sm'>
+                                                                -{formatPrice(calculateTotalDiscount(product))}
+                                                            </span>
+                                                        </div>
+                                                        <div className='text-xl font-bold text-blue-600'>
+                                                            {formatPrice(calculateProductPrice(product))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className='flex items-center gap-x-1'>
+                                                        <p className='text-gray-500 text-sm'>Số lượng:</p>
+                                                        <p className='text-lg font-medium'>{product.quantity}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -88,8 +144,8 @@ const OrderDetails = () => {
                         {/* Right Column - Order Info */}
                         <div className='space-y-6'>
                             {/* Customer Info */}
-                            <div className='bg-gray-50 rounded-lg p-4'>
-                                <h2 className='text-lg font-semibold mb-3'>Thông tin khách hàng</h2>
+                            <div className='bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition duration-200'>
+                                <h2 className='text-xl font-semibold text-gray-800 mb-4'>Thông tin khách hàng</h2>
                                 <div className='grid gap-4'>
                                     <div>
                                         <p className='text-gray-600'>Họ và tên</p>
@@ -111,9 +167,9 @@ const OrderDetails = () => {
                             </div>
 
                             {/* Payment Info */}
-                            <div className='bg-gray-50 rounded-lg p-4'>
-                                <h2 className='text-lg font-semibold mb-3'>Thông tin thanh toán</h2>
-                                <div className='space-y-2'>
+                            <div className='bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition duration-200'>
+                                <h2 className='text-xl font-semibold text-gray-800 mb-4'>Thông tin thanh toán</h2>
+                                <div className='space-y-3'>
                                     <div className='flex justify-between'>
                                         <span className='text-gray-600'>Phương thức thanh toán</span>
                                         <span className='font-medium capitalize'>
@@ -136,20 +192,24 @@ const OrderDetails = () => {
                             </div>
 
                             {/* Price Summary */}
-                            <div className='bg-gray-50 rounded-lg p-4'>
-                                <h2 className='text-lg font-semibold mb-3'>Tổng quan đơn hàng</h2>
-                                <div className='space-y-2'>
-                                    <div className='flex justify-between'>
-                                        <span className='text-gray-600'>Tổng tiền hàng</span>
-                                        <span>{formatPrice(orderData.itemsPrice)}</span>
+                            <div className='bg-white rounded-xl border border-gray-100 p-6 hover:shadow-md transition duration-200'>
+                                <h2 className='text-xl font-semibold text-gray-800 mb-4'>Tổng quan đơn hàng</h2>
+                                <div className='space-y-3'>
+                                    <div className='flex justify-between text-gray-600'>
+                                        <span>Tổng tiền hàng</span>
+                                        <span className='font-medium'>{formatPrice(orderData.itemsPrice)}</span>
                                     </div>
-                                    <div className='flex justify-between'>
-                                        <span className='text-gray-600'>Phí vận chuyển</span>
-                                        <span>{formatPrice(orderData.shippingPrice)}</span>
+                                    <div className='flex justify-between text-gray-600'>
+                                        <span>Phí vận chuyển</span>
+                                        <span className='font-medium'>{formatPrice(orderData.shippingPrice)}</span>
                                     </div>
-                                    <div className='border-t mt-2 pt-2 flex justify-between text-xl font-bold'>
-                                        <span>Tổng cộng</span>
-                                        <span className='text-blue-500'>{formatPrice(orderData.totalPrice)}</span>
+                                    <div className='border-t border-gray-200 mt-4 pt-4'>
+                                        <div className='flex justify-between items-center'>
+                                            <span className='text-xl font-bold text-gray-900'>Tổng cộng</span>
+                                            <span className='text-xl font-bold text-blue-600'>
+                                                {formatPrice(orderData.totalPrice)}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
