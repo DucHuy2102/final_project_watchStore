@@ -10,11 +10,6 @@ import { toast } from 'react-toastify';
 import 'react-phone-input-2/lib/style.css';
 import { TfiHandPointRight } from 'react-icons/tfi';
 
-// handle change phone input
-const handlePhoneChange = (phone) => {
-    return phone.startsWith('84') ? phone.replace(/^84/, '0') : phone;
-};
-
 export default function Register() {
     // state
     const [formData, setFormData] = useState({
@@ -25,6 +20,7 @@ export default function Register() {
     const [passwordStrength, setPasswordStrength] = useState(0);
     const [loadingState, setLoadingState] = useState(false);
     const navigate = useNavigate();
+    console.log(formData);
 
     // get strength of password
     const getStrength = (pass) => {
@@ -57,12 +53,9 @@ export default function Register() {
             return;
         }
 
-        const newPhone = handlePhoneChange(formData.phone);
-        const newFormData = { ...formData, phone: newPhone };
-
         try {
             setLoadingState(true);
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, newFormData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/register`, formData);
             if (res?.status === 200) {
                 toast.success('Đăng ký tài khoản thành công!');
                 setTimeout(() => {
