@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
-import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
+import { setProductToCheckout } from '../../../services/redux/slices/checkoutSlice';
 import { Tag } from 'antd';
 import { BsCheck } from 'react-icons/bs';
 

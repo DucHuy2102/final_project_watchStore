@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { Table, Badge, TextInput, Select, Button, Spinner, Modal } from 'flowbite-react';
 import { HiCheck, HiSearch } from 'react-icons/hi';
 import { BsArrowUp, BsArrowDown } from 'react-icons/bs';
-import { OrderDetail_Component } from '../../components/exportComponent';
+import { OrderDetail } from '../Products/components/exportCom_Product';
 
 export default function Order() {
     const { access_token: tokenUser } = useSelector((state) => state.user);
@@ -140,7 +140,7 @@ export default function Order() {
     return (
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             {orderDetail ? (
-                <OrderDetail_Component orderData={orderDetail} onBack={() => setOrderDetail(null)} />
+                <OrderDetail orderData={orderDetail} onBack={() => setOrderDetail(null)} />
             ) : (
                 <>
                     <h1 className='text-3xl font-bold text-gray-900 dark:text-white border-b pb-3'>Đơn hàng của tôi</h1>

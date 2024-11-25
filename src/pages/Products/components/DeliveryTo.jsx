@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { FaHouseUser, FaPhone, FaUser } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { update_Address } from '../../services/redux/slices/userSlice';
+import { update_Address } from '../../../services/redux/slices/userSlice';
 
 const AddressItem = ({ icon, text, placeholder, bgColor }) => (
     <div

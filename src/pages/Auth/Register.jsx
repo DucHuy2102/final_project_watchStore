@@ -2,14 +2,13 @@ import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { CiMail, CiUser } from 'react-icons/ci';
 import { GoLock } from 'react-icons/go';
-import { IoIosCart, IoIosHome, IoIosSend } from 'react-icons/io';
+import { IoIosHome, IoIosSend } from 'react-icons/io';
 import { Link, useNavigate } from 'react-router-dom';
-import { PasswordStrengthMeter } from '../../components/exportComponent';
+import { PasswordStrengthMeter } from './components/exportCom_Auth';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-phone-input-2/lib/style.css';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 
 // handle change phone input
 const handlePhoneChange = (phone) => {

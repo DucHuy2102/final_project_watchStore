@@ -1,13 +1,9 @@
-import {
-    Breadcrumb_Component,
-    FilterSortPanel_Component,
-    Pagination_Component,
-    ProductCard_Component,
-} from '../../components/exportComponent';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
 import { useSearchParams } from 'react-router-dom';
+import { FilterSortPanel, ProductCard } from './components/exportCom_Product';
+import { Breadcrumb_Component, Pagination_Component } from '../../components/exportComponent';
 
 export default function DashboardProduct() {
     // states
@@ -38,7 +34,7 @@ export default function DashboardProduct() {
                 const res = await axios(
                     `${
                         import.meta.env.VITE_API_URL
-                    }/client/get-all-product?${filterParams}&sortBy=${sortBy}&pageNum=${pageNum}`
+                    }/client/get-all-product?${filterParams}&sortBy=${sortBy}&pageNum=${pageNum}`,
                 );
                 if (res?.status === 200) {
                     setProducts(res.data.productResponses);
@@ -81,17 +77,16 @@ export default function DashboardProduct() {
 
                 {searchParams.size !== 0 && totalProducts > 0 ? (
                     <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
-                        Tìm được <span className='text-teal-500 font-bold'>{totalProducts}</span>{' '}
-                        sản phẩm khớp với bộ lọc
+                        Tìm được <span className='text-teal-500 font-bold'>{totalProducts}</span> sản phẩm khớp với bộ
+                        lọc
                     </span>
                 ) : (
                     <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
-                        Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản
-                        phẩm
+                        Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản phẩm
                     </span>
                 )}
 
-                <FilterSortPanel_Component />
+                <FilterSortPanel />
             </div>
 
             {products?.length > 0 ? (
@@ -101,28 +96,20 @@ export default function DashboardProduct() {
             my-5 gap-y-8 justify-items-center'
                 >
                     {products.map((product) => (
-                        <ProductCard_Component key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             ) : (
                 <div className='w-full flex flex-col justify-center items-center'>
-                    <img
-                        src={'../assets/productNoFound.jpg'}
-                        alt=''
-                        className='h-96 w-auto object-cover'
-                    />
-                    <p className='text-gray-400 text-lg text-center font-semibold'>
-                        Hiện tại không có sản phẩm nào
-                    </p>
+                    <img src={'../assets/productNoFound.jpg'} alt='' className='h-96 w-auto object-cover' />
+                    <p className='text-gray-400 text-lg text-center font-semibold'>Hiện tại không có sản phẩm nào</p>
                     <p className='text-gray-400 text-lg text-center font-semibold'>
                         Vui lòng thử lại sau hoặc thay đổi bộ lọc
                     </p>
                 </div>
             )}
 
-            {products && (
-                <Pagination_Component totalPages={totalPages} totalProduct={products?.length} />
-            )}
+            {products && <Pagination_Component totalPages={totalPages} totalProduct={products?.length} />}
         </div>
     );
 }

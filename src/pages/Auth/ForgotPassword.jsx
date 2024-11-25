@@ -3,10 +3,9 @@ import { useState } from 'react';
 import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { CiMail } from 'react-icons/ci';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { IoIosCart, IoIosHome, IoIosSend } from 'react-icons/io';
+import { IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { MdHomeRepairService, MdWatch } from 'react-icons/md';
 
 export default function ForgotPassword() {
     // state

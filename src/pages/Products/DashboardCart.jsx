@@ -23,7 +23,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import debounce from 'lodash.debounce';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     changeColorProduct,
     changeProductQuantity,
@@ -32,9 +32,9 @@ import {
 } from '../../services/redux/slices/cartSlice';
 import { FaClock } from 'react-icons/fa';
 import axios from 'axios';
-import EmptyCart from '../../components/Products/EmptyCart';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 import { toast } from 'react-toastify';
+import EmptyCart from './components/EmptyCart';
 
 const { Text } = Typography;
 
@@ -43,6 +43,7 @@ const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency
 export default function DashboardCart() {
     const { access_token: tokenUser } = useSelector((state) => state.user);
     const { cartItem, cartTotalQuantity } = useSelector((state) => state.cart);
+    console.log(tokenUser, cartTotalQuantity);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -148,7 +149,6 @@ export default function DashboardCart() {
             width: '20%',
             render: (_, item) => {
                 const selectedOption = item.productItem.option.find((opt) => opt.key === item.option);
-                console.log('selectedOption', selectedOption);
                 const originalPrice = selectedOption.value.price;
                 const discount = selectedOption.value.discount;
                 const discountPercent = Math.round((discount / originalPrice) * 100);
@@ -226,10 +226,6 @@ export default function DashboardCart() {
             ),
         },
     ];
-
-    useEffect(() => {
-        console.log(cartItem);
-    }, [cartItem]);
 
     const updateCartItem = async (dataToUpdate) => {
         try {
@@ -372,7 +368,7 @@ export default function DashboardCart() {
 
     return (
         <>
-            {cartTotalQuantity === 0 ? (
+            {cartTotalQuantity === 0 && !tokenUser ? (
                 <EmptyCart />
             ) : (
                 <div className='px-20 mx-auto py-8 min-h-screen'>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Modal, TextInput } from 'flowbite-react';
 import { FiSearch, FiGift, FiClock, FiPercent } from 'react-icons/fi';
-import { SelectedVoucher_Component } from '../../exportComponent';
+import SelectedVoucher from './SelectedVoucher';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount }) => {
@@ -145,7 +145,7 @@ const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, tot
 
             <Modal.Body className='relative p-4'>
                 {selectedVoucher ? (
-                    <SelectedVoucher_Component voucher={selectedVoucher} onRemove={() => onApplyVoucher(null)} />
+                    <SelectedVoucher voucher={selectedVoucher} onRemove={() => onApplyVoucher(null)} />
                 ) : (
                     <div className='space-y-4'>
                         <TextInput

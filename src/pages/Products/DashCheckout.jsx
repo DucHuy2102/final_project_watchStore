@@ -5,12 +5,6 @@ import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiHome, FiMail, FiPhone, FiTruck, FiUser } from 'react-icons/fi';
 import { Button, Label, Modal, Radio, Spinner, TextInput } from 'flowbite-react';
-import {
-    EmptyCheckout,
-    ProductInfo_CheckoutPage_Component,
-    SelectedVoucher_Component,
-    VoucherModal_Component,
-} from '../../components/exportComponent';
 import { Select } from 'antd';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -19,6 +13,7 @@ import { RiCoupon3Fill } from 'react-icons/ri';
 import { user_UpdateProfile } from '../../services/redux/slices/userSlice';
 import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../services/redux/slices/checkoutSlice';
+import { EmptyCheckout, ProductInfo_CheckoutPage, SelectedVoucher, VoucherModal } from './components/exportCom_Product';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
@@ -1162,7 +1157,7 @@ export default function DashCheckout() {
                                             <div className='space-y-6 mb-8'>
                                                 {!isBuyNow ? (
                                                     productItems.map((item, index) => (
-                                                        <ProductInfo_CheckoutPage_Component
+                                                        <ProductInfo_CheckoutPage
                                                             key={index}
                                                             dataProduct={{
                                                                 ...item,
@@ -1173,7 +1168,7 @@ export default function DashCheckout() {
                                                         />
                                                     ))
                                                 ) : (
-                                                    <ProductInfo_CheckoutPage_Component
+                                                    <ProductInfo_CheckoutPage
                                                         dataProduct={{
                                                             ...productItems,
                                                             selectedOption: productItems?.option?.find(
@@ -1186,7 +1181,7 @@ export default function DashCheckout() {
 
                                             <div className='space-y-4 border-t border-amber-200/50 dark:border-amber-700/50 py-5'>
                                                 {appliedVoucher ? (
-                                                    <SelectedVoucher_Component
+                                                    <SelectedVoucher
                                                         voucher={selectedVoucher}
                                                         onRemove={() => {
                                                             setSelectedVoucher(null);
@@ -1217,7 +1212,7 @@ export default function DashCheckout() {
                                                         </Button>
                                                     </div>
                                                 )}
-                                                <VoucherModal_Component
+                                                <VoucherModal
                                                     vouchers={allVouchers}
                                                     isOpen={openModalVoucher}
                                                     onClose={() => setOpenModalVoucher(false)}

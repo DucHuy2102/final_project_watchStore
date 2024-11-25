@@ -13,7 +13,7 @@ import { CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { toast } from 'react-toastify';
 import { TfiLock } from 'react-icons/tfi';
 import { GoLock } from 'react-icons/go';
-import { PasswordStrengthMeter } from '../../components/exportComponent';
+import { PasswordStrengthMeter } from '../Auth/components/exportCom_Auth';
 import { PiHouseLineLight } from 'react-icons/pi';
 import { Select } from 'antd';
 import { FaBan } from 'react-icons/fa';

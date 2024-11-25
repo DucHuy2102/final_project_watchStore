@@ -23,7 +23,7 @@ export { default as DashboardCart_Page } from './Products/DashboardCart';
 
 // checkout
 export { default as DashCheckout_Page } from './Products/DashCheckout';
-export { default as FormOrderInfo } from '../components/Products/Checkout/FormOrderInfo';
+export { default as FormOrderInfo } from './Products/components/Checkout/FormOrderInfo';
 
 // services
 export { default as DashService_Page } from './Services/DashService';

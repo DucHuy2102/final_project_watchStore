@@ -8,12 +8,13 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { addProductToCart } from '../../services/redux/slices/cartSlice';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { Breadcrumb_Component, Policy } from '../../components/exportComponent';
+import { Breadcrumb_Component } from '../../components/exportComponent';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
 import { FiMinus, FiPlus } from 'react-icons/fi';
 import { CiWarning } from 'react-icons/ci';
 import { Image } from 'antd';
 import { formatWatchDescription, prProduct } from '../../components/Utils/infomationComponent';
+import { Policy } from './components/exportCom_Product';
 
 export default function ProductDetail() {
     // redux

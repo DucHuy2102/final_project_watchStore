@@ -4,7 +4,7 @@ import { FaSortAlphaDown, FaSortAlphaUpAlt, FaTimes } from 'react-icons/fa';
 import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
 import { Badge } from 'antd';
 import { useSearchParams } from 'react-router-dom';
-import { Chip_Filter_Component } from '../exportComponent';
+import { Chip_Filter_Component } from '../../../components/exportComponent';
 
 // option values for advanced filter
 const options = [

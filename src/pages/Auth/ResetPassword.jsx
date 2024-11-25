@@ -5,7 +5,7 @@ import { TfiHandPointRight } from 'react-icons/tfi';
 import { IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import { GoLock } from 'react-icons/go';
-import { PasswordStrengthMeter } from '../../components/exportComponent';
+import { PasswordStrengthMeter } from './components/exportCom_Auth';
 import axios from 'axios';
 
 export default function ResetPassword() {
