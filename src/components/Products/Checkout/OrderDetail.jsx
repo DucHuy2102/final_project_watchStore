@@ -3,8 +3,12 @@ import { Button, Card, Modal } from 'flowbite-react';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { Image } from 'antd';
+import { Image, Input, Upload } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { BsSend } from 'react-icons/bs';
+import { Rate } from 'antd';
+import { PlusOutlined, LoadingOutlined } from '@ant-design/icons';
+import { toast } from 'react-toastify';
 
 const DisplayUserInfo = ({ title, value }) => (
     <div className='flex justify-between items-center'>
@@ -16,12 +20,18 @@ const DisplayUserInfo = ({ title, value }) => (
 );
 
 export default function OrderDetail({ orderData, onBack }) {
-    console.log(orderData);
+    const navigate = useNavigate();
     const { access_token: tokenUser } = useSelector((state) => state.user);
     const [openModal, setOpenModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
-    const navigate = useNavigate();
+    const [openModalReview, setOpenModalReview] = useState(false);
+    const [rating, setRating] = useState(1);
+    const [reviewText, setReviewText] = useState('');
+    const [reviewImages, setReviewImages] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
+    const [fileList, setFileList] = useState([]);
+    const [uploadLoading, setUploadLoading] = useState(false);
 
     const formatDate = useCallback((dateStr) => {
         return dateStr
@@ -61,6 +71,128 @@ export default function OrderDetail({ orderData, onBack }) {
             setLoading(false);
         }
     };
+
+    const handleCompleteOrder = async () => {
+        try {
+            setLoading(true);
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/order/is-delivered`,
+                {
+                    orderId: orderData.id,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
+            if (res?.status === 200) {
+                setOpenModalReview(true);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const uploadButton = (
+        <div
+            className='h-24 w-24 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 
+                      rounded-lg hover:border-blue-500 transition-colors duration-200'
+        >
+            {uploadLoading ? <LoadingOutlined /> : <PlusOutlined />}
+            <div className='mt-2'>Tải ảnh</div>
+        </div>
+    );
+
+    const handleUploadImageCloudinary = useCallback(async (file) => {
+        try {
+            setUploadLoading(true);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', 'review_image');
+
+            const response = await axios.post(`https://api.cloudinary.com/v1_1/dajzl4hdt/image/upload`, formData);
+
+            if (response.data?.secure_url) {
+                setReviewImages((prev) => [...prev, response.data.secure_url]);
+                return response.data.secure_url;
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            toast.error('Không thể tải ảnh lên. Vui lòng thử lại!');
+        } finally {
+            setUploadLoading(false);
+        }
+    }, []);
+
+    const handleSubmitReview = async () => {
+        if (rating === 0) {
+            toast.error('Vui lòng đánh giá sao cho sản phẩm!');
+            return;
+        }
+
+        if (reviewText === '') {
+            toast.error('Vui lòng đánh giá sản phẩm!');
+            return;
+        }
+
+        console.log(rating, reviewText, reviewImages);
+        // try {
+        //     setSubmitting(true);
+        //     const response = await axios.post(
+        //         `${import.meta.env.VITE_API_URL}/api/reviews`,
+        //         {
+        //             orderId: orderData.id,
+        //             rating,
+        //             content: reviewText.trim(),
+        //             images: reviewImages,
+        //         },
+        //         {
+        //             headers: {
+        //                 Authorization: `Bearer ${tokenUser}`,
+        //             },
+        //         },
+        //     );
+
+        //     if (response.status === 200) {
+        //         toast.success('Đánh giá của bạn đã được gửi thành công!');
+        //         setOpenModalReview(false);
+        //         setRating(0);
+        //         setReviewText('');
+        //         setReviewImages([]);
+        //         setFileList([]);
+        //     }
+        // } catch (error) {
+        //     console.error(error);
+        //     toast.error('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại!');
+        // } finally {
+        //     setSubmitting(false);
+        // }
+    };
+
+    // const handleSubmitReview = async () => {
+    //     if (rating === 0) {
+    //         // Show error message
+    //         return;
+    //     }
+
+    //     try {
+    //         setSubmitting(true);
+    //         // Implement your review submission logic here
+
+    //         // Close modal and reset form
+    //         setOpenModalReview(false);
+    //         setRating(0);
+    //         setReviewText('');
+    //         setReviewImages([]);
+    //     } catch (error) {
+    //         console.error(error);
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
 
     return (
         <div className='space-y-8 max-w-7xl mx-auto py-6'>
@@ -289,13 +421,26 @@ export default function OrderDetail({ orderData, onBack }) {
 
             {/* Button cancel order */}
             {orderData.state === 'processing' && (
-                <div className='flex justify-center pt-4'>
+                <div className='flex justify-center'>
                     <Button
                         color='failure'
                         className='focus:!ring-0 hover:bg-red-700 transition-colors px-6'
                         onClick={() => setOpenModal(true)}
                     >
-                        Hủy đơn hàng
+                        Hủy Đơn Hàng
+                    </Button>
+                </div>
+            )}
+
+            {/* Button complete order */}
+            {orderData.state === 'delivery' && (
+                <div className='flex justify-center'>
+                    <Button
+                        color='success'
+                        className='focus:!ring-0 hover:bg-green-700 transition-colors px-6'
+                        onClick={handleCompleteOrder}
+                    >
+                        Đã Nhận Hàng
                     </Button>
                 </div>
             )}
@@ -334,6 +479,107 @@ export default function OrderDetail({ orderData, onBack }) {
                                 onClick={() => setOpenModal(false)}
                             >
                                 Đóng
+                            </Button>
+                        </div>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+            {/* Modal review order */}
+            <Modal show={openModalReview} size='md' onClose={() => setOpenModalReview(false)} popup>
+                <Modal.Body className='pt-5'>
+                    <div className='space-y-6 p-2'>
+                        {/* Rating Stars */}
+                        <div className='flex flex-col items-center gap-2'>
+                            <span className='text-lg font-medium text-gray-700 dark:text-gray-300'>
+                                Đánh giá của bạn về chất lượng sản phẩm
+                            </span>
+                            <Rate value={rating} onChange={(value) => setRating(value)} />
+                        </div>
+                        {/* Review Text */}
+                        <Input.TextArea
+                            rows={4}
+                            maxLength={700}
+                            showCount
+                            className='w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 
+                        focus:ring-blue-500 focus:border-blue-500 transition-all duration-200
+                        bg-gray-50 dark:bg-gray-700 dark:border-gray-600'
+                            placeholder='Cửa hàng xin những đánh giá của bạn để cải thiện chất lượng dịch vụ và sản phẩm'
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                        />
+                        {/* Image Upload */}
+                        <div className='space-y-1'>
+                            <span className='text-sm text-gray-600 dark:text-gray-400'>
+                                Thêm hình ảnh (tối đa 4 ảnh)
+                            </span>
+                            <Upload
+                                listType='picture-card'
+                                fileList={fileList}
+                                onPreview={(file) => {
+                                    window.open(file.url || file.preview);
+                                }}
+                                beforeUpload={async (file) => {
+                                    const isImage = file.type.startsWith('image/');
+                                    if (!isImage) {
+                                        message.error('Chỉ có thể tải lên file ảnh!');
+                                        return false;
+                                    }
+
+                                    const isLt5M = file.size / 1024 / 1024 < 5;
+                                    if (!isLt5M) {
+                                        message.error('Kích thước ảnh phải nhỏ hơn 5MB!');
+                                        return false;
+                                    }
+
+                                    if (fileList.length >= 4) {
+                                        message.error('Chỉ có thể tải lên tối đa 4 ảnh!');
+                                        return false;
+                                    }
+
+                                    // Upload to Cloudinary
+                                    const url = await handleUploadImageCloudinary(file);
+                                    if (url) {
+                                        setFileList((prev) => [
+                                            ...prev,
+                                            {
+                                                uid: file.uid,
+                                                name: file.name,
+                                                status: 'done',
+                                                url: url,
+                                            },
+                                        ]);
+                                    }
+                                    return false;
+                                }}
+                                onRemove={(file) => {
+                                    setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
+                                    setReviewImages((prev) => prev.filter((url) => url !== file.url));
+                                }}
+                            >
+                                {fileList.length >= 4 ? null : uploadButton}
+                            </Upload>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className='flex justify-between items-center'>
+                            <Button
+                                color='gray'
+                                className='focus:!ring-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors px-2'
+                                onClick={() => setOpenModalReview(false)}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                color='blue'
+                                className='focus:!ring-0 bg-blue-600 hover:bg-blue-700 transition-colors px-2'
+                                onClick={handleSubmitReview}
+                                isProcessing={submitting}
+                            >
+                                <div className='flex items-center justify-center gap-x-1 group'>
+                                    <BsSend className='group-hover:scale-x-125 transition-transform duration-200' />
+                                    <span>Gửi</span>
+                                </div>
                             </Button>
                         </div>
                     </div>

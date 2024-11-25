@@ -50,7 +50,8 @@ export default function Order() {
     const getStatusColor = useCallback((state) => {
         const colors = {
             processing: 'warning',
-            delivered: 'success',
+            delivery: 'info',
+            complete: 'success',
             cancel: 'failure',
         };
         return colors[state] || 'default';
@@ -58,9 +59,10 @@ export default function Order() {
 
     const getStatusText = useCallback((state) => {
         const text = {
-            processing: 'Đang chờ giao',
-            delivered: 'Đã giao',
-            cancel: 'Hủy đơn',
+            processing: 'Đang chờ xử lý',
+            delivery: 'Đang giao hàng',
+            complete: 'Đã giao hàng',
+            cancel: 'Đã hủy đơn',
         };
         return text[state] || state;
     }, []);
