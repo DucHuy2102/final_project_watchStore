@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 const OrderDetails = () => {
     const { orderDetail: orderData } = useSelector((state) => state.checkout);
+    console.log(orderData);
     const navigate = useNavigate();
 
     const formatPrice = useCallback((price) => {

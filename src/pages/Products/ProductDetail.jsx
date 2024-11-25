@@ -349,19 +349,26 @@ export default function ProductDetail() {
 
     // function buy now product
     const handleBuyNow = () => {
-        console.log('Buy now product', product);
-        const totalAmountToPay = quantityProduct * (price - discount);
+        if (quantityProduct === 0) {
+            toast.error('Vui lòng chọn số lượng sản phẩm');
+            return;
+        }
         dispatch(
             setProductToCheckout({
-                productItems: product,
-                totalPrice: price * quantityProduct,
-                totalDiscountPrice: discount * quantityProduct,
-                totalAmountToPay: totalAmountToPay,
+                productItems: {
+                    option: selectedColor,
+                    productItem: product,
+                    quantity: quantityProduct,
+                },
                 totalQuantity: quantityProduct,
                 isBuyNow: true,
             }),
         );
-        navigate('/checkout');
+        setLoadingEffect(true);
+        setTimeout(() => {
+            setLoadingEffect(false);
+            navigate('/checkout');
+        }, 1500);
     };
 
     return (

@@ -4,13 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { CiEdit, CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { FaUserEdit } from 'react-icons/fa';
 import { FiCalendar, FiClock, FiHome, FiMail, FiPhone, FiTruck, FiUser } from 'react-icons/fi';
-import { Button, Label, Modal, Radio, Spinner, TextInput } from 'flowbite-react';
+import { Button, Modal, Spinner, TextInput } from 'flowbite-react';
 import { Select } from 'antd';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { RiCoupon3Fill } from 'react-icons/ri';
-import { user_UpdateProfile } from '../../services/redux/slices/userSlice';
 import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../services/redux/slices/checkoutSlice';
 import { EmptyCheckout, ProductInfo_CheckoutPage, SelectedVoucher, VoucherModal } from './components/exportCom_Product';
@@ -123,6 +122,16 @@ const ExpectedDeliveryTime = ({ dayOfWeek, formattedDate }) => (
     </motion.div>
 );
 
+const validatePhone = (phone) => {
+    const phoneRegex = /^0[3|5|7|8|9][0-9]{8}$/;
+    return phoneRegex.test(phone);
+};
+
+const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
 export default function DashCheckout() {
     // ==================================== Redux ====================================
     const { access_token: tokenUser, user: currentUser } = useSelector((state) => state.user);
@@ -132,7 +141,9 @@ export default function DashCheckout() {
     const { productItems, totalQuantity } = checkoutData;
     const totalPrice = useMemo(() => {
         if (isBuyNow) {
-            const selectedOption = productItems?.option?.find((opt) => opt.key === checkoutData.option);
+            const selectedOption = productItems?.productItem?.option?.find(
+                (opt) => opt.key === checkoutData?.productItems?.option,
+            );
             if (selectedOption) {
                 const { price, discount } = selectedOption.value;
                 const discountedPrice = price - discount;
@@ -174,28 +185,28 @@ export default function DashCheckout() {
 
     // modal edit address
     const [showModalEditAddress, setShowModalEditAddress] = useState(false);
-    const [selectedOption, setSelectedOption] = useState('thisUser');
-    const [formData, setFormData] = useState({
-        fullName: currentUser?.fullName ?? '',
-        email: currentUser?.email ?? '',
-        phone: currentUser?.phone ?? '',
+    const [formEditAddress, setFormEditAddress] = useState({
+        fullName: '',
+        email: '',
+        phone: '',
         address: {
             province: {
-                label: currentUser?.address?.province.label ?? '',
-                value: currentUser?.address?.province.value ?? null,
+                label: '',
+                value: null,
             },
             district: {
-                label: currentUser?.address?.district.label ?? '',
-                value: currentUser?.address?.district.value ?? null,
+                label: '',
+                value: null,
             },
             ward: {
-                label: currentUser?.address?.ward?.label ?? '',
-                value: currentUser?.address?.ward?.value ?? null,
+                label: '',
+                value: null,
             },
-            street: currentUser?.address?.street ?? '',
-            fullAddress: currentUser?.address?.fullAddress ?? '',
+            street: '',
+            fullAddress: '',
         },
     });
+
     const [infoItemData, setInfoItemData] = useState({
         fullName: currentUser?.fullName ?? 'Chưa cập nhật',
         email: currentUser?.email ?? 'Chưa cập nhật',
@@ -242,48 +253,6 @@ export default function DashCheckout() {
         }
     }, [dispatch, formOrderResponse, navigate, paymentMethod]);
 
-    // handle selected option
-    useEffect(() => {
-        if (selectedOption === 'anotherUser') {
-            setFormData({
-                fullName: '',
-                email: '',
-                phone: '',
-                address: {
-                    province: { label: '', value: null },
-                    district: { label: '', value: null },
-                    ward: { label: '', value: null },
-                    street: '',
-                    fullAddress: '',
-                },
-            });
-        } else {
-            setFormData({
-                fullName: currentUser?.fullName ?? '',
-                email: currentUser?.email ?? '',
-                phone: currentUser?.phone ?? '',
-                address: {
-                    province: {
-                        label: currentUser?.address?.province.label ?? '',
-                        value: currentUser?.address?.province.value ?? null,
-                    },
-                    district: {
-                        label: currentUser?.address?.district.label ?? '',
-                        value: currentUser?.address?.district.value ?? null,
-                    },
-                    ward: {
-                        label: currentUser?.address?.ward?.label ?? '',
-                        value: currentUser?.address?.ward?.value ?? null,
-                    },
-                    street: currentUser?.address?.street ?? '',
-                    fullAddress: currentUser?.address?.fullAddress ?? '',
-                },
-            });
-        }
-
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedOption]);
-
     // get all vouchers from API
     useEffect(() => {
         if (totalQuantity === 0) return;
@@ -303,7 +272,11 @@ export default function DashCheckout() {
     // handle input change
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        if (name === 'street') {
+            setFormEditAddress((prev) => ({ ...prev, address: { ...prev.address, [name]: value } }));
+        } else {
+            setFormEditAddress((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     // ==================================== Address ====================================
@@ -335,10 +308,10 @@ export default function DashCheckout() {
     // get district from api
     useEffect(() => {
         const getDistrict = async () => {
-            if (!formData?.address.province?.value) return;
+            if (!formEditAddress?.address.province?.value) return;
             try {
                 const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/district', {
-                    params: { province_id: formData.address.province.value },
+                    params: { province_id: formEditAddress.address.province.value },
                     headers: {
                         Token: import.meta.env.VITE_TOKEN_GHN,
                     },
@@ -352,15 +325,15 @@ export default function DashCheckout() {
         };
 
         getDistrict();
-    }, [formData?.address.province?.value]);
+    }, [formEditAddress?.address.province?.value]);
 
     // get ward from api
     useEffect(() => {
         const getWard = async () => {
-            if (!formData?.address.district?.value) return;
+            if (!formEditAddress?.address.district?.value) return;
             try {
                 const res = await axios.get('https://online-gateway.ghn.vn/shiip/public-api/master-data/ward', {
-                    params: { district_id: formData.address.district.value },
+                    params: { district_id: formEditAddress.address.district.value },
                     headers: {
                         Token: import.meta.env.VITE_TOKEN_GHN,
                     },
@@ -374,117 +347,64 @@ export default function DashCheckout() {
         };
 
         getWard();
-    }, [formData?.address.district?.value]);
+    }, [formEditAddress?.address.district?.value]);
 
     // handle confirm info
-    const handleConfirmInfo = useCallback(() => {
+    const handleConfirmInfo = () => {
+        console.log(formEditAddress);
         if (
-            !formData.fullName ||
-            !formData.email ||
-            !formData.phone ||
-            !formData.address.ward ||
-            !formData.address.district ||
-            !formData.address.province
+            !formEditAddress.fullName ||
+            !formEditAddress.email ||
+            !formEditAddress.phone ||
+            !formEditAddress.address.ward ||
+            !formEditAddress.address.district ||
+            !formEditAddress.address.province
         ) {
             toast.error('Vui lòng điền đầy đủ thông tin');
             return;
         }
-        const newAddress = `${formData.address.street}, ${formData.address.ward.label}, ${formData.address.district.label}, ${formData.address.province.label}`;
+        const newAddress = `${formEditAddress.address.street}, ${formEditAddress.address.ward.label}, ${formEditAddress.address.district.label}, ${formEditAddress.address.province.label}`;
         setInfoItemData({
-            fullName: formData.fullName,
-            email: formData.email,
-            phone: formData.phone,
+            fullName: formEditAddress.fullName,
+            email: formEditAddress.email,
+            phone: formEditAddress.phone,
             address: newAddress,
         });
         setShowModalEditAddress(false);
-
-        // save info user if user choose 'thisUser' option in modal edit address
-        if (selectedOption === 'thisUser') {
-            const handleSaveInfoUser = async () => {
-                const dataUpdate = {
-                    avatarImg: currentUser.avatarImg,
-                    fullName: formData.fullName,
-                    email: formData.email,
-                    phone: formData.phone,
-                    address: {
-                        province: {
-                            label: formData.address.province.label,
-                            value: formData.address.province.value,
-                        },
-                        district: {
-                            label: formData.address.district.label,
-                            value: formData.address.district.value,
-                        },
-                        ward: {
-                            label: formData.address.ward.label,
-                            value: formData.address.ward.value,
-                        },
-                        street: formData.address.street,
-                        fullAddress: newAddress,
-                    },
-                };
-                try {
-                    const res = await axios.put(
-                        `${import.meta.env.VITE_API_URL}/api/profile/update`,
-                        {
-                            ...dataUpdate,
-                        },
-                        {
-                            headers: {
-                                Authorization: `Bearer ${tokenUser}`,
-                            },
-                        },
-                    );
-                    if (res?.status === 200) {
-                        const { data } = res;
-                        toast.success('Cập nhật thông tin thành công!');
-                        dispatch(
-                            user_UpdateProfile({
-                                user: data,
-                            }),
-                        );
-                    }
-                } catch (error) {
-                    console.log('Error save info user', error);
-                    toast.error('Lỗi hệ thống. Vui lòng thử lại sau');
-                }
-            };
-            handleSaveInfoUser();
-        }
-    }, []);
+    };
 
     // ==================================== Call API GNH ====================================
     const totalWeight = useMemo(() => {
-        if (Array.isArray(productItems) && totalQuantity > 0) {
+        if (!isBuyNow) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.weight, 0));
         } else {
-            return Math.ceil(productItems.weight);
+            return Math.ceil(productItems?.productItem?.weight);
         }
-    }, [productItems, totalQuantity]);
+    }, [isBuyNow, productItems]);
 
     const totalHeight = useMemo(() => {
-        if (Array.isArray(productItems) && totalQuantity > 0) {
+        if (!isBuyNow) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.height, 0) / 10);
         } else {
-            return Math.ceil(productItems.height);
+            return Math.ceil(productItems?.productItem?.height);
         }
-    }, [productItems, totalQuantity]);
+    }, [isBuyNow, productItems]);
 
     const totalLength = useMemo(() => {
-        if (Array.isArray(productItems) && totalQuantity > 0) {
+        if (!isBuyNow) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.length, 0) / 10);
         } else {
-            return Math.ceil(productItems.length);
+            return Math.ceil(productItems?.productItem?.length);
         }
-    }, [productItems, totalQuantity]);
+    }, [isBuyNow, productItems]);
 
     const totalWidth = useMemo(() => {
-        if (Array.isArray(productItems) && totalQuantity > 0) {
+        if (!isBuyNow) {
             return Math.ceil(productItems.reduce((total, item) => total + item.productItem.width, 0) / 10);
         } else {
-            return Math.ceil(productItems.width);
+            return Math.ceil(productItems?.productItem?.width);
         }
-    }, [productItems, totalQuantity]);
+    }, [isBuyNow, productItems]);
 
     // calculate fee ship
     useEffect(() => {
@@ -512,7 +432,7 @@ export default function DashCheckout() {
                     );
                     if (res?.status === 200) {
                         const { data } = res.data;
-                        setShippingFee(data.service_fee);
+                        setShippingFee(data.service_fee !== 0 ? data.service_fee : 27190);
                     }
                 } catch (error) {
                     console.log('Error calculate fee ship', error);
@@ -649,26 +569,46 @@ export default function DashCheckout() {
                         productItem: cartRedux.map((item) => item.idCart),
                         paymentMethod: paymentMethod,
                         shippingPrice: shippingFee,
-                        quantity: totalQuantity,
-                        couponCode: appliedVoucher,
+                        couponCode: appliedVoucher ?? '',
                         profile: {
-                            name: formData.fullName,
-                            phone: formData.phone,
-                            email: formData.email,
+                            name: formEditAddress.fullName !== '' ? formEditAddress.fullName : currentUser?.fullName,
+                            phone: formEditAddress.phone !== '' ? formEditAddress.phone : currentUser?.phone,
+                            email: formEditAddress.email !== '' ? formEditAddress.email : currentUser?.email,
                             address: {
                                 province: {
-                                    label: formData.address.province.label,
-                                    value: formData.address.province.value,
+                                    label:
+                                        formEditAddress.address.province.label !== ''
+                                            ? formEditAddress.address.province.label
+                                            : currentUser?.address.province.label,
+                                    value:
+                                        formEditAddress.address.province.value !== null
+                                            ? formEditAddress.address.province.value
+                                            : currentUser?.address.province.value,
                                 },
                                 district: {
-                                    label: formData.address.district.label,
-                                    value: formData.address.district.value,
+                                    label:
+                                        formEditAddress.address.district.label !== ''
+                                            ? formEditAddress.address.district.label
+                                            : currentUser?.address.district.label,
+                                    value:
+                                        formEditAddress.address.district.value !== null
+                                            ? formEditAddress.address.district.value
+                                            : currentUser?.address.district.value,
                                 },
                                 ward: {
-                                    label: formData.address.ward.label,
-                                    value: formData.address.ward.value,
+                                    label:
+                                        formEditAddress.address.ward.label !== ''
+                                            ? formEditAddress.address.ward.label
+                                            : currentUser?.address.ward.label,
+                                    value:
+                                        formEditAddress.address.ward.value !== null
+                                            ? formEditAddress.address.ward.value
+                                            : currentUser?.address.ward.value,
                                 },
-                                fullAddress: formData.address.fullAddress,
+                                fullAddress:
+                                    formEditAddress.address.fullAddress !== ''
+                                        ? formEditAddress.address.fullAddress
+                                        : currentUser?.address.fullAddress,
                             },
                         },
                     },
@@ -700,29 +640,51 @@ export default function DashCheckout() {
                 const res = await axios.post(
                     `${import.meta.env.VITE_API_URL}/api/order/buy-now`,
                     {
-                        productId: productItems.id,
+                        productId: productItems.productItem.id,
+                        quantity: productItems.quantity,
+                        option: productItems.option,
                         paymentMethod: paymentMethod,
-
                         shippingPrice: shippingFee,
-                        couponCode: appliedVoucher,
+                        couponCode: appliedVoucher ?? '',
                         profile: {
-                            name: formData.fullName,
-                            phone: formData.phone,
-                            email: formData.email,
+                            name: formEditAddress.fullName !== '' ? formEditAddress.fullName : currentUser?.fullName,
+                            phone: formEditAddress.phone !== '' ? formEditAddress.phone : currentUser?.phone,
+                            email: formEditAddress.email !== '' ? formEditAddress.email : currentUser?.email,
                             address: {
                                 province: {
-                                    label: formData.address.province.label,
-                                    value: formData.address.province.value,
+                                    label:
+                                        formEditAddress.address.province.label !== ''
+                                            ? formEditAddress.address.province.label
+                                            : currentUser?.address.province.label,
+                                    value:
+                                        formEditAddress.address.province.value !== null
+                                            ? formEditAddress.address.province.value
+                                            : currentUser?.address.province.value,
                                 },
                                 district: {
-                                    label: formData.address.district.label,
-                                    value: formData.address.district.value,
+                                    label:
+                                        formEditAddress.address.district.label !== ''
+                                            ? formEditAddress.address.district.label
+                                            : currentUser?.address.district.label,
+                                    value:
+                                        formEditAddress.address.district.value !== null
+                                            ? formEditAddress.address.district.value
+                                            : currentUser?.address.district.value,
                                 },
                                 ward: {
-                                    label: formData.address.ward.label,
-                                    value: formData.address.ward.value,
+                                    label:
+                                        formEditAddress.address.ward.label !== ''
+                                            ? formEditAddress.address.ward.label
+                                            : currentUser?.address.ward.label,
+                                    value:
+                                        formEditAddress.address.ward.value !== null
+                                            ? formEditAddress.address.ward.value
+                                            : currentUser?.address.ward.value,
                                 },
-                                fullAddress: formData.address.fullAddress,
+                                fullAddress:
+                                    formEditAddress.address.fullAddress !== ''
+                                        ? formEditAddress.address.fullAddress
+                                        : currentUser?.address.fullAddress,
                             },
                         },
                     },
@@ -743,8 +705,7 @@ export default function DashCheckout() {
                 }
             } catch (error) {
                 console.log('Error create order', error);
-                toast.error('Lỗi hệ thống. Trang sẽ tải lại sau 3 giây');
-                setTimeout(() => window.location.reload(), 3000);
+                toast.error('Lỗi hệ thống. Vui lòng thử lại!');
             } finally {
                 setIsLoading(false);
             }
@@ -762,248 +723,6 @@ export default function DashCheckout() {
             </div>
         );
     }
-
-    const ModalEditAddress = () => {
-        return (
-            <Modal
-                show={showModalEditAddress}
-                onClose={() => setShowModalEditAddress(false)}
-                size='md'
-                className='!p-0'
-            >
-                <div className='absolute inset-0 bg-gradient-to-br from-amber-50/90 via-white/90 to-purple-50/90 dark:from-gray-900/90 dark:via-gray-800/90 dark:to-purple-900/90 backdrop-blur-sm rounded-lg' />
-
-                <Modal.Header className='relative border-b border-amber-200/30 dark:border-amber-700/30'>
-                    <div className='flex items-center gap-4'>
-                        <div className='p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg'>
-                            <FaUserEdit className='text-white text-xl animate-pulse' />
-                        </div>
-                        <div>
-                            <h3 className='text-xl font-serif font-bold bg-gradient-to-r from-amber-700 via-amber-600 to-purple-700 bg-clip-text text-transparent'>
-                                Thông tin giao hàng
-                            </h3>
-                            <p className='text-sm text-gray-500 dark:text-gray-400'>
-                                Vui lòng điền đầy đủ thông tin bên dưới
-                            </p>
-                        </div>
-                    </div>
-                </Modal.Header>
-
-                <Modal.Body className='relative space-y-4 px-6'>
-                    {/* Radio Options */}
-                    <div className='flex justify-between items-center p-4 bg-gradient-to-r from-amber-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 rounded-xl shadow-sm'>
-                        <div className='flex items-center gap-x-3'>
-                            <Radio
-                                id='thisUser'
-                                checked={selectedOption === 'thisUser'}
-                                onChange={() => setSelectedOption('thisUser')}
-                                className='text-amber-500 focus:ring-amber-500 cursor-pointer'
-                            />
-                            <Label
-                                htmlFor='thisUser'
-                                className='text-gray-700 dark:text-gray-300 font-medium cursor-pointer'
-                            >
-                                Thông tin của tôi
-                            </Label>
-                        </div>
-                        <div className='flex items-center gap-x-3'>
-                            <Radio
-                                id='anotherUser'
-                                checked={selectedOption === 'anotherUser'}
-                                onChange={() => setSelectedOption('anotherUser')}
-                                className='text-amber-500 focus:ring-amber-500 cursor-pointer'
-                            />
-                            <Label
-                                htmlFor='anotherUser'
-                                className='text-gray-700 dark:text-gray-300 font-medium cursor-pointer'
-                            >
-                                Gửi cho người khác
-                            </Label>
-                        </div>
-                    </div>
-
-                    {/* Form Fields */}
-                    <div className='space-y-4'>
-                        <h4 className='text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2'>
-                            <span className='w-[30%] h-[1px] bg-gradient-to-r from-amber-500 to-transparent' />
-                            Thông tin cá nhân
-                        </h4>
-                        <div className='group'>
-                            <TextInput
-                                icon={CiUser}
-                                type='text'
-                                name='fullName'
-                                placeholder='Họ và Tên người nhận'
-                                value={formData.fullName}
-                                onChange={handleInputChange}
-                                className='focus:border-amber-500 focus:ring-amber-500'
-                            />
-                        </div>
-
-                        <div className='grid grid-cols-2 gap-4'>
-                            <TextInput
-                                icon={CiMail}
-                                type='email'
-                                name='email'
-                                placeholder='Email người nhận'
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                className='focus:border-amber-500 focus:ring-amber-500'
-                            />
-                            <TextInput
-                                icon={CiPhone}
-                                type='text'
-                                name='phone'
-                                placeholder='Số điện thoại'
-                                value={formData.phone}
-                                onChange={handleInputChange}
-                                className='focus:border-amber-500 focus:ring-amber-500'
-                            />
-                        </div>
-
-                        <h4 className='text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2'>
-                            <span className='w-[30%] h-[1px] bg-gradient-to-r from-amber-500 to-transparent'></span>
-                            Địa chỉ giao hàng
-                        </h4>
-
-                        <div className='space-y-4'>
-                            <Select
-                                placeholder='Chọn Thành Phố'
-                                className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
-                                options={
-                                    provinces?.map((province) => ({
-                                        label: province.ProvinceName,
-                                        value: province.ProvinceID,
-                                    })) ?? []
-                                }
-                                value={formData.address.province.label || null}
-                                onChange={(value) => {
-                                    const selectedProvince = provinces.find(
-                                        (province) => province.ProvinceID === value,
-                                    );
-                                    setFormData({
-                                        ...formData,
-                                        address: {
-                                            ...formData.address,
-                                            province: {
-                                                label: selectedProvince.NameExtension[1],
-                                                value: value,
-                                            },
-                                            district: {
-                                                label: '',
-                                                value: null,
-                                            },
-                                            ward: {
-                                                label: '',
-                                                value: null,
-                                            },
-                                        },
-                                    });
-                                }}
-                            />
-
-                            <div className='grid grid-cols-2 gap-4'>
-                                <Select
-                                    placeholder='Quận/Huyện'
-                                    className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
-                                    options={
-                                        districts?.map((district) => ({
-                                            label: district.DistrictName,
-                                            value: district.DistrictID,
-                                        })) ?? []
-                                    }
-                                    value={formData.address.district.label || null}
-                                    onChange={(value) => {
-                                        const selectedDistrict = districts.find(
-                                            (district) => district.DistrictID === value,
-                                        );
-                                        setFormData({
-                                            ...formData,
-                                            address: {
-                                                ...formData.address,
-                                                district: {
-                                                    label: selectedDistrict.NameExtension[0],
-                                                    value: value,
-                                                },
-                                            },
-                                        });
-                                    }}
-                                />
-                                <Select
-                                    placeholder='Phường/Xã'
-                                    className='w-full !rounded-lg !shadow-sm hover:!border-amber-500'
-                                    options={
-                                        wards?.map((ward) => ({
-                                            label: ward.WardName,
-                                            value: ward.WardCode,
-                                        })) ?? []
-                                    }
-                                    value={formData.address.ward.label || null}
-                                    onChange={(value) => {
-                                        const selectedWard = wards.find((ward) => ward.WardCode === value);
-                                        setFormData({
-                                            ...formData,
-                                            address: {
-                                                ...formData.address,
-                                                ward: {
-                                                    label: selectedWard.NameExtension[0],
-                                                    value: value,
-                                                },
-                                            },
-                                        });
-                                    }}
-                                />
-                            </div>
-
-                            <TextInput
-                                type='text'
-                                icon={CiHome}
-                                className='w-full focus:border-amber-500 focus:ring-amber-500'
-                                placeholder='Số nhà, tên đường'
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        address: {
-                                            ...formData.address,
-                                            street: e.target.value,
-                                        },
-                                    })
-                                }
-                            />
-                        </div>
-                    </div>
-                </Modal.Body>
-
-                <Modal.Footer className='relative border-t border-amber-200/30 dark:border-amber-700/30'>
-                    <div className='flex items-center justify-between w-full'>
-                        <Button
-                            color='gray'
-                            onClick={() => setShowModalEditAddress(false)}
-                            className='!ring-0 hover:bg-gray-100 dark:hover:bg-gray-600'
-                        >
-                            Hủy
-                        </Button>
-                        <Button
-                            onClick={handleConfirmInfo}
-                            className='!ring-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
-                        >
-                            <span className='flex items-center justify-center gap-x-2'>
-                                Xác nhận
-                                <svg className='w-4 h-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                                    <path
-                                        strokeLinecap='round'
-                                        strokeLinejoin='round'
-                                        strokeWidth={2}
-                                        d='M5 13l4 4L19 7'
-                                    />
-                                </svg>
-                            </span>
-                        </Button>
-                    </div>
-                </Modal.Footer>
-            </Modal>
-        );
-    };
 
     return (
         <div className='min-h-screen py-10'>
@@ -1062,7 +781,7 @@ export default function DashCheckout() {
                                                     hover:to-amber-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-amber-200/50'
                                                 >
                                                     <CiEdit className='w-5 h-5' />
-                                                    Chỉnh sửa
+                                                    Gửi đến địa chỉ khác
                                                 </Button>
                                             </div>
 
@@ -1102,7 +821,253 @@ export default function DashCheckout() {
                                     </div>
                                 </div>
 
-                                <ModalEditAddress />
+                                {/* Modal Edit Address */}
+                                <Modal
+                                    show={showModalEditAddress}
+                                    onClose={() => setShowModalEditAddress(false)}
+                                    size='md'
+                                    className='!p-0'
+                                    dismissible={false}
+                                    autoFocus={false}
+                                >
+                                    <div className='absolute inset-0 bg-gradient-to-br from-amber-50/90 via-white/90 to-purple-50/90 dark:from-gray-900/90 dark:via-gray-800/90 dark:to-purple-900/90 backdrop-blur-sm rounded-lg' />
+
+                                    <Modal.Header className='relative border-b border-amber-200/30 dark:border-amber-700/30'>
+                                        <div className='flex items-center gap-4'>
+                                            <div className='p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg shadow-lg'>
+                                                <FaUserEdit className='text-white text-xl animate-pulse' />
+                                            </div>
+                                            <div>
+                                                <h3 className='text-xl font-serif font-bold bg-gradient-to-r from-amber-700 via-amber-600 to-purple-700 bg-clip-text text-transparent'>
+                                                    Thông tin giao hàng
+                                                </h3>
+                                                <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                                    Vui lòng điền đầy đủ thông tin bên dưới
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Modal.Header>
+
+                                    <Modal.Body className='relative px-6'>
+                                        <div className='space-y-4'>
+                                            <div className='flex items-center gap-3 mb-4'>
+                                                <span className='w-1.5 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full' />
+                                                <h4 className='text-base font-medium text-gray-700 dark:text-gray-300'>
+                                                    Thông tin cá nhân
+                                                </h4>
+                                            </div>
+                                            <div className='space-y-4'>
+                                                <TextInput
+                                                    icon={CiUser}
+                                                    type='text'
+                                                    name='fullName'
+                                                    placeholder='Họ và Tên người nhận'
+                                                    value={formEditAddress.fullName}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <TextInput
+                                                    icon={CiMail}
+                                                    type='email'
+                                                    name='email'
+                                                    placeholder='Email người nhận'
+                                                    value={formEditAddress.email}
+                                                    onChange={handleInputChange}
+                                                    className={`${
+                                                        !validateEmail(formEditAddress.email) && formEditAddress.email
+                                                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                                            : ''
+                                                    }`}
+                                                />
+                                                {formEditAddress.email && !validateEmail(formEditAddress.email) && (
+                                                    <div className='flex items-center gap-x-1 text-red-500 text-sm animate-fadeIn'>
+                                                        <svg
+                                                            className='w-4 h-4 flex-shrink-0'
+                                                            fill='currentColor'
+                                                            viewBox='0 0 20 20'
+                                                        >
+                                                            <path
+                                                                fillRule='evenodd'
+                                                                d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+                                                                clipRule='evenodd'
+                                                            />
+                                                        </svg>
+                                                        <span>Email không hợp lệ</span>
+                                                    </div>
+                                                )}
+                                                <TextInput
+                                                    icon={CiPhone}
+                                                    type='text'
+                                                    name='phone'
+                                                    placeholder='Số điện thoại'
+                                                    value={formEditAddress.phone}
+                                                    onChange={handleInputChange}
+                                                    className={`${
+                                                        !validatePhone(formEditAddress.phone) && formEditAddress.phone
+                                                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                                            : ''
+                                                    }`}
+                                                />
+                                                {formEditAddress.phone && !validatePhone(formEditAddress.phone) && (
+                                                    <div className='flex items-center gap-x-1 text-red-500 text-sm animate-fadeIn'>
+                                                        <svg
+                                                            className='w-4 h-4 flex-shrink-0'
+                                                            fill='currentColor'
+                                                            viewBox='0 0 20 20'
+                                                        >
+                                                            <path
+                                                                fillRule='evenodd'
+                                                                d='M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z'
+                                                                clipRule='evenodd'
+                                                            />
+                                                        </svg>
+                                                        <span>Số điện thoại không hợp lệ</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className='flex items-center gap-3 mb-4 mt-6'>
+                                                <span className='w-1.5 h-6 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full' />
+                                                <h4 className='text-base font-medium text-gray-700 dark:text-gray-300'>
+                                                    Địa chỉ giao hàng
+                                                </h4>
+                                            </div>
+
+                                            <div className='space-y-4'>
+                                                <Select
+                                                    placeholder='Chọn Thành Phố'
+                                                    className='w-full h-10 !rounded-lg !shadow-sm hover:!border-amber-500'
+                                                    options={
+                                                        provinces?.map((province) => ({
+                                                            label: province.ProvinceName,
+                                                            value: province.ProvinceID,
+                                                        })) ?? []
+                                                    }
+                                                    onChange={(value) => {
+                                                        const selectedProvince = provinces.find(
+                                                            (province) => province.ProvinceID === value,
+                                                        );
+                                                        setFormEditAddress(() => ({
+                                                            ...formEditAddress,
+                                                            address: {
+                                                                ...formEditAddress.address,
+                                                                province: {
+                                                                    label: selectedProvince.NameExtension[1],
+                                                                    value: value,
+                                                                },
+                                                                district: {
+                                                                    label: '',
+                                                                    value: null,
+                                                                },
+                                                                ward: {
+                                                                    label: '',
+                                                                    value: null,
+                                                                },
+                                                            },
+                                                        }));
+                                                    }}
+                                                />
+
+                                                <div className='grid grid-cols-2 gap-4'>
+                                                    <Select
+                                                        placeholder='Quận/Huyện'
+                                                        className='w-full h-10 !rounded-lg !shadow-sm hover:!border-amber-500'
+                                                        options={
+                                                            districts?.map((district) => ({
+                                                                label: district.DistrictName,
+                                                                value: district.DistrictID,
+                                                            })) ?? []
+                                                        }
+                                                        onChange={(value) => {
+                                                            const selectedDistrict = districts.find(
+                                                                (district) => district.DistrictID === value,
+                                                            );
+                                                            setFormEditAddress(() => ({
+                                                                ...formEditAddress,
+                                                                address: {
+                                                                    ...formEditAddress.address,
+                                                                    district: {
+                                                                        label: selectedDistrict.NameExtension[0],
+                                                                        value: value,
+                                                                    },
+                                                                },
+                                                            }));
+                                                        }}
+                                                    />
+
+                                                    <Select
+                                                        placeholder='Phường/Xã'
+                                                        className='w-full h-10 !rounded-lg !shadow-sm hover:!border-amber-500'
+                                                        options={
+                                                            wards?.map((ward) => ({
+                                                                label: ward.WardName,
+                                                                value: ward.WardCode,
+                                                            })) ?? []
+                                                        }
+                                                        onChange={(value) => {
+                                                            const selectedWard = wards.find(
+                                                                (ward) => ward.WardCode === value,
+                                                            );
+                                                            setFormEditAddress(() => ({
+                                                                ...formEditAddress,
+                                                                address: {
+                                                                    ...formEditAddress.address,
+                                                                    ward: {
+                                                                        label: selectedWard.NameExtension[0],
+                                                                        value: value,
+                                                                    },
+                                                                },
+                                                            }));
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <TextInput
+                                                    type='text'
+                                                    icon={CiHome}
+                                                    name='street'
+                                                    className='w-full'
+                                                    placeholder='Số nhà, tên đường'
+                                                    value={formEditAddress.address.street}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    </Modal.Body>
+
+                                    <Modal.Footer className='relative border-t border-amber-200/30 dark:border-amber-700/30'>
+                                        <div className='flex items-center justify-between w-full'>
+                                            <Button
+                                                color='gray'
+                                                onClick={() => setShowModalEditAddress(false)}
+                                                className='!ring-0 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                                tabIndex='-1'
+                                            >
+                                                Hủy
+                                            </Button>
+                                            <Button
+                                                onClick={handleConfirmInfo}
+                                                className='!ring-0 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
+                                            >
+                                                <span className='flex items-center justify-center gap-x-2'>
+                                                    Xác nhận
+                                                    <svg
+                                                        className='w-4 h-4'
+                                                        fill='none'
+                                                        stroke='currentColor'
+                                                        viewBox='0 0 24 24'
+                                                    >
+                                                        <path
+                                                            strokeLinecap='round'
+                                                            strokeLinejoin='round'
+                                                            strokeWidth={2}
+                                                            d='M5 13l4 4L19 7'
+                                                        />
+                                                    </svg>
+                                                </span>
+                                            </Button>
+                                        </div>
+                                    </Modal.Footer>
+                                </Modal>
 
                                 {/* Payment Methods Card */}
                                 <div className='relative'>
@@ -1171,8 +1136,8 @@ export default function DashCheckout() {
                                                     <ProductInfo_CheckoutPage
                                                         dataProduct={{
                                                             ...productItems,
-                                                            selectedOption: productItems?.option?.find(
-                                                                (opt) => opt.key === checkoutData.option,
+                                                            selectedOption: productItems?.productItem?.option?.find(
+                                                                (opt) => opt.key === checkoutData?.productItems?.option,
                                                             )?.value,
                                                         }}
                                                     />
@@ -1274,7 +1239,7 @@ export default function DashCheckout() {
 
                                                     <div className='flex items-center justify-center gap-2'>
                                                         <span className='relative text-sm font-medium text-white tracking-wide'>
-                                                            Xác nhận đặt hàng
+                                                            Tiến Hành Đặt Hàng
                                                         </span>
                                                         <svg
                                                             className='w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-0.5'

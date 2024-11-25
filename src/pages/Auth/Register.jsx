@@ -43,7 +43,7 @@ export default function Register() {
     // handle submit form
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.username || !formData.email || !formData.phone || !formData.password) {
+        if (!formData.username || !formData.email || !formData.password) {
             toast.error('Vui lòng nhập đầy đủ thông tin!');
             return;
         }

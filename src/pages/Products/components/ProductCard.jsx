@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Button, Modal } from 'flowbite-react';
+import { Button, Modal, Spinner } from 'flowbite-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 import { setProductToCheckout } from '../../../services/redux/slices/checkoutSlice';
@@ -9,7 +9,6 @@ import { Tag } from 'antd';
 import { BsCheck } from 'react-icons/bs';
 
 export default function ProductCard({ product }) {
-    console.log(product);
     const { id, productName, img, genderUser, length, width, style, waterproof, option } = product;
     const sizeProduct = useMemo(() => {
         return length === width ? `${length} mm` : `${length} x ${width} mm`;
@@ -28,6 +27,7 @@ export default function ProductCard({ product }) {
     const tokenUser = useSelector((state) => state.user.access_token);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [loadingEffect, setLoadingEffect] = useState(false);
     const [selectedColor, setSelectedColor] = useState(initialSelectedColor);
 
     const selectedOption = option?.find((opt) => opt.key === selectedColor)?.value;
@@ -113,25 +113,25 @@ export default function ProductCard({ product }) {
     // function buy now
     const handleBuyNow = useCallback(() => {
         if (!selectedOption) return;
-
-        const totalAmountToPay = quantity * (selectedOption.price - selectedOption.discount);
+        const keyColor = option?.find((opt) => opt.key === selectedColor).key;
         dispatch(
             setProductToCheckout({
                 productItems: {
-                    ...product,
-                    selectedColor,
-                    selectedOption,
+                    option: keyColor,
+                    productItem: product,
+                    quantity: quantity,
                 },
-                totalPrice: selectedOption.price * quantity,
-                totalDiscountPrice: selectedOption.discount * quantity,
-                totalAmountToPay,
                 totalQuantity: quantity,
                 isBuyNow: true,
             }),
         );
-        navigate('/checkout');
+        setLoadingEffect(true);
+        setTimeout(() => {
+            setLoadingEffect(false);
+            navigate('/checkout');
+        }, 1500);
         setShowModalBuyNow(false);
-    }, [dispatch, navigate, product, quantity, selectedColor, selectedOption]);
+    }, [dispatch, navigate, option, product, quantity, selectedColor, selectedOption]);
 
     // function navigate to login page
     const handleNavigateToLoginPage = useCallback(() => {
@@ -143,6 +143,18 @@ export default function ProductCard({ product }) {
     const handleNavigateToProductDetail = useCallback(() => {
         navigate(`/product-detail/${id}`);
     }, [navigate, id]);
+
+    // loading
+    if (loadingEffect) {
+        return (
+            <div className='w-full min-h-screen flex justify-center items-center '>
+                <div className='flex flex-col items-center'>
+                    <Spinner size='xl' color='info' />
+                    <p className='mt-4 text-gray-400 text-lg font-semibold'>Vui lòng chờ trong giây lát...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div
