@@ -4,23 +4,30 @@ import { FiSearch, FiGift, FiClock, FiPercent } from 'react-icons/fi';
 import SelectedVoucher from './SelectedVoucher';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount }) => {
-    const { isValidDate, hasRemainingTimes, isMinPriceReached, isApplicable, remainingAmount, formattedExpiryDate } =
+const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProvince }) => {
+    const { isValidDate, hasRemainingTimes, isMinPriceReached, isApplicable, remainingAmount, formattedExpiryDate, isValidProvince } =
         useMemo(() => {
             const now = new Date();
             const createdDate = new Date(voucher.createdDate);
             const expiryDate = new Date(voucher.expiryDate);
+            
+            const isValidProvince = !voucher.province || voucher.province.value === userProvince.value;
 
             return {
                 isValidDate: now >= createdDate && now <= expiryDate,
                 hasRemainingTimes: voucher.times > 0,
                 isMinPriceReached: totalAmount >= voucher.minPrice,
                 isApplicable:
-                    now >= createdDate && now <= expiryDate && voucher.times > 0 && totalAmount >= voucher.minPrice,
+                    now >= createdDate && 
+                    now <= expiryDate && 
+                    voucher.times > 0 && 
+                    totalAmount >= voucher.minPrice &&
+                    isValidProvince,
                 remainingAmount: voucher.minPrice - totalAmount,
                 formattedExpiryDate: expiryDate.toLocaleDateString('vi-VN'),
+                isValidProvince,
             };
-        }, [voucher.createdDate, voucher.expiryDate, voucher.times, voucher.minPrice, totalAmount]);
+        }, [voucher.createdDate, voucher.expiryDate, voucher.times, voucher.minPrice, totalAmount, voucher.province, userProvince]);
 
     return (
         <div className='relative group'>
@@ -78,6 +85,8 @@ const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount }) => {
                                         ? 'Hết lượt'
                                         : !isMinPriceReached
                                         ? `Thiếu ${remainingAmount.toLocaleString('vi-VN')}₫`
+                                        : !isValidProvince
+                                        ? 'Không áp dụng cho khu vực này'
                                         : 'Khả dụng'}
                                 </span>
                             </div>
@@ -103,7 +112,7 @@ const EmptyState = () => (
     </div>
 );
 
-const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, totalAmount, selectedVoucher }) => {
+const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, totalAmount, selectedVoucher, userProvince }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredVouchers = useMemo(() => {
@@ -174,6 +183,7 @@ const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, tot
                                                     voucher={voucher}
                                                     onApplyVoucher={() => handleVoucherApply(voucher)}
                                                     totalAmount={totalAmount}
+                                                    userProvince={userProvince}
                                                 />
                                             </motion.div>
                                         ))}

@@ -712,6 +712,12 @@ export default function DashCheckout() {
         }
     };
 
+    // Pass user's province to VoucherModal
+    const userProvince = useMemo(() => ({
+        label: currentUser?.address?.province?.label || '',
+        value: currentUser?.address?.province?.value || null
+    }), [currentUser?.address?.province]);
+
     if (isLoading) {
         return (
             <div
@@ -1184,6 +1190,7 @@ export default function DashCheckout() {
                                                     onApplyVoucher={handleApplyVoucher}
                                                     totalAmount={totalPrice}
                                                     selectedVoucher={selectedVoucher}
+                                                    userProvince={userProvince}
                                                 />
                                             </div>
 

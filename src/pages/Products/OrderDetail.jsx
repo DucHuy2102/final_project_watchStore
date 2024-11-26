@@ -138,61 +138,39 @@ export default function OrderDetail({ orderData, onBack }) {
             return;
         }
 
-        console.log(rating, reviewText, reviewImages);
-        // try {
-        //     setSubmitting(true);
-        //     const response = await axios.post(
-        //         `${import.meta.env.VITE_API_URL}/api/reviews`,
-        //         {
-        //             orderId: orderData.id,
-        //             rating,
-        //             content: reviewText.trim(),
-        //             images: reviewImages,
-        //         },
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${tokenUser}`,
-        //             },
-        //         },
-        //     );
+        try {
+            setSubmitting(true);
+            const response = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/review/create-review`,
+                {
+                    orderId: orderData.id,
+                    rating,
+                    reviewText: reviewText.trim(),
+                    reviewImages: reviewImages,
+                    productId: orderData.products[0].product.id,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
 
-        //     if (response.status === 200) {
-        //         toast.success('Đánh giá của bạn đã được gửi thành công!');
-        //         setOpenModalReview(false);
-        //         setRating(0);
-        //         setReviewText('');
-        //         setReviewImages([]);
-        //         setFileList([]);
-        //     }
-        // } catch (error) {
-        //     console.error(error);
-        //     toast.error('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại!');
-        // } finally {
-        //     setSubmitting(false);
-        // }
+            if (response.status === 200) {
+                toast.success('Đánh giá của bạn đã được gửi thành công!');
+                setOpenModalReview(false);
+                setRating(0);
+                setReviewText('');
+                setReviewImages([]);
+                setFileList([]);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error('Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại!');
+        } finally {
+            setSubmitting(false);
+        }
     };
-
-    // const handleSubmitReview = async () => {
-    //     if (rating === 0) {
-    //         // Show error message
-    //         return;
-    //     }
-
-    //     try {
-    //         setSubmitting(true);
-    //         // Implement your review submission logic here
-
-    //         // Close modal and reset form
-    //         setOpenModalReview(false);
-    //         setRating(0);
-    //         setReviewText('');
-    //         setReviewImages([]);
-    //     } catch (error) {
-    //         console.error(error);
-    //     } finally {
-    //         setSubmitting(false);
-    //     }
-    // };
 
     return (
         <div className='space-y-8 max-w-7xl mx-auto py-6'>

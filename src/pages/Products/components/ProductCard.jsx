@@ -228,7 +228,7 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Modal Buy Now */}
-            <Modal size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
+            <Modal className='!z-[9999]' size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
                 {tokenUser ? (
                     <>
                         <Modal.Header />
