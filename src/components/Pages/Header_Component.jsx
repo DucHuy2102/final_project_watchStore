@@ -76,8 +76,9 @@ export default function Header_Component() {
                 pathname.startsWith('/admin')
                     ? 'hidden sm:hidden md:hidden lg:hidden'
                     : 'block'
-            } border-b border-gray-200 dark:border-gray-700 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 shadow-sm relative z-[9999]`}
+            } border-b border-gray-200 dark:border-gray-700 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 shadow-sm sticky top-0 z-50`}
         >
+            {/* Logo */}
             <Link
                 to='/'
                 className='self-center tracking-wider outline-none whitespace-nowrap text-2xl sm:text-3xl font-bold hover:scale-105 transition-transform duration-300'
@@ -98,6 +99,7 @@ export default function Header_Component() {
                 </span>
             </Link>
 
+            {/* Desktop search */}
             <form onSubmit={handleSearch}>
                 <TextInput
                     type='text'
@@ -109,6 +111,7 @@ export default function Header_Component() {
                 />
             </form>
 
+            {/* Mobile search */}
             <div className='md:hidden ml-14'>
                 <Button
                     className='rounded-full w-10 focus:!ring-0'
@@ -119,6 +122,8 @@ export default function Header_Component() {
                     <AiOutlineSearch size={20} />
                 </Button>
             </div>
+
+            {/* Mobile search */}
             {showMobileSearch && (
                 <form ref={searchRef} onSubmit={handleSearch} className='w-full mt-2'>
                     <TextInput
@@ -163,7 +168,7 @@ export default function Header_Component() {
 
                     {tokenUser ? (
                         <Dropdown
-                            className='mt-[2px] relative z-[9999]'
+                            className='mt-[2px]'
                             inline
                             arrowIcon={false}
                             label={
@@ -223,6 +228,7 @@ export default function Header_Component() {
                 </div>
             )}
 
+            {/* Navbar */}
             <Navbar.Collapse className='md:inline-block'>
                 <Navbar.Link
                     active={pathname === '/'}

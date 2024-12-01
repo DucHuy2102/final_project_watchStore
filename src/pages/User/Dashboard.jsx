@@ -92,9 +92,9 @@ export default function Dashboard() {
 
     const orderStats = [
         { name: 'Đang xử lý', value: orderProcessing },
-        { name: 'Đang giao', value: orderDelivery },
-        { name: 'Đã giao', value: orderComplete },
-        { name: 'Đã hủy', value: orderCancel },
+        { name: 'Đang giao', value: orderDelivery + 1 },
+        { name: 'Đã giao', value: orderComplete + 2 },
+        { name: 'Đã hủy', value: orderCancel + 3 },
     ];
 
     const recentOrders = useMemo(() => {

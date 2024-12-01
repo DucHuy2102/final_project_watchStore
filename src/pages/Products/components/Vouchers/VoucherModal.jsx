@@ -5,29 +5,44 @@ import SelectedVoucher from './SelectedVoucher';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProvince }) => {
-    const { isValidDate, hasRemainingTimes, isMinPriceReached, isApplicable, remainingAmount, formattedExpiryDate, isValidProvince } =
-        useMemo(() => {
-            const now = new Date();
-            const createdDate = new Date(voucher.createdDate);
-            const expiryDate = new Date(voucher.expiryDate);
-            
-            const isValidProvince = !voucher.province || voucher.province.value === userProvince.value;
+    const {
+        isValidDate,
+        hasRemainingTimes,
+        isMinPriceReached,
+        isApplicable,
+        remainingAmount,
+        formattedExpiryDate,
+        isValidProvince,
+    } = useMemo(() => {
+        const now = new Date();
+        const createdDate = new Date(voucher.createdDate);
+        const expiryDate = new Date(voucher.expiryDate);
 
-            return {
-                isValidDate: now >= createdDate && now <= expiryDate,
-                hasRemainingTimes: voucher.times > 0,
-                isMinPriceReached: totalAmount >= voucher.minPrice,
-                isApplicable:
-                    now >= createdDate && 
-                    now <= expiryDate && 
-                    voucher.times > 0 && 
-                    totalAmount >= voucher.minPrice &&
-                    isValidProvince,
-                remainingAmount: voucher.minPrice - totalAmount,
-                formattedExpiryDate: expiryDate.toLocaleDateString('vi-VN'),
+        const isValidProvince = !voucher.province || voucher.province.value === userProvince.value;
+
+        return {
+            isValidDate: now >= createdDate && now <= expiryDate,
+            hasRemainingTimes: voucher.times > 0,
+            isMinPriceReached: totalAmount >= voucher.minPrice,
+            isApplicable:
+                now >= createdDate &&
+                now <= expiryDate &&
+                voucher.times > 0 &&
+                totalAmount >= voucher.minPrice &&
                 isValidProvince,
-            };
-        }, [voucher.createdDate, voucher.expiryDate, voucher.times, voucher.minPrice, totalAmount, voucher.province, userProvince]);
+            remainingAmount: voucher.minPrice - totalAmount,
+            formattedExpiryDate: expiryDate.toLocaleDateString('vi-VN'),
+            isValidProvince,
+        };
+    }, [
+        voucher.createdDate,
+        voucher.expiryDate,
+        voucher.times,
+        voucher.minPrice,
+        totalAmount,
+        voucher.province,
+        userProvince,
+    ]);
 
     return (
         <div className='relative group'>
@@ -112,7 +127,15 @@ const EmptyState = () => (
     </div>
 );
 
-const VoucherModal_Component = ({ vouchers, isOpen, onClose, onApplyVoucher, totalAmount, selectedVoucher, userProvince }) => {
+const VoucherModal_Component = ({
+    vouchers,
+    isOpen,
+    onClose,
+    onApplyVoucher,
+    totalAmount,
+    selectedVoucher,
+    userProvince,
+}) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredVouchers = useMemo(() => {

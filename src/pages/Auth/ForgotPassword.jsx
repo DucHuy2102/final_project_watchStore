@@ -73,6 +73,7 @@ export default function ForgotPassword() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             className='mt-1 focus:ring-2 focus:ring-blue-500 dark:focus:ring-purple-500'
+                                            autoFocus
                                         />
                                     </div>
 

@@ -14,31 +14,27 @@ import { FiMinus, FiPlus } from 'react-icons/fi';
 import { CiWarning } from 'react-icons/ci';
 import { Image } from 'antd';
 import { formatWatchDescription, prProduct } from '../../components/Utils/infomationComponent';
-import { Policy } from './components/exportCom_Product';
+import { ListReview, Policy, Review } from './components/exportCom_Product';
 
 export default function ProductDetail() {
-    // redux
-    const tokenUser = useSelector((state) => state.user.access_token);
-
-    // format price to VND
     const formatPrice = useCallback(
         (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price),
         [],
     );
 
-    // check color is light or dark
-    const isLightColor = useCallback((color) => {
+    const isLightColor = (color) => {
         const hex = color.replace('#', '');
         const r = parseInt(hex.substr(0, 2), 16);
         const g = parseInt(hex.substr(2, 2), 16);
         const b = parseInt(hex.substr(4, 2), 16);
         const brightness = (r * 299 + g * 587 + b * 114) / 1000;
         return brightness > 155;
-    }, []);
+    };
 
     // state
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { access_token: tokenUser } = useSelector((state) => state.user);
     const { pathname } = useLocation();
     const { id } = useParams();
     const [product, setProduct] = useState({});
@@ -47,8 +43,47 @@ export default function ProductDetail() {
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [moreProduct, setMoreProduct] = useState([]);
+    const [isBuyThisProduct, setIsBuyThisProduct] = useState(true);
+    const [listReviews, setListReviews] = useState([]);
+    console.log(isBuyThisProduct);
 
-    // call API to get product detail by productId
+    const getReviewsByProductId = async () => {
+        try {
+            setLoadingEffect(true);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-reviews-by-product`, {
+                params: { productId: id },
+            });
+            if (res?.status === 200) {
+                setListReviews(res.data);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingEffect(false);
+        }
+    };
+
+    const checkIsBuyThisProduct = async () => {
+        try {
+            setLoadingEffect(true);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/order/is-ordered`, null, {
+                params: { productId: id },
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                },
+            });
+            if (res?.status === 200) {
+                const { data } = res;
+                setIsBuyThisProduct(data);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoadingEffect(false);
+        }
+    };
+
+    // call API to get product detail
     useEffect(() => {
         const getProductDetail = async () => {
             try {
@@ -66,7 +101,9 @@ export default function ProductDetail() {
                 setLoading(false);
             }
         };
+        checkIsBuyThisProduct();
         getProductDetail();
+        getReviewsByProductId();
     }, [id]);
 
     // destructuring product detail
@@ -175,13 +212,20 @@ export default function ProductDetail() {
         ],
     );
 
-    // selected COLOR of product
+    const [selectedOption, setSelectedOption] = useState(null);
     const [selectedColor, setSelectedColor] = useState(
         option?.find((opt) => opt.value.state === 'saling')?.key || null,
     );
 
-    // selected OPTION of product
-    const [selectedOption, setSelectedOption] = useState(null);
+    useEffect(() => {
+        if (product?.option?.length > 0) {
+            const defaultOption = product.option.find((opt) => opt.value.state === 'saling') || product.option[0];
+            if (defaultOption) {
+                setSelectedColor(defaultOption.key);
+                setSelectedOption(defaultOption);
+            }
+        }
+    }, [product]);
 
     // available colors of product
     const availableColors = useMemo(() => {
@@ -193,7 +237,6 @@ export default function ProductDetail() {
         if (!selectedColor || !product?.option) return null;
         return product.option.find((opt) => opt.key === selectedColor);
     }, [selectedColor, product?.option]);
-    console.log(selectedColor, selectedOptionDetails);
 
     // price, discount, priceFormat, discountPrice, percentDiscount of product
     const prices = useMemo(() => {
@@ -219,24 +262,17 @@ export default function ProductDetail() {
     }, [selectedOptionDetails, price, discount, formatPrice]);
 
     // handle select color of product
-    const handleColorSelect = useCallback(
-        (color) => {
-            setSelectedColor(color);
-            const newOption = product?.option?.find((opt) => opt.key === color);
-            setSelectedOption(newOption);
-            setQuantityProduct(0);
-        },
-        [product?.option],
-    );
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+        const newOption = product?.option?.find((opt) => opt.key === color);
+        setSelectedOption(newOption);
+        setQuantityProduct(0);
+    };
 
     // navgigate to another product detail page
-    const handleNavigateToProductDetail = useCallback(
-        (productId) => {
-            console.log(productId);
-            navigate(`/product-detail/${productId}`);
-        },
-        [navigate],
-    );
+    const handleNavigateToProductDetail = (productId) => {
+        navigate(`/product-detail/${productId}`);
+    };
 
     // function add product to cart
     const handleAddProductToCart = useCallback(async () => {
@@ -341,12 +377,6 @@ export default function ProductDetail() {
         }
     };
 
-    // function navigate to login page
-    const handleNavigateToLoginPage = () => {
-        navigate('/login', { state: { from: pathname } });
-        setShowModalBuyNow(false);
-    };
-
     // function buy now product
     const handleBuyNow = () => {
         if (quantityProduct === 0) {
@@ -373,12 +403,13 @@ export default function ProductDetail() {
 
     return (
         <div className='min-h-screen bg-gradient-to-b from-[#f8f9fb] to-white dark:from-gray-900 dark:to-gray-800'>
-            {/* Hero section with breadcrumb */}
+            {/* Breadcrumb */}
             <div className='px-20 pt-5'>
                 <Breadcrumb_Component displayName={productName} />
             </div>
 
             <div className='px-10 py-2 lg:max-w-7xl max-w-4xl mx-auto'>
+                {/* Product detail */}
                 <div
                     className='bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 p-10 mb-10
                     backdrop-blur-xl backdrop-filter'
@@ -742,7 +773,7 @@ export default function ProductDetail() {
                     </div>
                 </div>
 
-                {/* Related products with enhanced design */}
+                {/* Related products */}
                 <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8'>
                     <h2 className='text-2xl font-bold text-center mb-10 text-gray-900 dark:text-white'>
                         Sản phẩm liên quan
@@ -786,17 +817,59 @@ export default function ProductDetail() {
                     </Swiper>
                 </div>
 
+                {/* Review product */}
+                <div className='flex flex-col justify-center items-center mb-8 mt-4'>
+                    <div className='w-full max-w-4xl mx-auto flex items-center justify-between'>
+                        <h3 className='relative inline-block'>
+                            <span
+                                className='text-2xl font-bold 
+                                    bg-gradient-to-r from-gray-800 via-gray-600 to-gray-900
+                                    dark:from-gray-100 dark:via-white dark:to-gray-200
+                                    bg-clip-text text-transparent
+                                    tracking-wide font-serif'
+                            >
+                                Đánh giá từ khách hàng
+                            </span>
+                            {listReviews.length > 0 && (
+                                <span className='ml-3 inline-flex items-center'>
+                                    <span className='text-2xl font-bold text-blue-500'>{listReviews.length}</span>
+                                    <span className='ml-1 text-lg text-gray-400 font-light'>đánh giá</span>
+                                </span>
+                            )}
+                            <span
+                                className='absolute -bottom-2 left-0 w-2/3 h-0.5
+                                    bg-gradient-to-r from-blue-600 to-transparent'
+                            ></span>
+                        </h3>
+
+                        {isBuyThisProduct && <Review />}
+                    </div>
+
+                    <ListReview reviews={listReviews} />
+                </div>
+
                 {/* Modal verify user */}
                 <Modal show={showModalBuyNow} size='md' popup>
                     <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                        <CiWarning size='70px' color={'#FFE31A'} />
+                        <CiWarning size='70px' className='text-yellow-300' />
                         <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
-                        <div className='w-full flex justify-between items-center gap-x-5'>
-                            <Button outline className='w-full focus:!ring-0' onClick={() => setShowModalBuyNow(false)}>
+                        <div className='w-full flex justify-between items-center gap-4'>
+                            <Button
+                                color='gray'
+                                onClick={() => setShowModalBuyNow(false)}
+                                className='w-full hover:shadow-sm hover:scale-105 transition-all duration-300 rounded-xl !text-black !ring-0'
+                            >
                                 Hủy
                             </Button>
-                            <Button className='w-full focus:!ring-0' onClick={handleNavigateToLoginPage}>
-                                Đăng nhập
+                            <Button
+                                color='blue'
+                                onClick={() => {
+                                    navigate('/login', { state: { from: pathname } });
+                                    setShowModalBuyNow(false);
+                                }}
+                                className='w-full hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl !ring-0'
+                            >
+                                Xác nhận
                             </Button>
                         </div>
                     </Modal.Body>

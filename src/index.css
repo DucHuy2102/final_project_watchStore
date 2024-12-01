@@ -35,3 +35,18 @@
     font-family: 'Inter', sans-serif;
     letter-spacing: 0.5px;
 }
+
+.custom-select-dropdown .ant-select-item {
+    padding: 10px 12px !important;
+    margin: 4px 8px !important;
+    border-radius: 6px !important;
+}
+
+.custom-select-dropdown .ant-select-item-option-selected {
+    background-color: #f0f7ff !important;
+    font-weight: 600 !important;
+}
+
+.custom-select-dropdown .ant-select-item:hover {
+    background-color: #f5f5f5 !important;
+}

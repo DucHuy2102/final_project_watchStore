@@ -185,7 +185,12 @@ export default function FilterSortPanel() {
                 </Badge>
 
                 {/* sort */}
-                <Dropdown outline label={sortValue.label ? sortValue.label : 'Sắp xếp'}>
+                <Dropdown
+                    className='!ring-0 focus:!ring-0 !outline-none'
+                    outline
+                    label={sortValue.label ? sortValue.label : 'Sắp xếp'}
+                    style={{ border: 'none', boxShadow: 'none' }}
+                >
                     <Dropdown.Item onClick={() => handleSortChange('gia-tang-dan', 'Giá tăng dần')} icon={FaArrowUp}>
                         Giá tăng dần
                     </Dropdown.Item>

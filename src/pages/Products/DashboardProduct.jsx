@@ -1,9 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { Spinner } from 'flowbite-react';
+import { Button, Select } from 'antd';
 import { useSearchParams } from 'react-router-dom';
-import { FilterSortPanel, ProductCard } from './components/exportCom_Product';
-import { Breadcrumb_Component, Pagination_Component } from '../../components/exportComponent';
+import { FilterModal, Pagination, ProductCard } from './components/exportCom_Product';
+import { Breadcrumb_Component } from '../../components/exportComponent';
+import { FaFilter } from 'react-icons/fa';
+
+const SORT_OPTIONS = [
+    { value: 'gia-tang-dan', label: 'Giá tăng dần', icon: '↑' },
+    { value: 'gia-giam-dan', label: 'Giá giảm dần', icon: '↓' },
+    { value: 'a-z', label: 'Từ A - Z', icon: 'A' },
+    { value: 'z-a', label: 'Từ Z - A', icon: 'Z' },
+];
 
 export default function DashboardProduct() {
     // states
@@ -12,44 +21,194 @@ export default function DashboardProduct() {
     const [products, setProducts] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
+    const [showModalFilter, setShowModalFilter] = useState(false);
+    const [selectedFilters, setSelectedFilters] = useState([]);
+    const [wireMaterial, setWireMaterial] = useState([]);
+    const [waterProof, setWaterProof] = useState([]);
+
+    const getAllProduct = async () => {
+        try {
+            setLoading(true);
+            const filterParams = Array.from(searchParams.entries())
+                .filter(([key]) => key !== 'pageNum')
+                .map(([key, value]) => `${key}=${value}`)
+                .join('&');
+
+            const pageNum = searchParams.get('pageNum') || '1';
+
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_URL}/client/get-all-product${
+                    filterParams ? `?${filterParams}&pageNum=${pageNum}` : `?pageNum=${pageNum}`
+                }`,
+            );
+            if (res.status === 200) {
+                const { data } = res;
+                setProducts(data.productResponses);
+                setTotalPages(data.totalPages);
+                setTotalProducts(data.totalProducts);
+                setWaterProof(data.waterProof);
+                setWireMaterial(data.wireMaterial);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const getFilterParams = () => {
-            const filterParams = new URLSearchParams();
-            searchParams.forEach((value, key) => {
-                if (value && key !== 'sortBy' && key !== 'pageNum') {
-                    filterParams.set(key, value);
+        getAllProduct();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
+
+    const FILTER_OPTIONS = useMemo(
+        () => [
+            {
+                title: 'Đối tượng',
+                choices: [
+                    { key: 'gender', value: 'Nữ', label: 'Đồng hồ nữ' },
+                    { key: 'gender', value: 'Nam', label: 'Đồng hồ nam' },
+                    { key: 'gender', value: 'Thiếu nhi', label: 'Đồng hồ thiếu nhi' },
+                    { key: 'gender', value: 'Tất cả', label: 'Tất cả đối tượng' },
+                ],
+            },
+            {
+                title: 'Chất liệu dây',
+                choices: wireMaterial?.map((wireMaterial) => ({
+                    key: 'wireMaterial',
+                    value: wireMaterial,
+                    label: wireMaterial,
+                })),
+            },
+            {
+                title: 'Hình dáng mặt đồng hồ',
+                choices: [
+                    { key: 'shape', value: 'Đồng hồ mặt tròn', label: 'Đồng hồ mặt tròn' },
+                    { key: 'shape', value: 'Đồng hồ mặt vuông', label: 'Đồng hồ mặt vuông' },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt chữ nhật',
+                        label: 'Đồng hồ mặt chữ nhật',
+                    },
+                    {
+                        key: 'shape ',
+                        value: 'Đồng hồ mặt tam giác',
+                        label: 'Đồng hồ mặt tam giác',
+                    },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt bầu dục',
+                        label: 'Đồng hồ mặt bầu dục',
+                    },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt Tonneau',
+                        label: 'Đồng hồ mặt Tonneau',
+                    },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt Carage',
+                        label: 'Đồng hồ mặt Carage',
+                    },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt Cushion',
+                        label: 'Đồng hồ mặt Cushion',
+                    },
+                    {
+                        key: 'shape',
+                        value: 'Đồng hồ mặt bát giác',
+                        label: 'Đồng hồ mặt bát giác',
+                    },
+                ],
+            },
+            {
+                title: 'Kháng nước',
+                choices: waterProof?.map((waterProof) => ({
+                    key: 'waterProof',
+                    value: waterProof,
+                    label: `${waterProof} ATM`,
+                })),
+            },
+        ],
+        [waterProof, wireMaterial],
+    );
+
+    const handleSelectOptionFilter = useCallback(
+        (choice) => {
+            const isChoiceExist = selectedFilters.some(
+                (item) => item.key === choice.key && item.value === choice.value,
+            );
+            if (isChoiceExist) {
+                setSelectedFilters(
+                    selectedFilters.filter((item) => item.key !== choice.key || item.value !== choice.value),
+                );
+            } else {
+                setSelectedFilters([...selectedFilters, choice]);
+            }
+        },
+        [selectedFilters],
+    );
+
+    const updateSearchParams = useCallback(
+        (filters) => {
+            const newSearchParams = new URLSearchParams();
+            newSearchParams.set('pageNum', '1');
+
+            const filterGroups = {};
+            filters.forEach((filter) => {
+                if (filter?.value.trim()) {
+                    if (!filterGroups[filter.key]) {
+                        filterGroups[filter.key] = new Set();
+                    }
+                    filterGroups[filter.key].add(filter.value.trim());
                 }
             });
-            return new URLSearchParams(filterParams).toString();
-        };
 
-        const getProducts = async () => {
-            setLoading(true);
-            try {
-                const filterParams = getFilterParams();
-                const sortBy = searchParams.get('sortBy');
-                const pageNum = searchParams.get('pageNum') || '1';
-
-                const res = await axios(
-                    `${
-                        import.meta.env.VITE_API_URL
-                    }/client/get-all-product?${filterParams}&sortBy=${sortBy}&pageNum=${pageNum}`,
-                );
-                if (res?.status === 200) {
-                    setProducts(res.data.productResponses);
-                    setTotalPages(res.data.totalPages);
-                    setTotalProducts(res.data.totalProducts);
+            Object.entries(filterGroups).forEach(([key, values]) => {
+                const valuesArray = Array.from(values);
+                if (valuesArray.length > 0) {
+                    newSearchParams.set(key, valuesArray.join(','));
                 }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+            });
 
-        getProducts();
-    }, [searchParams, setSearchParams]);
+            searchParams.forEach((value, key) => {
+                if (key !== 'pageNum' && !FILTER_OPTIONS.some((option) => option.choices[0].key === key)) {
+                    newSearchParams.set(key, value);
+                }
+            });
+
+            searchParams.forEach((value, key) => {
+                if (key === 'q' && value.trim()) {
+                    newSearchParams.set(key, value);
+                }
+            });
+
+            setSearchParams(newSearchParams);
+        },
+        [FILTER_OPTIONS, searchParams, setSearchParams],
+    );
+
+    const handleSubmitFilter = (e) => {
+        e.preventDefault();
+        updateSearchParams(selectedFilters);
+        setShowModalFilter(false);
+    };
+
+    const handleSortChange = (value) => {
+        const newSearchParams = new URLSearchParams(searchParams);
+        if (value) {
+            newSearchParams.set('sortBy', value);
+        } else {
+            newSearchParams.delete('sortBy');
+        }
+        newSearchParams.set('pageNum', '1');
+        setSearchParams(newSearchParams);
+    };
 
     // loading
     if (loading) {
@@ -86,7 +245,48 @@ export default function DashboardProduct() {
                     </span>
                 )}
 
-                <FilterSortPanel />
+                <div className='w-full sm:w-auto flex items-center justify-center gap-x-2'>
+                    <Select
+                        placeholder='Sắp xếp theo'
+                        options={SORT_OPTIONS}
+                        onChange={handleSortChange}
+                        className='w-[180px] h-11'
+                        popupClassName='custom-select-dropdown'
+                        value={searchParams.get('sortBy')}
+                        optionRender={(option) => (
+                            <div className='flex items-center gap-3 px-1'>
+                                <span className='text-blue-500 font-semibold'>{option.data.icon}</span>
+                                <span>{option.data.label}</span>
+                            </div>
+                        )}
+                        allowClear
+                    />
+
+                    <Button
+                        onClick={() => setShowModalFilter(true)}
+                        className={`h-11 px-5 flex items-center gap-2 border-2 ${
+                            selectedFilters.length ? 'border-blue-500 text-blue-500' : ''
+                        }`}
+                    >
+                        <FaFilter />
+                        <span className='hidden sm:inline'>Bộ Lọc</span>
+                        {selectedFilters.length > 0 && (
+                            <span className='flex items-center justify-center w-5 h-5 text-xs font-medium bg-blue-500 text-white rounded-full'>
+                                {selectedFilters.length}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                <FilterModal
+                    show={showModalFilter}
+                    onClose={() => setShowModalFilter(false)}
+                    options={FILTER_OPTIONS}
+                    selectedFilters={selectedFilters}
+                    onRemoveFilter={() => setSelectedFilters([])}
+                    onSelect={handleSelectOptionFilter}
+                    onSubmit={handleSubmitFilter}
+                />
             </div>
 
             {products?.length > 0 ? (
@@ -109,7 +309,7 @@ export default function DashboardProduct() {
                 </div>
             )}
 
-            {products && <Pagination_Component totalPages={totalPages} totalProduct={products?.length} />}
+            {totalPages > 1 && <Pagination totalProduct={totalProducts} />}
         </div>
     );
 }

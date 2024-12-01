@@ -23,6 +23,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getCartUser } from './services/redux/slices/cartSlice';
+import { io } from 'socket.io-client';
 
 export default function App() {
     // state

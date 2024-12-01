@@ -139,6 +139,7 @@ export default function Login() {
                                 <TextInput
                                     icon={CiUser}
                                     type='text'
+                                    autoFocus
                                     placeholder='Tên người dùng'
                                     id='username'
                                     value={formData.username}

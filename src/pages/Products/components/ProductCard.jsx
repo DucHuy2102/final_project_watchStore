@@ -2,35 +2,36 @@ import { useMemo, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Button, Modal, Spinner } from 'flowbite-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 import { setProductToCheckout } from '../../../services/redux/slices/checkoutSlice';
 import { Tag } from 'antd';
 import { BsCheck } from 'react-icons/bs';
 
+const isLightColor = (hex) => {
+    hex = hex.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.5;
+};
+
 export default function ProductCard({ product }) {
-    const { id, productName, img, genderUser, length, width, style, waterproof, option } = product;
-    const sizeProduct = useMemo(() => {
-        return length === width ? `${length} mm` : `${length} x ${width} mm`;
-    }, [length, width]);
+    const { id, productName, img, genderUser, style, waterproof, option } = product;
     const handleRenderGenderUser = useMemo(() => {
-        return genderUser === 'Male' ? 'Nam' : 'Nữ';
+        return genderUser === 'Nam' ? 'Nam' : 'Nữ';
     }, [genderUser]);
-    const initialSelectedColor = useMemo(() => {
-        return option?.find((opt) => opt.value.state === 'saling')?.key || null;
-    }, [option]);
 
     // state
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const tokenUser = useSelector((state) => state.user.access_token);
+    const { access_token: tokenUser } = useSelector((state) => state.user);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [loadingEffect, setLoadingEffect] = useState(false);
-    const [selectedColor, setSelectedColor] = useState(initialSelectedColor);
-
-    const selectedOption = option?.find((opt) => opt.key === selectedColor)?.value;
+    const [selectedColor, setSelectedColor] = useState(option?.[0]?.key);
 
     const priceFormat = useCallback((price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -39,29 +40,20 @@ export default function ProductCard({ product }) {
         }).format(price);
     }, []);
 
-    const handleQuantityDecrease = useCallback((e) => {
+    const handleQuantityDecrease = (e) => {
         e.stopPropagation();
         setQuantity((prev) => Math.max(1, prev - 1));
-    }, []);
+    };
 
-    const handleQuantityIncrease = useCallback((e) => {
+    const handleQuantityIncrease = (e) => {
         e.stopPropagation();
         setQuantity((prev) => prev + 1);
-    }, []);
+    };
 
     const handleColorSelect = useCallback((e, colorKey) => {
         e.stopPropagation();
         setSelectedColor(colorKey);
     }, []);
-
-    const isLightColor = (hex) => {
-        hex = hex.replace('#', '');
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        return luminance > 0.5;
-    };
 
     const renderColorOptions = useMemo(() => {
         if (!option) return null;
@@ -91,6 +83,7 @@ export default function ProductCard({ product }) {
         ));
     }, [option, selectedColor, handleColorSelect]);
 
+    const selectedOption = option?.find((opt) => opt.key === selectedColor)?.value;
     const priceDisplay = useMemo(() => {
         if (!selectedOption) return null;
 
@@ -132,17 +125,6 @@ export default function ProductCard({ product }) {
         }, 1500);
         setShowModalBuyNow(false);
     }, [dispatch, navigate, option, product, quantity, selectedColor, selectedOption]);
-
-    // function navigate to login page
-    const handleNavigateToLoginPage = useCallback(() => {
-        navigate('/login', { state: { from: pathname } });
-        setShowModalBuyNow(false);
-    }, [navigate, pathname]);
-
-    // function navigate to product detail
-    const handleNavigateToProductDetail = useCallback(() => {
-        navigate(`/product-detail/${id}`);
-    }, [navigate, id]);
 
     // loading
     if (loadingEffect) {
@@ -196,7 +178,7 @@ export default function ProductCard({ product }) {
             </div>
 
             {/*  Product info */}
-            <div onClick={handleNavigateToProductDetail} className='w-full px-4 py-3 cursor-pointer'>
+            <div onClick={() => navigate(`/product-detail/${id}`)} className='w-full px-4 py-3 cursor-pointer'>
                 <div className='mb-3'>
                     <h3
                         className='text-lg font-semibold text-gray-700 
@@ -206,12 +188,10 @@ export default function ProductCard({ product }) {
                     </h3>
                 </div>
 
-                {option && (
-                    <div className='space-y-3'>
-                        <div className='flex gap-2'>{renderColorOptions}</div>
-                        {priceDisplay}
-                    </div>
-                )}
+                <div className='space-y-3'>
+                    <div className='flex gap-2'>{renderColorOptions}</div>
+                    {priceDisplay}
+                </div>
             </div>
 
             {/* Button buy */}
@@ -228,70 +208,103 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Modal Buy Now */}
-            <Modal className='!z-[9999]' size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
+            <Modal size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
                 {tokenUser ? (
                     <>
                         <Modal.Header />
-                        <Modal.Body>
+                        <Modal.Body className='overflow-hidden'>
                             <div className='flex flex-col justify-center items-center'>
-                                <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>
-                                    {img.map((item, index) => (
-                                        <SwiperSlide key={index}>
-                                            <img
-                                                src={item}
-                                                alt={productName}
-                                                className='h-full w-full rounded-lg object-cover transition-transform duration-500 ease-in-out transform hover:scale-105'
+                                <div className='w-full max-w-md overflow-hidden rounded-lg shadow-lg'>
+                                    <Swiper className='h-[350px] w-full rounded-lg' loop={true} spaceBetween={0}>
+                                        {img.map((item, index) => (
+                                            <SwiperSlide key={index}>
+                                                <img
+                                                    src={item}
+                                                    alt={productName}
+                                                    className='h-full w-full object-cover transition-transform duration-500 ease-in-out transform hover:scale-105'
+                                                />
+                                            </SwiperSlide>
+                                        ))}
+                                    </Swiper>
+                                </div>
+                                <div className='w-full mt-6 space-y-3'>
+                                    <Link to={`/product-detail/${id}`}>
+                                        <h4 className='text-xl font-bold text-gray-900 text-center truncate'>
+                                            {productName}
+                                        </h4>
+                                    </Link>
+                                    <div className='flex items-center justify-center gap-4 text-gray-600'>
+                                        <p className='text-base flex items-center gap-2'>
+                                            Màu sắc đã chọn:{' '}
+                                            <span
+                                                className='inline-block rounded-full w-5 h-5 border shadow-sm'
+                                                style={{
+                                                    backgroundColor: selectedColor,
+                                                    border: isLightColor(selectedColor) ? '1px solid #e2e8f0' : 'none',
+                                                }}
                                             />
-                                        </SwiperSlide>
-                                    ))}
-                                </Swiper>
-                                <h4 className='mt-4 text-lg sm:text-xl font-semibold text-gray-800'>{productName}</h4>
-                                <p className='text-sm sm:text-base text-gray-500'>
-                                    {sizeProduct} | {handleRenderGenderUser} giới
-                                </p>
-                                <p className='text-lg font-semibold sm:text-xl text-blue-500'>
-                                    {selectedOption && priceFormat(selectedOption.price - selectedOption.discount)}
-                                </p>
-                                <div className='flex items-center mt-4'>
+                                        </p>
+                                        <span className='w-px h-4 bg-gray-400' />
+                                        <p className='text-base'>{handleRenderGenderUser} giới</p>
+                                    </div>
+                                    <p className='text-2xl font-bold text-blue-600 text-center'>
+                                        {selectedOption &&
+                                            priceFormat((selectedOption.price - selectedOption.discount) * quantity)}
+                                    </p>
+
+                                    <div className='flex items-center justify-center'>
+                                        <Button
+                                            className='focus:!ring-0 !px-2 !font-bold'
+                                            pill
+                                            color={'gray'}
+                                            onClick={handleQuantityDecrease}
+                                        >
+                                            −
+                                        </Button>
+                                        <span className='text-center font-semibold text-xl w-12'>{quantity}</span>
+                                        <Button
+                                            className='focus:!ring-0 !px-2 !font-bold'
+                                            pill
+                                            color={'gray'}
+                                            onClick={handleQuantityIncrease}
+                                        >
+                                            +
+                                        </Button>
+                                    </div>
+
                                     <Button
-                                        className='focus:!ring-0'
-                                        pill
-                                        color={'gray'}
-                                        onClick={handleQuantityDecrease}
+                                        className='w-full !bg-blue-500 hover:!bg-blue-600 !text-white font-medium 
+                                        py-2 focus:!ring-0 transition-all duration-300'
+                                        onClick={handleBuyNow}
                                     >
-                                        -
-                                    </Button>
-                                    <span className='text-center font-semibold text-lg w-10 sm:w-12'>{quantity}</span>
-                                    <Button
-                                        className='focus:!ring-0'
-                                        pill
-                                        color={'gray'}
-                                        onClick={handleQuantityIncrease}
-                                    >
-                                        +
+                                        Tiến hành mua hàng
                                     </Button>
                                 </div>
-                                <Button className='w-full mt-4 focus:!ring-0' onClick={handleBuyNow}>
-                                    Mua hàng ngay
-                                </Button>
                             </div>
                         </Modal.Body>
                     </>
                 ) : (
                     <Modal show={showModalBuyNow} size='md' popup>
                         <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                            <CiWarning size='70px' color={'red'} />
+                            <CiWarning size='70px' className='text-yellow-300' />
                             <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>
-                            <div className='w-full flex justify-between items-center gap-x-5'>
+                            <div className='w-full flex justify-between items-center gap-4'>
                                 <Button
-                                    outline
-                                    className='w-full focus:!ring-0'
+                                    color='gray'
                                     onClick={() => setShowModalBuyNow(false)}
+                                    className='w-full hover:shadow-sm hover:scale-105 transition-all duration-300 rounded-xl !text-black !ring-0'
                                 >
                                     Hủy
                                 </Button>
-                                <Button className='w-full focus:!ring-0' onClick={handleNavigateToLoginPage}>
-                                    Đăng nhập
+                                <Button
+                                    color='blue'
+                                    onClick={() => {
+                                        navigate('/login', { state: { from: pathname } });
+                                        setShowModalBuyNow(false);
+                                    }}
+                                    className='w-full hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl !ring-0'
+                                >
+                                    Xác nhận
                                 </Button>
                             </div>
                         </Modal.Body>

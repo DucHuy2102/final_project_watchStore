@@ -91,6 +91,7 @@ export default function ResetPassword() {
                                 setPasswordStrength(getStrength(e.target.value));
                             }}
                             className='mt-1'
+                            autoFocus
                         />
                     </div>
                     <PasswordStrengthMeter password={password} strength={passwordStrength} />

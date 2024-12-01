@@ -19,6 +19,7 @@
         "axios": "^1.7.7",
         "class-variance-authority": "^0.7.0",
         "clsx": "^2.1.1",
+        "date-fns": "^4.1.0",
         "firebase": "^10.13.1",
         "flowbite-react": "^0.10.1",
         "framer-motion": "^11.11.8",
@@ -37,6 +38,7 @@
         "reactjs-social-login": "^2.6.3",
         "recharts": "^2.13.3",
         "redux-persist": "^6.0.0",
+        "socket.io-client": "^4.8.1",
         "swiper": "^11.1.12",
         "tailwind-merge": "^2.5.4",
         "tailwindcss-animate": "^1.0.7"

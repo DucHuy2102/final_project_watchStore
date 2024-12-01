@@ -12,8 +12,10 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { CheckCircleFilled } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
 
 export default function DashService() {
+    const { access_token: tokenUser } = useSelector((state) => state.user);
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -136,11 +138,15 @@ export default function DashService() {
 
             const submitData = {
                 ...formData,
-                images: validUrls,
+                img: validUrls,
             };
 
-            const res = await axios.post('/api/services/submit', submitData);
-            if (res.status === 200) {
+            const res = await axios.post('/api/service/create-service', submitData, {
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                },
+            });
+            if (res?.status === 200) {
                 setShowSuccess(true);
                 setFormData({
                     name: '',
@@ -189,7 +195,6 @@ export default function DashService() {
 
                 <div className='px-4 py-8 -mt-16 relative'>
                     <div className='max-w-6xl mx-auto px-4 lg:px-8'>
-                        {/* Introduction text */}
                         <div className='bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-md mb-8 max-w-3xl mx-auto'>
                             <p className='text-lg italic text-gray-700 leading-relaxed'>
                                 Trung tâm sửa chữa Watc
@@ -200,11 +205,9 @@ export default function DashService() {
                             </p>
                         </div>
 
-                        {/* Content */}
                         <div className='grid lg:grid-cols-2 gap-8 items-start'>
                             {/* Contact Info */}
                             <div className='space-y-6'>
-                                {/* Store Image Card */}
                                 <div className='relative h-56 rounded-2xl overflow-hidden group'>
                                     <img
                                         src={'../assets/storeService.jpg'}
@@ -224,13 +227,11 @@ export default function DashService() {
                                     </div>
                                 </div>
 
-                                {/* Store Hours and Contact Info Combined */}
                                 <div className='bg-gradient-to-br from-white via-gray-50 to-white backdrop-blur-lg rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100/50'>
                                     <h3 className='font-serif text-2xl bg-gradient-to-r from-amber-800 via-amber-600 to-amber-800 bg-clip-text text-transparent mb-7'>
                                         Thông tin liên hệ
                                     </h3>
                                     <div className='grid grid-cols-2 gap-8'>
-                                        {/* Store Hours */}
                                         <div className='space-y-5'>
                                             <h4 className='font-medium text-gray-800 mb-4 text-lg'>Giờ làm việc</h4>
                                             <ul className='space-y-4'>
@@ -249,7 +250,6 @@ export default function DashService() {
                                             </ul>
                                         </div>
 
-                                        {/* Contact Information */}
                                         <div className='space-y-6'>
                                             <h4 className='font-medium text-gray-800 mb-4 text-lg'>
                                                 Thông tin liên lạc
@@ -301,7 +301,7 @@ export default function DashService() {
                                             <div className='w-20 h-0.5 mx-auto mt-2 bg-gradient-to-r from-transparent via-amber-400 to-transparent' />
                                         </div>
 
-                                        <form className='space-y-6' onSubmit={handleSubmit}>
+                                        <form className='flex flex-col space-y-5' onSubmit={handleSubmit}>
                                             <div className='space-y-4'>
                                                 <Input
                                                     prefix={<UserOutlined className='text-amber-600' />}
@@ -311,6 +311,7 @@ export default function DashService() {
                                                     onChange={handleInputChange}
                                                     className='h-12 rounded-xl border-gray-200 hover:border-amber-500 focus:border-amber-500'
                                                     required
+                                                    autoFocus
                                                 />
                                                 <Input
                                                     prefix={<PhoneOutlined className='text-amber-600' />}
@@ -380,8 +381,6 @@ export default function DashService() {
                                                 onChange={handleFileChange}
                                                 beforeUpload={() => false}
                                                 showUploadList={{ showPreviewIcon: true, showRemoveIcon: true }}
-                                                className='rounded-xl border-2 border-dashed border-gray-200 
-                                                    hover:border-amber-500 transition-colors'
                                             >
                                                 <p className='ant-upload-drag-icon'>
                                                     <InboxOutlined className='text-3xl text-amber-600' />

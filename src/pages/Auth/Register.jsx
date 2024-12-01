@@ -126,6 +126,7 @@ export default function Register() {
                                     value={formData.username}
                                     onChange={handleChange}
                                     className='mt-1'
+                                    autoFocus
                                 />
                             </div>
                             <div>
