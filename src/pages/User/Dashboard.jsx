@@ -54,6 +54,7 @@ const CHART_CONFIG = {
 export default function Dashboard() {
     const { access_token: tokenUser, user } = useSelector((state) => state.user);
     const [orders, setOrders] = useState([]);
+    console.log(orders);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     console.log(orders);
@@ -232,7 +233,7 @@ export default function Dashboard() {
                     <MetricCard
                         icon={<Package2 className='w-8 h-8 text-green-500' />}
                         title='Đơn thành công'
-                        value={orderComplete === 0 ? orderComplete.length : 'Không có'}
+                        value={orderComplete === 0 ? orderComplete : 'Không có'}
                         trend='+8.2%'
                         trendUp={true}
                     />

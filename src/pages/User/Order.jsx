@@ -26,15 +26,11 @@ export default function Order() {
         const getAllOrders = async () => {
             try {
                 setIsLoading(true);
-                const res = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/api/order`,
-
-                    {
-                        headers: {
-                            Authorization: `Bearer ${tokenUser}`,
-                        },
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order`, {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
                     },
-                );
+                });
                 if (res.status === 200) {
                     setOrders(res.data);
                 }

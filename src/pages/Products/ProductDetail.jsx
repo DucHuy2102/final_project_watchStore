@@ -44,7 +44,7 @@ export default function ProductDetail() {
     const [quantityProduct, setQuantityProduct] = useState(0);
     const [showModalBuyNow, setShowModalBuyNow] = useState(false);
     const [moreProduct, setMoreProduct] = useState([]);
-    const [isBuyThisProduct, setIsBuyThisProduct] = useState(true);
+    const [isBuyThisProduct, setIsBuyThisProduct] = useState(false);
     const [listReviews, setListReviews] = useState([]);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -71,43 +71,11 @@ export default function ProductDetail() {
         });
     };
 
-    const getReviewsByProductId = async () => {
-        try {
-            setLoadingEffect(true);
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-reviews-by-product`, {
-                params: { productId: id },
-            });
-            if (res?.status === 200) {
-                setListReviews(res.data);
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoadingEffect(false);
-        }
-    };
+    const handleAddNewReview = useCallback((newReview) => {
+        setListReviews((prevReviews) => [newReview, ...prevReviews]);
+    }, []);
 
-    const checkIsBuyThisProduct = async () => {
-        try {
-            setLoadingEffect(true);
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/order/is-ordered`, null, {
-                params: { productId: id },
-                headers: {
-                    Authorization: `Bearer ${tokenUser}`,
-                },
-            });
-            if (res?.status === 200) {
-                const { data } = res;
-                setIsBuyThisProduct(data);
-            }
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoadingEffect(false);
-        }
-    };
-
-    // call API to get product detail
+    // get product detail
     useEffect(() => {
         const getProductDetail = async () => {
             try {
@@ -125,8 +93,54 @@ export default function ProductDetail() {
                 setLoading(false);
             }
         };
-        checkIsBuyThisProduct();
         getProductDetail();
+    }, [id]);
+
+    // check is buy this product
+    useEffect(() => {
+        const checkIsBuyThisProduct = async () => {
+            try {
+                setLoadingEffect(true);
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/order/is-ordered`, null, {
+                    params: { productId: id },
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                });
+                if (res?.status === 200) {
+                    const { data } = res;
+                    setIsBuyThisProduct(data);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoadingEffect(false);
+            }
+        };
+
+        if (tokenUser) {
+            checkIsBuyThisProduct();
+        }
+    }, [id, tokenUser]);
+
+    // get allreviews by product id
+    useEffect(() => {
+        const getReviewsByProductId = async () => {
+            try {
+                setLoadingEffect(true);
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-reviews-by-product`, {
+                    params: { productId: id },
+                });
+                if (res?.status === 200) {
+                    setListReviews(res.data);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setLoadingEffect(false);
+            }
+        };
+
         getReviewsByProductId();
     }, [id]);
 
@@ -859,12 +873,12 @@ export default function ProductDetail() {
                                 </span>
                             )}
                             <span
-                                className='absolute -bottom-2 left-0 w-2/3 h-0.5
+                                className='absolute -bottom-2 left-0 w-2/3 h-px
                                     bg-gradient-to-r from-blue-600 to-transparent'
                             ></span>
                         </h3>
 
-                        {isBuyThisProduct && <Review />}
+                        {isBuyThisProduct && <Review onReviewAdded={handleAddNewReview} />}
                     </div>
 
                     <ListReview reviews={listReviews} />

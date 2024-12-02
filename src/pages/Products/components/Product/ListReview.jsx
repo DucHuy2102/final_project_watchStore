@@ -1,4 +1,4 @@
-import { Avatar, Rate, Modal, Button } from 'antd';
+import { Rate, Modal } from 'antd';
 import { Image } from 'antd';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -21,7 +21,7 @@ const ReviewItem = ({ review }) => (
                         bg-clip-text text-transparent bg-gradient-to-br from-blue-600 to-blue-800
                         dark:from-blue-300 dark:to-blue-500'
                     >
-                        {review.user.name.charAt(0).toUpperCase()}
+                        {review?.user?.name?.charAt(0).toUpperCase()}
                     </span>
                 </div>
             </div>
@@ -29,28 +29,28 @@ const ReviewItem = ({ review }) => (
             <div className='flex-1'>
                 <div className='flex items-start justify-between'>
                     <div>
-                        <h4 className='font-medium text-gray-900 dark:text-white'>{review.user.name}</h4>
+                        <h4 className='font-medium text-gray-900 dark:text-white'>{review?.user?.name}</h4>
                         <div className='flex items-center gap-2 mt-1'>
-                            <Rate disabled value={review.rating} className='text-sm' />
+                            <Rate disabled value={review?.rating} className='text-sm' />
                             <span className='text-sm text-gray-500'>{review.rating} sao</span>
                         </div>
                         <p className='text-sm text-gray-500 mt-1'>
-                            {format(new Date(review.createdAt), 'dd MMMM yyyy, HH:mm', {
+                            {format(new Date(review?.createdAt), 'dd MMMM yyyy, HH:mm', {
                                 locale: vi,
                             })}
                         </p>
                     </div>
-                    {review.user.address?.fullAddress && (
-                        <span className='text-sm text-gray-500'>{review.user.address.fullAddress}</span>
+                    {review?.user?.address?.fullAddress && (
+                        <span className='text-sm text-gray-500'>{review?.user?.address?.fullAddress}</span>
                     )}
                 </div>
 
                 <p className='text-gray-600 dark:text-gray-300 mt-3 leading-relaxed'>{review.reviewText}</p>
 
-                {review.reviewImages && review.reviewImages.length > 0 && (
+                {review?.reviewImages && review?.reviewImages?.length > 0 && (
                     <div className='mt-4'>
                         <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
-                            {review.reviewImages.map((image, index) => (
+                            {review?.reviewImages?.map((image, index) => (
                                 <div
                                     key={index}
                                     className='group relative aspect-square overflow-hidden 

@@ -1,33 +1,51 @@
 import { Alert, Button, Card, Modal, Spinner, TextInput } from 'flowbite-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-import { app } from '../../services/firebase';
+import axios from 'axios';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import axios from 'axios';
-import { user_SignOut, user_UpdateProfile } from '../../services/redux/slices/userSlice';
-import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import { Link, useNavigate } from 'react-router-dom';
-import { CiHome, CiMail, CiPhone, CiUser } from 'react-icons/ci';
 import { toast } from 'react-toastify';
 import { TfiLock } from 'react-icons/tfi';
-import { GoLock } from 'react-icons/go';
-import { PasswordStrengthMeter } from '../Auth/components/exportCom_Auth';
 import { PiHouseLineLight } from 'react-icons/pi';
-import { Select } from 'antd';
-import { FaBan } from 'react-icons/fa';
-import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
+import { Select, Tooltip } from 'antd';
+import { FaBan, FaEnvelope, FaHome, FaPhone, FaUser } from 'react-icons/fa';
+import { user_SignOut, user_UpdateProfile } from '../../services/redux/slices/userSlice';
+import { PasswordStrengthMeter } from '../Auth/components/exportCom_Auth';
 import { resetCart } from '../../services/redux/slices/cartSlice';
+import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
+import { HiOutlineExclamationCircle } from 'react-icons/hi';
 
-export default function Profile_Component() {
-    // get token user from redux store
-    const currentUser = useSelector((state) => state.user.user);
-    const tokenUser = useSelector((state) => state.user.access_token);
+const handleUploadToCloudinary = async (file) => {
+    if (!file) return null;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', `${import.meta.env.VITE_CLOUDINARY_PRESETS_NAME}`);
+
+    try {
+        const response = await fetch(
+            `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+            {
+                method: 'POST',
+                body: formData,
+            },
+        );
+        const data = await response.json();
+        return data.secure_url;
+    } catch (error) {
+        console.error('Lỗi khi upload:', error);
+        toast.error('Không thể tải ảnh lên. Vui lòng thử lại!');
+        return null;
+    }
+};
+
+export default function Profile() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { user: currentUser, access_token: tokenUser } = useSelector((state) => state.user);
 
     // states
-    const dispatch = useDispatch();
     const fileRef = useRef();
     const [imgFile, setImgFile] = useState(null);
     const [imgURL, setImgURL] = useState(null);
@@ -55,9 +73,8 @@ export default function Profile_Component() {
         },
     });
     const [loading, setLoading] = useState(false);
-    const [showModal, setShowModal] = useState(false);
     const modalRef = useRef();
-    const [initialFormData, setInitialFormData] = useState(formData);
+    const [showModalLogout, setShowModalLogout] = useState(false);
 
     // change password states
     const [modalVerifyResetPassword, setModalVerifyResetPassword] = useState(false);
@@ -86,50 +103,34 @@ export default function Profile_Component() {
         }, 1000);
     }, []);
 
-    // get strength of password
-    const getStrength = useCallback((pass) => {
-        let strength = 0;
-        if (pass.length >= 6) strength++;
-        if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
-        if (pass.match(/\d/)) strength++;
-        if (pass.match(/[^a-zA-Z\d]/)) strength++;
-        return strength;
-    }, []);
-
     // ======================================== Fetch API ========================================
-    // upload image to firebase storage
+    // upload image to cloudinary
     useEffect(() => {
-        if (imgFile) {
-            const uploadImage = async () => {
-                const storage = getStorage(app);
-                const fileName = new Date().getTime() + imgFile.name;
-                const storageRef = ref(storage, fileName);
-                const uploadTask = uploadBytesResumable(storageRef, imgFile);
-                uploadTask.on(
-                    'state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        setImgUploadProgress(progress.toFixed(0));
-                        console.log('Upload is ' + progress + '% done');
-                    },
-                    () => {
-                        toast.error('Kích thước ảnh quá lớn, vui lòng chọn ảnh khác !!!');
-                        setImgUploadProgress(null);
-                        setImgFile(null);
-                        setImgURL(null);
-                    },
-                    () => {
-                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                            setImgURL(downloadURL);
-                            setFormData({ ...formData, avatarImg: downloadURL });
-                        });
-                    },
-                );
-            };
+        const uploadImage = async () => {
+            if (!imgFile) return;
 
-            uploadImage();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+            setImgUploadProgress(1);
+            try {
+                const uploadedUrl = await handleUploadToCloudinary(imgFile);
+                if (uploadedUrl) {
+                    setImgURL(uploadedUrl);
+                    setFormData({ ...formData, avatarImg: uploadedUrl });
+                    setImgUploadProgress(100);
+                } else {
+                    setImgUploadProgress(null);
+                    setImgFile(null);
+                    setImgURL(null);
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                toast.error('Không thể tải ảnh lên. Vui lòng thử lại!');
+                setImgUploadProgress(null);
+                setImgFile(null);
+                setImgURL(null);
+            }
+        };
+
+        uploadImage();
     }, [imgFile]);
 
     // get province from api
@@ -198,13 +199,13 @@ export default function Profile_Component() {
 
     // ======================================== Update user ========================================
     // handle change avatar function
-    const handleChangeAvatar = useCallback((e) => {
+    const handleChangeAvatar = (e) => {
         const file = e.target.files[0];
         if (file) {
             setImgFile(file);
             setImgURL(URL.createObjectURL(file));
         }
-    }, []);
+    };
 
     // update user profile function
     const handleSubmitForm = async (e) => {
@@ -213,12 +214,7 @@ export default function Profile_Component() {
             toast.error('Xin chờ hệ thống đang tải ảnh !!!');
             return;
         }
-        const isFormChanged = Object.keys(formData).some((key) => formData[key] !== initialFormData[key]);
 
-        if (!isFormChanged) {
-            toast.info('Không có gì thay đổi để cập nhật!');
-            return;
-        }
         try {
             const { street, ...updatedFormData } = formData.address;
             const dataUpdate = {
@@ -256,13 +252,6 @@ export default function Profile_Component() {
         }
     };
 
-    // sign out function
-    const handleSignOutAccount = async () => {
-        dispatch(user_SignOut());
-        dispatch(resetCart());
-        dispatch(resetCheckout());
-    };
-
     // loading
     if (loading) {
         return (
@@ -276,6 +265,16 @@ export default function Profile_Component() {
     }
 
     // ======================================== Reset password user ========================================
+    // get strength of password
+    const getStrength = (pass) => {
+        let strength = 0;
+        if (pass.length >= 6) strength++;
+        if (pass.match(/[a-z]/) && pass.match(/[A-Z]/)) strength++;
+        if (pass.match(/\d/)) strength++;
+        if (pass.match(/[^a-zA-Z\d]/)) strength++;
+        return strength;
+    };
+
     // verify password function
     const handleVerifyResetPassword = async () => {
         if (!formPassword.oldPassword) {
@@ -325,7 +324,7 @@ export default function Profile_Component() {
                 setTimeout(() => {
                     dispatch(user_SignOut());
                     navigate('/login');
-                }, 3000);
+                }, 2000);
             }
         } catch (error) {
             toast.error('Hệ thống đang bận, vui lòng thử lại!');
@@ -336,7 +335,6 @@ export default function Profile_Component() {
     // navigate to login page
     const handleNavigateUser = () => {
         dispatch(user_SignOut());
-        navigate('/login');
     };
 
     // ======================================== Update address user ========================================
@@ -362,57 +360,72 @@ export default function Profile_Component() {
         }
     };
 
-    return (
-        <div className='w-full mt-10 my-auto max-w-5xl mx-auto'>
-            {/* <div className='p-10 border border-gray-100 dark:border-gray-700 shadow-lg rounded-2xl'> */}
-            <Card className='p-6 border border-gray-200 dark:border-gray-700 shadow-lg rounded-2xl'>
-                <h1 className='text-center font-semibold text-3xl my-7'>Trang cá nhân</h1>
+    const handleSignOutAccount = async () => {
+        dispatch(user_SignOut());
+        dispatch(resetCart());
+        dispatch(resetCheckout());
+    };
 
-                {/* form */}
-                <form className='grid grid-cols-1 md:grid-cols-2 gap-6' onSubmit={handleSubmitForm}>
-                    {/* avatar */}
+    return (
+        <div className='w-full flex justify-center items-center'>
+            <Card className='max-w-4xl w-full mt-5 p-10 border-0'>
+                <h1 className='text-center font-bold text-3xl mb-8'>
+                    <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600'>
+                        Thông tin tài khoản
+                    </span>
+                </h1>
+
+                <form className='grid grid-cols-1 md:grid-cols-2 gap-8' onSubmit={handleSubmitForm}>
                     <input type='file' accept='image/*' onChange={handleChangeAvatar} ref={fileRef} hidden />
-                    <div className='relative w-40 h-40 mx-auto cursor-pointer' onClick={() => fileRef.current.click()}>
-                        {imgUploadProgress && imgUploadProgress < 100 && (
-                            <CircularProgressbar
-                                value={imgUploadProgress || 0}
-                                text={`${imgUploadProgress === null ? '' : imgUploadProgress + '%'}`}
-                                strokeWidth={5}
-                                styles={{
-                                    root: {
-                                        width: '100%',
-                                        height: '100%',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                    },
-                                    path: { stroke: `rgba(0,255,0,${imgUploadProgress / 100})` },
-                                }}
+                    <div className='flex flex-col items-center space-y-4'>
+                        <div
+                            className='relative w-48 h-48 cursor-pointer transition-transform hover:scale-105'
+                            onClick={() => fileRef.current.click()}
+                        >
+                            {imgUploadProgress && imgUploadProgress < 100 && (
+                                <CircularProgressbar
+                                    value={imgUploadProgress || 0}
+                                    text={`${imgUploadProgress === null ? '' : imgUploadProgress + '%'}`}
+                                    strokeWidth={5}
+                                    styles={{
+                                        root: {
+                                            width: '100%',
+                                            height: '100%',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                        },
+                                        path: {
+                                            stroke: `rgba(59, 130, 246, ${imgUploadProgress / 100})`,
+                                        },
+                                    }}
+                                />
+                            )}
+                            <img
+                                src={imgURL || formData.avatarImg || '/assets/default_Avatar.jpg'}
+                                className={`rounded-full h-full w-full object-cover border-8 border-blue-100 dark:border-blue-900 shadow-lg ${
+                                    imgUploadProgress && imgUploadProgress < 100 && 'opacity-60'
+                                }`}
+                                alt='Avatar'
                             />
-                        )}
-                        <img
-                            src={imgURL || formData.avatarImg || '/assets/default_Avatar.jpg'}
-                            className={`rounded-full h-full w-full object-cover border-8 border-[lightgray] ${
-                                imgUploadProgress && imgUploadProgress < 100 && 'opacity-60'
-                            }`}
-                            alt='Avatar'
-                        />
+                        </div>
+                        <p className='text-sm text-gray-500 dark:text-gray-400'>Nhấn vào ảnh để thay đổi</p>
                     </div>
 
-                    {/* input fields */}
-                    <div className='grid grid-cols-1 gap-5'>
+                    {/* fields */}
+                    <div className='grid grid-cols-1 gap-6'>
                         <TextInput
                             type='text'
-                            icon={CiUser}
-                            className='w-full'
+                            icon={FaUser}
+                            className='w-full transition-all duration-200 focus:ring-2 focus:ring-blue-500'
                             placeholder='Họ và tên'
                             value={formData.fullName}
                             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                         />
                         <TextInput
                             type='text'
-                            icon={CiMail}
-                            className='w-full'
+                            icon={FaEnvelope}
+                            className='w-full transition-all duration-200 focus:ring-2 focus:ring-blue-500'
                             placeholder='Email'
                             value={formData.email}
                             onChange={(e) => setFormData({ ...formData, email: e.target.value.trim() })}
@@ -420,8 +433,8 @@ export default function Profile_Component() {
                         <TextInput
                             type='text'
                             id='phone'
-                            icon={CiPhone}
-                            className='w-full'
+                            icon={FaPhone}
+                            className='w-full transition-all duration-200 focus:ring-2 focus:ring-blue-500'
                             value={formData.phone}
                             placeholder='Số điện thoại'
                             onChange={(e) => {
@@ -431,27 +444,30 @@ export default function Profile_Component() {
                                 }
                             }}
                         />
-                        <div
+                        <Tooltip
+                            title={formData.address.fullAddress}
                             ref={modalRef}
                             onClick={() => setModalChangeAddress(true)}
-                            className='flex items-center gap-x-2 rounded-lg bg-[#F9FAFB] dark:bg-[#374151]
-                        border border-gray-300 dark:border-gray-700 py-[7px] px-3 cursor-pointer'
                         >
-                            <CiHome className='text-gray-500 dark:text-gray-400' size={20} />
-                            <span className='text-gray-800 dark:text-gray-200 text-sm'>
-                                {formData.address.fullAddress ? formData.address.fullAddress : 'Địa chỉ của bạn'}
-                            </span>
-                        </div>
+                            <TextInput
+                                type='text'
+                                id='phone'
+                                icon={FaHome}
+                                className='w-full transition-all duration-200 focus:ring-2 focus:ring-blue-500'
+                                value={formData.address.fullAddress}
+                                placeholder='Địa chỉ'
+                            />
+                        </Tooltip>
                     </div>
 
-                    {/* buttons: reset password, update address and update profile */}
-                    <div className='col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    {/* buttons with enhanced styling */}
+                    <div className='col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4'>
                         <div className='flex justify-between items-center gap-x-4'>
                             <Button
                                 outline
                                 type='button'
-                                className='w-full focus:!ring-0'
-                                gradientDuoTone='cyanToBlue'
+                                color='blue'
+                                className='w-full transform transition-all duration-200 hover:scale-105 !ring-0'
                                 onClick={() => setModalVerifyResetPassword(true)}
                                 disabled={imgUploadProgress && imgUploadProgress < 100}
                             >
@@ -460,8 +476,8 @@ export default function Profile_Component() {
                             <Button
                                 outline
                                 type='button'
-                                className='w-full focus:!ring-0'
-                                gradientDuoTone='cyanToBlue'
+                                className='w-full transform transition-all duration-200 hover:scale-105 !ring-0'
+                                color='blue'
                                 onClick={() => setModalChangeAddress(true)}
                                 disabled={imgUploadProgress && imgUploadProgress < 100}
                             >
@@ -470,10 +486,9 @@ export default function Profile_Component() {
                         </div>
 
                         <Button
-                            outline
                             type='submit'
-                            className='w-full focus:!ring-0'
-                            gradientDuoTone='purpleToBlue'
+                            className='w-full transform transition-all duration-200 hover:scale-105 !ring-0'
+                            color='blue'
                             disabled={imgUploadProgress && imgUploadProgress < 100}
                         >
                             {imgUploadProgress && imgUploadProgress < 100
@@ -482,61 +497,79 @@ export default function Profile_Component() {
                         </Button>
                     </div>
                 </form>
-
-                {/* buttons: return to shop & sign out */}
-                <div className='flex flex-col md:flex-row justify-between items-center mt-8 text-black dark:text-white'>
+                <div className='flex flex-col md:flex-row justify-between items-center text-black dark:text-white'>
                     <Button
                         className='focus:!ring-0'
                         as={Link}
                         to='/'
                         type='submit'
-                        gradientDuoTone='cyanToBlue'
+                        color='blue'
                         disabled={imgUploadProgress && imgUploadProgress < 100}
                     >
                         Quay lại cửa hàng
                     </Button>
-                    <button
-                        onClick={() => setShowModal(true)}
-                        className='bg-red-500 hover:bg-red-600 text-white border dark:border-none px-10 py-2 rounded-lg transition duration-200 cursor-pointer'
-                        disabled={imgUploadProgress && imgUploadProgress < 100}
-                    >
+                    <Button className='focus:!ring-0 px-4' color='failure' onClick={() => setShowModalLogout(true)}>
                         Đăng xuất
-                    </button>
+                    </Button>
                 </div>
             </Card>
 
-            {/* confirm change password */}
-            <Modal show={modalVerifyResetPassword} onClose={() => setModalVerifyResetPassword(false)} size='md' popup>
+            {/* modal verify reset password */}
+            <Modal
+                show={modalVerifyResetPassword}
+                size='md'
+                popup
+                className='backdrop-blur-sm'
+                onClose={() => setModalVerifyResetPassword(false)}
+            >
                 <Modal.Header />
-                <Modal.Body>
-                    <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                        <TfiLock className='text-blue-500 text-5xl mx-auto' />
-                        <span className='text-lg font-medium text-black'>
-                            Nhập mật khẩu hiện tại để xác nhận thay đổi
-                        </span>
-                        <TextInput
-                            type='password'
-                            icon={GoLock}
-                            className='w-full'
-                            placeholder='Mật khẩu hiện tại'
-                            value={formPassword.oldPassword}
-                            onChange={(e) =>
-                                setFormPassword({
-                                    ...formPassword,
-                                    oldPassword: e.target.value,
-                                })
-                            }
-                        />
+                <Modal.Body className='px-6 py-8'>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-6'>
+                        <TfiLock className='text-blue-500 text-6xl' />
 
-                        <div className='w-full flex justify-between items-center'>
+                        <div className='text-center space-y-2'>
+                            <h3 className='text-2xl font-bold text-blue-500'>Xác thực bảo mật</h3>
+                            <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                Nhập mật khẩu hiện tại để xác nhận thay đổi
+                            </p>
+                        </div>
+
+                        <div className='w-full space-y-2'>
+                            <input
+                                type='password'
+                                className='w-full rounded-lg border-gray-200 dark:border-gray-700 p-2.5 
+                                focus:border-gray-300 focus:ring-0 text-gray-700'
+                                placeholder='Mật khẩu hiện tại'
+                                value={formPassword.oldPassword}
+                                onChange={(e) =>
+                                    setFormPassword({
+                                        ...formPassword,
+                                        oldPassword: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+
+                        <div className='w-full flex justify-between items-center gap-4 mt-4'>
                             <Button
-                                className='focus:!ring-0'
                                 color='gray'
-                                onClick={() => setModalVerifyResetPassword(false)}
+                                onClick={() => {
+                                    setFormPassword({
+                                        oldPassword: '',
+                                        newPassword: '',
+                                        verifyPassword: '',
+                                    });
+                                    setModalVerifyResetPassword(false);
+                                }}
+                                className='w-full hover:shadow-sm hover:scale-105 transition-all duration-300 rounded-xl !text-black !ring-0'
                             >
                                 Hủy
                             </Button>
-                            <Button className='focus:!ring-0' color='blue' onClick={handleVerifyResetPassword}>
+                            <Button
+                                color='blue'
+                                onClick={handleVerifyResetPassword}
+                                className='w-full hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl !ring-0'
+                            >
                                 Xác nhận
                             </Button>
                         </div>
@@ -544,48 +577,86 @@ export default function Profile_Component() {
                 </Modal.Body>
             </Modal>
 
-            {/* modal loading confirm password */}
-            {loadingPassword && (
-                <Modal show={loadingPassword} size='md' popup onClose={() => setLoadingPassword(false)}>
-                    <Modal.Header />
-                    <Modal.Body>
-                        <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                            <Spinner size='xl' color='info' />
-                            <span className='text-lg font-medium text-black'>
-                                Hệ thống đang xác thực. Vui lòng chờ...
-                            </span>
-                        </div>
-                    </Modal.Body>
-                </Modal>
-            )}
+            {/* modal loading */}
+            <Modal
+                show={loadingPassword}
+                size='md'
+                popup
+                className='backdrop-blur-sm'
+                onClose={() => setLoadingPassword(false)}
+            >
+                <Modal.Header />
+                <Modal.Body className='p-8'>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-6'>
+                        <Spinner size='xl' />
+                        <span className='text-lg font-medium text-gray-800 dark:text-gray-200 text-center'>
+                            Hệ thống đang xác thực
+                            <span className='animate-pulse'>...</span>
+                        </span>
+                    </div>
+                </Modal.Body>
+            </Modal>
 
             {/* modal check password fail */}
-            {checkPasswordFail && (
-                <Modal show={checkPasswordFail} size='md' popup onClose={() => setCheckPasswordFail(false)}>
-                    <Modal.Body>
-                        <div className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
-                            <FaBan size='50px' color='red' />
-                            <span className='text-lg font-medium text-black'>Xác thực mật khẩu thất bại !!!</span>
-                            <Button className='w-full focus:!ring-0' onClick={handleNavigateUser}>
-                                Đăng nhập
+            <Modal show={checkPasswordFail} size='md' popup onClose={() => setCheckPasswordFail(false)}>
+                <Modal.Header />
+                <Modal.Body className='px-6 py-10'>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-6'>
+                        <div className='animate-bounce'>
+                            <div className='relative'>
+                                <FaBan size='60px' className='text-red-500/20' />
+                                <FaBan size='60px' className='absolute top-0 left-0 text-red-500 animate-pulse' />
+                            </div>
+                        </div>
+
+                        <div className='text-center space-y-2'>
+                            <h3 className='text-2xl font-bold text-red-500'>Xác thực thất bại!</h3>
+                            <p className='text-sm text-gray-500 dark:text-gray-400'>
+                                Mật khẩu không chính xác. Vui lòng thử lại.
+                            </p>
+                        </div>
+
+                        <div className='w-full space-y-3'>
+                            <Button
+                                className='w-full transform transition-all duration-300 
+                    hover:scale-105 bg-gradient-to-r from-red-500 to-red-600 
+                    !ring-0 shadow-lg hover:shadow-xl'
+                                onClick={handleNavigateUser}
+                            >
+                                Đăng nhập lại
+                            </Button>
+                            <Button
+                                color='gray'
+                                className='w-full transform transition-all duration-300 
+                    hover:scale-105 !ring-0 !text-black'
+                                onClick={() => {
+                                    setFormPassword({
+                                        oldPassword: '',
+                                        newPassword: '',
+                                        verifyPassword: '',
+                                    });
+                                    setCheckPasswordFail(false);
+                                }}
+                            >
+                                Đóng
                             </Button>
                         </div>
-                    </Modal.Body>
-                </Modal>
-            )}
+                    </div>
+                </Modal.Body>
+            </Modal>
 
-            {/* change password modal */}
-            <Modal show={modalChangePassword} onClose={() => setModalChangePassword(false)} size='md' popup>
+            {/* modal change password */}
+            <Modal show={modalChangePassword} size='md' popup onClose={() => setModalChangePassword(false)}>
                 <Modal.Header />
-                <Modal.Body>
+                <Modal.Body className='px-6 py-8'>
                     <div className='w-full flex flex-col justify-center items-center gap-y-3'>
                         <TfiLock className='text-blue-500 text-5xl mx-auto' />
-                        <span className='text-lg font-medium text-black'>Nhập mật khẩu mới</span>
-                        <TextInput
+                        <span className='text-lg font-medium text-blue-500'>Nhập mật khẩu mới</span>
+                        <input
                             type='password'
                             id='newPassword'
-                            icon={GoLock}
-                            className='w-full'
+                            className='w-full rounded-lg border-gray-200 dark:border-gray-700 p-2.5 
+                                focus:border-gray-300 focus:ring-0 text-gray-700'
                             placeholder='Mật khẩu mới'
                             value={formPassword.newPassword}
                             onChange={(e) => {
@@ -604,11 +675,11 @@ export default function Profile_Component() {
                                 />
                             </div>
                         )}
-                        <TextInput
+                        <input
                             type='password'
                             id='verifyPassword'
-                            icon={GoLock}
-                            className='w-full'
+                            className='w-full rounded-lg border-gray-200 dark:border-gray-700 p-2.5 
+                                focus:border-gray-300 focus:ring-0 text-gray-700'
                             placeholder='Xác thực mật khẩu mới'
                             value={formPassword.verifyPassword}
                             onChange={(e) =>
@@ -619,20 +690,31 @@ export default function Profile_Component() {
                             }
                         />
                         {formPassword.newPassword !== formPassword.verifyPassword && (
-                            <Alert color='failure' className='w-full flex justify-center items-center'>
+                            <Alert color='failure' className='w-full flex justify-center items-center font-semibold'>
                                 Mật khẩu không khớp
                             </Alert>
                         )}
 
-                        <div className='w-full flex justify-between items-center'>
+                        <div className='w-full flex justify-between items-center gap-5'>
                             <Button
-                                className='focus:!ring-0'
                                 color='gray'
-                                onClick={() => setModalChangePassword(false)}
+                                onClick={() => {
+                                    setModalChangePassword(false);
+                                    setFormPassword({
+                                        oldPassword: '',
+                                        newPassword: '',
+                                        verifyPassword: '',
+                                    });
+                                }}
+                                className='w-full hover:shadow-sm hover:scale-105 transition-all duration-300 rounded-xl !text-black !ring-0'
                             >
                                 Hủy
                             </Button>
-                            <Button className='focus:!ring-0' color='blue' onClick={handleResetPassword}>
+                            <Button
+                                color='blue'
+                                onClick={handleResetPassword}
+                                className='w-full hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl !ring-0'
+                            >
                                 Xác nhận
                             </Button>
                         </div>
@@ -640,13 +722,15 @@ export default function Profile_Component() {
                 </Modal.Body>
             </Modal>
 
-            {/* change address modal */}
-            <Modal show={modalChangeAddress} onClose={() => setModalChangeAddress(false)} size='md' popup>
+            {/* modal change address */}
+            <Modal show={modalChangeAddress} size='md' popup onClose={() => setModalChangeAddress(false)}>
                 <Modal.Header />
-                <Modal.Body>
-                    <div className='w-full flex flex-col justify-center items-center gap-y-3'>
-                        <PiHouseLineLight className='text-blue-500 text-5xl mx-auto' />
-                        <span className='text-lg font-medium text-black'>Cập nhật địa chỉ của bạn</span>
+                <Modal.Body className='px-5 py-10'>
+                    <div className='w-full flex flex-col justify-center items-center gap-y-5'>
+                        <div className='flex flex-col justify-center items-center gap-y-1'>
+                            <PiHouseLineLight className='text-blue-500 text-6xl mx-auto' />
+                            <span className='text-lg font-medium text-blue-500'>Cập nhật địa chỉ của bạn</span>
+                        </div>
                         <Select
                             placeholder='Chọn Thành Phố'
                             className='w-full h-10'
@@ -717,9 +801,10 @@ export default function Profile_Component() {
                             }}
                         />
 
-                        <TextInput
+                        <input
                             type='text'
-                            className='w-full'
+                            className='w-full rounded-lg border-gray-200 dark:border-gray-700 p-2.5 
+                                focus:border-gray-300 focus:ring-0 text-gray-700'
                             placeholder='Số nhà, tên đường'
                             onChange={(e) =>
                                 setFormData({
@@ -746,11 +831,19 @@ export default function Profile_Component() {
                                 </div>
                             )}
 
-                        <div className='w-full flex justify-between items-center'>
-                            <Button className='focus:!ring-0' color='gray' onClick={() => setModalChangeAddress(false)}>
+                        <div className='w-full flex justify-between items-center gap-5'>
+                            <Button
+                                color='gray'
+                                onClick={() => setModalChangeAddress(false)}
+                                className='w-full hover:shadow-sm hover:scale-105 transition-all duration-300 rounded-xl !text-black !ring-0'
+                            >
                                 Hủy
                             </Button>
-                            <Button className='focus:!ring-0' color='blue' onClick={handleUpdateAddress}>
+                            <Button
+                                color='blue'
+                                onClick={handleUpdateAddress}
+                                className='w-full hover:shadow-lg hover:scale-105 transition-all duration-300 rounded-xl !ring-0'
+                            >
                                 Xác nhận
                             </Button>
                         </div>
@@ -758,15 +851,15 @@ export default function Profile_Component() {
                 </Modal.Body>
             </Modal>
 
-            {/* logout account modal */}
-            <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
+            {/* modal logout */}
+            <Modal show={showModalLogout} onClose={() => setShowModalLogout(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='text-center'>
-                        <HiOutlineExclamationCircle className='text-red-500 text-5xl mx-auto' />
+                        <HiOutlineExclamationCircle className='text-yellow-400 text-5xl mx-auto' />
                         <span className='text-lg font-medium text-black'>Bạn có chắc chắn muốn đăng xuất?</span>
                         <div className='flex justify-between items-center mt-5'>
-                            <Button className='focus:!ring-0' color='gray' onClick={() => setShowModal(false)}>
+                            <Button className='focus:!ring-0' color='gray' onClick={() => setShowModalLogout(false)}>
                                 Hủy
                             </Button>
                             <Button className='focus:!ring-0' color='warning' onClick={handleSignOutAccount}>
@@ -776,7 +869,6 @@ export default function Profile_Component() {
                     </div>
                 </Modal.Body>
             </Modal>
-            {/* </div> */}
         </div>
     );
 }

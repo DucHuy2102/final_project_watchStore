@@ -9,7 +9,7 @@ import { MdRateReview } from 'react-icons/md';
 import { Upload, Rate } from 'antd';
 import { FiUpload } from 'react-icons/fi';
 
-export default function Review() {
+export default function Review({ onReviewAdded }) {
     const [openModal, setOpenModal] = useState(false);
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState('');
@@ -59,22 +59,21 @@ export default function Review() {
             const uploadPromises = reviewImages.map((file) => handleUploadImageCloudinary(file.originFileObj));
             const uploadedUrls = await Promise.all(uploadPromises);
             const successfulUrls = uploadedUrls.filter((url) => url !== null);
-            const res = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/review/create-review`,
-                {
-                    rating,
-                    reviewText,
-                    productId,
-                    reviewImages: successfulUrls,
+            const reviewData = {
+                rating,
+                reviewText,
+                productId,
+                reviewImages: successfulUrls,
+            };
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/review/create-review`, reviewData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            );
+            });
 
             if (res?.status === 200) {
+                console.log(res);
+                onReviewAdded(reviewData);
                 toast.success('Đánh giá sản phẩm thành công');
                 resetForm();
                 setOpenModal(false);
