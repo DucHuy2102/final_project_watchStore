@@ -10,11 +10,12 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { Breadcrumb_Component } from '../../components/exportComponent';
 import { setProductToCheckout } from '../../services/redux/slices/checkoutSlice';
-import { FiMinus, FiPlus } from 'react-icons/fi';
+import { FiArrowUp, FiMinus, FiPlus } from 'react-icons/fi';
 import { CiWarning } from 'react-icons/ci';
 import { Image } from 'antd';
 import { formatWatchDescription, prProduct } from '../../components/Utils/infomationComponent';
 import { ListReview, Policy, Review } from './components/exportCom_Product';
+import { FaStar } from 'react-icons/fa';
 
 export default function ProductDetail() {
     const formatPrice = useCallback(
@@ -45,7 +46,30 @@ export default function ProductDetail() {
     const [moreProduct, setMoreProduct] = useState([]);
     const [isBuyThisProduct, setIsBuyThisProduct] = useState(true);
     const [listReviews, setListReviews] = useState([]);
-    console.log(isBuyThisProduct);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const toggleVisibility = () => {
+            if (window.scrollY > 300) {
+                setIsVisible(true);
+            } else {
+                setIsVisible(false);
+            }
+        };
+
+        window.addEventListener('scroll', toggleVisibility);
+
+        return () => {
+            window.removeEventListener('scroll', toggleVisibility);
+        };
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    };
 
     const getReviewsByProductId = async () => {
         try {
@@ -106,31 +130,8 @@ export default function ProductDetail() {
         getReviewsByProductId();
     }, [id]);
 
-    // destructuring product detail
-    const {
-        img,
-        productName,
-        brand,
-        origin,
-        discount,
-        price,
-        description,
-        wireMaterial,
-        shellMaterial,
-        style,
-        feature,
-        shape,
-        waterproof,
-        weight,
-        genderUser,
-        category,
-        length,
-        width,
-        height,
-        option,
-    } = product;
-
-    const sizeProduct = length === width ? `${length} mm` : `${length} x ${width} mm`;
+    const sizeProduct =
+        product.length === product.width ? `${product.length} mm` : `${product.length} x ${product.width} mm`;
 
     // specifications of product detail
     const specifications = useMemo(
@@ -138,17 +139,17 @@ export default function ProductDetail() {
             {
                 id: 1,
                 title: 'Thương Hiệu',
-                value: brand,
+                value: product.brand,
             },
             {
                 id: 2,
                 title: 'Xuất xứ',
-                value: origin,
+                value: product.origin,
             },
             {
                 id: 3,
                 title: 'Độ dầy',
-                value: `${height} mm`,
+                value: `${product.height} mm`,
             },
             {
                 id: 4,
@@ -158,63 +159,63 @@ export default function ProductDetail() {
             {
                 id: 5,
                 title: 'Chất liệu dây',
-                value: wireMaterial,
+                value: product.wireMaterial,
             },
             {
                 id: 6,
                 title: 'Chất liệu vỏ',
-                value: shellMaterial,
+                value: product.shellMaterial,
             },
             {
                 id: 7,
                 title: 'Phong cách',
-                value: style,
+                value: product.style,
             },
             {
                 id: 8,
                 title: 'Tính năng',
-                value: feature,
+                value: product.feature,
             },
             {
                 id: 9,
                 title: 'Hình dạng',
-                value: shape,
+                value: product.shape,
             },
             {
                 id: 10,
                 title: 'Kháng nước',
-                value: `${waterproof}atm`,
+                value: `${product.waterproof}atm`,
             },
             {
                 id: 11,
                 title: 'Trọng lượng',
-                value: `${weight} g`,
+                value: `${product.weight} g`,
             },
             {
                 id: 12,
                 title: 'Đối tượng sử dụng',
-                value: genderUser,
+                value: product.genderUser,
             },
         ],
         [
-            brand,
-            feature,
-            genderUser,
-            height,
-            origin,
-            shape,
-            shellMaterial,
+            product.brand,
+            product.feature,
+            product.genderUser,
+            product.height,
+            product.origin,
+            product.shape,
+            product.shellMaterial,
+            product.style,
+            product.waterproof,
+            product.weight,
+            product.wireMaterial,
             sizeProduct,
-            style,
-            waterproof,
-            weight,
-            wireMaterial,
         ],
     );
 
     const [selectedOption, setSelectedOption] = useState(null);
     const [selectedColor, setSelectedColor] = useState(
-        option?.find((opt) => opt.value.state === 'saling')?.key || null,
+        product.option?.find((opt) => opt.value.state === 'saling')?.key || null,
     );
 
     useEffect(() => {
@@ -242,11 +243,11 @@ export default function ProductDetail() {
     const prices = useMemo(() => {
         if (!selectedOptionDetails)
             return {
-                price: price,
-                discount: discount,
-                priceFormat: formatPrice(price),
-                discountPrice: formatPrice(price - discount),
-                percentDiscount: discount !== 0 ? Math.floor((discount / price) * 100) : 0,
+                price: product.price,
+                discount: product.discount,
+                priceFormat: formatPrice(product.price),
+                discountPrice: formatPrice(product.price - product.discount),
+                percentDiscount: product.discount !== 0 ? Math.floor((product.discount / product.price) * 100) : 0,
             };
 
         const optPrice = selectedOptionDetails.value.price;
@@ -259,7 +260,7 @@ export default function ProductDetail() {
             discountPrice: formatPrice(optPrice - optDiscount),
             percentDiscount: optDiscount !== 0 ? Math.floor((optDiscount / optPrice) * 100) : 0,
         };
-    }, [selectedOptionDetails, price, discount, formatPrice]);
+    }, [selectedOptionDetails, product.price, product.discount, formatPrice]);
 
     // handle select color of product
     const handleColorSelect = (color) => {
@@ -267,11 +268,6 @@ export default function ProductDetail() {
         const newOption = product?.option?.find((opt) => opt.key === color);
         setSelectedOption(newOption);
         setQuantityProduct(0);
-    };
-
-    // navgigate to another product detail page
-    const handleNavigateToProductDetail = (productId) => {
-        navigate(`/product-detail/${productId}`);
     };
 
     // function add product to cart
@@ -328,10 +324,10 @@ export default function ProductDetail() {
     // get more product of the same brand
     useEffect(() => {
         const getMoreProduct = async () => {
-            if (!category) return;
+            if (!product.category) return;
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/category`, {
-                    params: { idCategory: category },
+                    params: { idCategory: product.category },
                 });
                 if (res?.status === 200) {
                     const { data } = res;
@@ -342,7 +338,7 @@ export default function ProductDetail() {
             }
         };
         getMoreProduct();
-    }, [category]);
+    }, [product.category]);
 
     useEffect(() => {
         if (product?.option?.length > 0) {
@@ -354,7 +350,6 @@ export default function ProductDetail() {
         }
     }, [product]);
 
-    // loading
     if (loading) {
         return (
             <div className='w-full min-h-screen flex justify-center items-center '>
@@ -377,7 +372,6 @@ export default function ProductDetail() {
         }
     };
 
-    // function buy now product
     const handleBuyNow = () => {
         if (quantityProduct === 0) {
             toast.error('Vui lòng chọn số lượng sản phẩm');
@@ -401,11 +395,16 @@ export default function ProductDetail() {
         }, 1500);
     };
 
+    const handleScrollToReview = () => {
+        const reviewEle = document.getElementById('review-product');
+        reviewEle.scrollIntoView({ behavior: 'smooth' });
+    };
+
     return (
         <div className='min-h-screen bg-gradient-to-b from-[#f8f9fb] to-white dark:from-gray-900 dark:to-gray-800'>
             {/* Breadcrumb */}
-            <div className='px-20 pt-5'>
-                <Breadcrumb_Component displayName={productName} />
+            <div className='pl-40 pt-5'>
+                <Breadcrumb_Component displayName={product.productName} />
             </div>
 
             <div className='px-10 py-2 lg:max-w-7xl max-w-4xl mx-auto'>
@@ -426,7 +425,7 @@ export default function ProductDetail() {
                                 className='aspect-square rounded-2xl overflow-hidden bg-gray-50 
                                 shadow-md hover:shadow-xl transition-shadow duration-300'
                             >
-                                {img.map((item, index) => (
+                                {product.img.map((item, index) => (
                                     <SwiperSlide key={index}>
                                         <Image
                                             src={item}
@@ -448,7 +447,7 @@ export default function ProductDetail() {
                             </Swiper>
 
                             <div className='grid grid-cols-5 gap-4'>
-                                {img.slice(0, 5).map((item, index) => (
+                                {product.img.slice(0, 5).map((item, index) => (
                                     <div
                                         key={index}
                                         className='aspect-square rounded-xl overflow-hidden cursor-pointer
@@ -480,11 +479,34 @@ export default function ProductDetail() {
                             {/* Brand & Name */}
                             <div className='space-y-3'>
                                 <h3 className='text-sm font-semibold text-blue-600 dark:text-blue-400 tracking-wider uppercase'>
-                                    {brand}
+                                    {product.brand}
                                 </h3>
-                                <h1 className='text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight'>
-                                    {productName}
-                                </h1>
+                                <div className='space-y-2'>
+                                    <h1 className='text-4xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight'>
+                                        {product.productName}
+                                    </h1>
+                                    {listReviews.length > 0 && (
+                                        <div
+                                            onClick={handleScrollToReview}
+                                            className='cursor-pointer inline-flex items-center gap-3 px-4 py-2 
+                            bg-gradient-to-r from-gray-50 to-gray-100 
+                            dark:from-gray-800 dark:to-gray-700
+                            rounded-full shadow-sm border border-gray-200 dark:border-gray-600
+                            transform hover:scale-105 transition-all duration-300'
+                                        >
+                                            <div className='flex items-center gap-1'>
+                                                <FaStar className='w-5 h-5 text-yellow-400' />
+                                                <span className='text-lg font-bold text-blue-500'>
+                                                    {listReviews.length}
+                                                </span>
+                                            </div>
+                                            <div className='h-4 w-px bg-gray-400 dark:bg-gray-500' />
+                                            <span className='text-sm font-medium text-gray-600 dark:text-gray-300'>
+                                                Đánh giá từ khách hàng
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* Price */}
@@ -643,13 +665,13 @@ export default function ProductDetail() {
 
                 {/* Product details tabs */}
                 <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 p-8 mb-8'>
-                    <Tabs className='focus:!ring-0 !outline-none'>
+                    <Tabs>
                         <Tabs.Item title='Mô tả sản phẩm'>
                             <div className='prose dark:prose-invert max-w-none py-6'>
                                 <div
                                     className='space-y-6'
                                     dangerouslySetInnerHTML={{
-                                        __html: formatWatchDescription(description, productName)
+                                        __html: formatWatchDescription(product.description, product.productName)
                                             .split('\n')
                                             .map(
                                                 (paragraph) =>
@@ -792,7 +814,7 @@ export default function ProductDetail() {
                         {moreProduct?.map((product) => (
                             <SwiperSlide key={product.id}>
                                 <div
-                                    onClick={() => handleNavigateToProductDetail(product.id)}
+                                    onClick={() => navigate(`/product-detail/${product.id}`)}
                                     className='group cursor-pointer'
                                 >
                                     <div className='aspect-square rounded-xl overflow-hidden mb-4 bg-gray-50'>
@@ -818,7 +840,7 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Review product */}
-                <div className='flex flex-col justify-center items-center mb-8 mt-4'>
+                <div id='review-product' className='flex flex-col justify-center items-center mb-8 mt-4'>
                     <div className='w-full max-w-4xl mx-auto flex items-center justify-between'>
                         <h3 className='relative inline-block'>
                             <span
@@ -874,6 +896,24 @@ export default function ProductDetail() {
                         </div>
                     </Modal.Body>
                 </Modal>
+
+                {/* Scroll to top */}
+                {isVisible && (
+                    <button
+                        onClick={scrollToTop}
+                        className='fixed bottom-20 right-8 p-4 bg-white dark:bg-gray-800 
+                    rounded-full shadow-lg hover:shadow-2xl transform hover:scale-110 
+                    transition-all duration-300 z-50 group border border-gray-200 
+                    dark:border-gray-700'
+                        aria-label='Scroll to top'
+                    >
+                        <FiArrowUp
+                            className='w-6 h-6 text-gray-600 dark:text-gray-300 
+                        group-hover:text-blue-600 dark:group-hover:text-blue-400 
+                        transition-colors duration-300'
+                        />
+                    </button>
+                )}
             </div>
         </div>
     );
