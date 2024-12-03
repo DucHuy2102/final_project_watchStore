@@ -2,7 +2,7 @@ import { Button, Dropdown } from 'flowbite-react';
 import { useCallback } from 'react';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toggleTheme } from '../../services/redux/slices/themeSlice';
 import { IoIosCart, IoIosHome } from 'react-icons/io';
 import { MdHomeRepairService, MdWatch } from 'react-icons/md';
@@ -10,7 +10,7 @@ import { user_SignOut } from '../../services/redux/slices/userSlice';
 import { Badge } from 'antd';
 
 export default function Mini_Navbar() {
-    const location = useLocation();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     const { access_token: tokenUser, user: currentUser } = useSelector((state) => state.user);
     const { cartTotalQuantity } = useSelector((state) => state.cart);
@@ -79,7 +79,7 @@ export default function Mini_Navbar() {
 
                 {tokenUser ? (
                     <Dropdown
-                        className='mt-[1px] relative z-[9999]'
+                        className='w-[8vw]'
                         inline
                         arrowIcon={false}
                         label={
@@ -105,21 +105,21 @@ export default function Mini_Navbar() {
                             </Link>
                         </Dropdown.Header>
                         <div className='p-1 bg-white dark:bg-gray-900'>
-                            <Dropdown.Item className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
-                                <Link
-                                    to={'/dashboard?tab=profile'}
-                                    className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
-                                >
+                            <Dropdown.Item
+                                onClick={() => navigate('/dashboard?tab=profile')}
+                                className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                            >
+                                <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
                                     Trang cá nhân
-                                </Link>
+                                </div>
                             </Dropdown.Item>
-                            <Dropdown.Item className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
-                                <Link
-                                    to={'/dashboard?tab=order'}
-                                    className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
-                                >
-                                    Đơn hàng của tôi
-                                </Link>
+                            <Dropdown.Item
+                                onClick={() => navigate('/dashboard?tab=profile')}
+                                className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                            >
+                                <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
+                                    Đơn hàng
+                                </div>
                             </Dropdown.Item>
                             <Dropdown.Divider className='my-1 border-amber-200/50 dark:border-gray-700' />
                             <Dropdown.Item

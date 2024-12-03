@@ -21,6 +21,10 @@ export default function Order() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmingOrder, setConfirmingOrder] = useState(null);
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
     // get all orders from api
     useEffect(() => {
         const getAllOrders = async () => {

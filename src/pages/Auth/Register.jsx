@@ -9,6 +9,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-phone-input-2/lib/style.css';
 import { TfiHandPointRight } from 'react-icons/tfi';
+import { FaEnvelope, FaLock, FaUser } from 'react-icons/fa';
 
 export default function Register() {
     // state
@@ -119,7 +120,8 @@ export default function Register() {
                             <div>
                                 <Label value='Tên người dùng' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
-                                    icon={CiUser}
+                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
+                                    icon={FaUser}
                                     type='text'
                                     placeholder='Tên người dùng'
                                     id='username'
@@ -132,7 +134,8 @@ export default function Register() {
                             <div>
                                 <Label value='Email' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
-                                    icon={CiMail}
+                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
+                                    icon={FaEnvelope}
                                     type='text'
                                     placeholder='Địa chỉ email'
                                     id='email'
@@ -144,7 +147,8 @@ export default function Register() {
                             <div>
                                 <Label value='Mật khẩu' className='text-gray-700 dark:text-gray-300' />
                                 <TextInput
-                                    icon={GoLock}
+                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
+                                    icon={FaLock}
                                     type='password'
                                     placeholder='Mật khẩu'
                                     id='password'
@@ -153,6 +157,7 @@ export default function Register() {
                                     className='mt-1'
                                 />
                             </div>
+
                             <PasswordStrengthMeter password={formData.password} strength={passwordStrength} />
 
                             <Button

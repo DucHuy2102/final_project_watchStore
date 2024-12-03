@@ -101,6 +101,7 @@ export default function Profile() {
         setTimeout(() => {
             setLoading(false);
         }, 1000);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
     // ======================================== Fetch API ========================================

@@ -190,21 +190,21 @@ export default function Header_Component() {
                                 </Link>
                             </Dropdown.Header>
                             <div className='p-1 bg-white dark:bg-gray-900'>
-                                <Dropdown.Item className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
-                                    <Link
-                                        to={'/dashboard?tab=profile'}
-                                        className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
-                                    >
+                                <Dropdown.Item
+                                    onClick={() => navigate('/dashboard?tab=profile')}
+                                    className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                                >
+                                    <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
                                         Trang cá nhân
-                                    </Link>
+                                    </div>
                                 </Dropdown.Item>
-                                <Dropdown.Item className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'>
-                                    <Link
-                                        to={'/dashboard?tab=order'}
-                                        className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'
-                                    >
+                                <Dropdown.Item
+                                    onClick={() => navigate('/dashboard?tab=profile')}
+                                    className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                                >
+                                    <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
                                         Đơn hàng
-                                    </Link>
+                                    </div>
                                 </Dropdown.Item>
                                 <Dropdown.Divider className='my-1 border-amber-200/50 dark:border-gray-700' />
                                 <Dropdown.Item

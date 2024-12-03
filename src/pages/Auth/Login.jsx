@@ -1,7 +1,6 @@
 import { Button, Label, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
-import { CiLogin, CiUser } from 'react-icons/ci';
-import { GoLock } from 'react-icons/go';
+import { CiLogin } from 'react-icons/ci';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
@@ -11,6 +10,7 @@ import { TfiHandPointRight } from 'react-icons/tfi';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { IoIosHome } from 'react-icons/io';
+import { FaLock, FaUser } from 'react-icons/fa';
 
 export default function Login() {
     // state
@@ -137,7 +137,8 @@ export default function Login() {
                                     Tên người dùng
                                 </Label>
                                 <TextInput
-                                    icon={CiUser}
+                                    icon={FaUser}
+                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
                                     type='text'
                                     autoFocus
                                     placeholder='Tên người dùng'
@@ -151,7 +152,8 @@ export default function Login() {
                                     Mật khẩu
                                 </Label>
                                 <TextInput
-                                    icon={GoLock}
+                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
+                                    icon={FaLock}
                                     type='password'
                                     placeholder='Mật khẩu'
                                     id='password'
@@ -163,8 +165,9 @@ export default function Login() {
                                 <Link
                                     to='/forgot-password'
                                     className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
-                    transition-colors duration-300'
+                    transition-colors duration-300 flex items-center'
                                 >
+                                    <TfiHandPointRight className='mr-1' />
                                     Quên mật khẩu?
                                 </Link>
                             </div>

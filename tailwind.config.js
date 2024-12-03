@@ -11,6 +11,7 @@ export default {
                 montserrat: ['Montserrat', 'sans-serif'],
             },
             animation: {
+                'spin-reverse-slow': 'spin-reverse 3s linear infinite',
                 'spin-slow': 'spin 3s linear infinite',
                 'bounce-slow': 'bounce 3s infinite',
                 'rotate-y-180': 'rotateY 1s forwards',
@@ -27,6 +28,14 @@ export default {
                 tilt: 'tilt 10s infinite linear',
             },
             keyframes: {
+                'spin-reverse': {
+                    from: {
+                        transform: 'rotate(360deg)',
+                    },
+                    to: {
+                        transform: 'rotate(0deg)',
+                    },
+                },
                 shine: {
                     '0%': { left: '-100%', opacity: 0 },
                     '50%': { opacity: 0.5 },

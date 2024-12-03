@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Button, Label, Spinner, TextInput } from 'flowbite-react';
-import { CiMail } from 'react-icons/ci';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { IoIosSend } from 'react-icons/io';
+import { IoIosHome, IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { FaEnvelope } from 'react-icons/fa';
 
 export default function ForgotPassword() {
     // state
@@ -44,13 +44,25 @@ export default function ForgotPassword() {
                     <div className='absolute bottom-0 right-0 w-96 h-96 bg-purple-200 dark:bg-purple-900/20 rounded-full filter blur-3xl opacity-30 translate-x-1/2 translate-y-1/2'></div>
                 </div>
 
+                <div className='absolute top-5 left-10'>
+                    <Link
+                        to={'/'}
+                        className='flex items-center gap-2 px-6 py-2.5 hover:text-blue-600 text-gray-700 
+                            dark:text-gray-200 bg-white dark:bg-gray-800 rounded-tl-3xl rounded-br-3xl shadow-lg hover:shadow-xl
+                            transition-all duration-300 group'
+                    >
+                        <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
+                        <span className='font-medium'>Trang chủ</span>
+                    </Link>
+                </div>
+
                 <div className='w-full lg:w-1/2 flex flex-col items-center justify-center relative z-10'>
                     <div className='w-full max-w-md p-8 bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] border border-white/20'>
                         {!isSubmitted ? (
                             <>
                                 <div className='flex flex-col items-center mb-8'>
-                                    <div className='w-16 h-16 bg-gradient-to-tr from-blue-600 to-purple-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg transform rotate-12'>
-                                        <CiMail className='h-8 w-8 text-white transform -rotate-12' />
+                                    <div className='w-16 h-16 bg-gradient-to-tr from-blue-600 to-purple-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg animate-spin-slow'>
+                                        <FaEnvelope className='h-8 w-8 text-white animate-spin-reverse-slow' />
                                     </div>
                                     <h2 className='text-3xl font-bold md:text-4xl bg-gradient-to-r from-blue-600 via-purple-500 to-blue-600 bg-clip-text text-transparent mb-3 text-center'>
                                         Quên mật khẩu
@@ -67,7 +79,8 @@ export default function ForgotPassword() {
                                             className='text-gray-700 dark:text-gray-300 font-medium'
                                         />
                                         <TextInput
-                                            icon={CiMail}
+                                            icon={FaEnvelope}
+                                            style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
                                             type='email'
                                             placeholder='Nhập email của bạn'
                                             value={email}
@@ -99,7 +112,7 @@ export default function ForgotPassword() {
                             <div className='flex flex-col justify-center items-center p-4'>
                                 <div className='w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto my-6 shadow-lg transform rotate-12 hover:rotate-0 transition-all duration-300'>
                                     <a href='https://mail.google.com' target='_blank' rel='noopener noreferrer'>
-                                        <CiMail className='h-12 w-12 text-white transform -rotate-12 hover:rotate-0 transition-all' />
+                                        <FaEnvelope className='h-12 w-12 text-white transform -rotate-12 hover:rotate-0 transition-all' />
                                     </a>
                                 </div>
                                 <span className='text-2xl font-bold sm:text-3xl bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent text-center block mb-6'>
@@ -120,9 +133,7 @@ export default function ForgotPassword() {
                                 className='group flex items-center gap-3 px-8 py-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 border border-gray-200 dark:border-gray-600'
                             >
                                 <TfiHandPointRight className='text-blue-600 dark:text-blue-400 transition-transform duration-300 transform group-hover:translate-x-1' />
-                                <span className='text-gray-700 dark:text-gray-200 font-medium'>
-                                    Trở về trang đăng nhập
-                                </span>
+                                <span className='text-gray-700 dark:text-gray-200 font-medium'>Trang đăng nhập</span>
                             </Link>
                         </div>
                     </div>

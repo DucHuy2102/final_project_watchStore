@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Card, Modal } from 'flowbite-react';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import axios from 'axios';
@@ -32,6 +32,11 @@ export default function OrderDetail({ orderData, onBack }) {
     const [submitting, setSubmitting] = useState(false);
     const [fileList, setFileList] = useState([]);
     const [uploadLoading, setUploadLoading] = useState(false);
+    const [isDeleted, setIsDeleted] = useState(orderData.state === 'processing');
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
 
     const formatDate = useCallback((dateStr) => {
         return dateStr
@@ -46,7 +51,6 @@ export default function OrderDetail({ orderData, onBack }) {
     }, []);
 
     const handleCancelOrder = async () => {
-        console.log('Cancel order', orderData);
         try {
             setLoading(true);
             const res = await axios.put(
@@ -63,7 +67,8 @@ export default function OrderDetail({ orderData, onBack }) {
             );
             if (res?.status === 200) {
                 setOpenModal(false);
-                window.location.reload();
+                setMessage('');
+                setIsDeleted(false);
             }
         } catch (error) {
             console.log(error);
@@ -207,7 +212,7 @@ export default function OrderDetail({ orderData, onBack }) {
                             <span className='text-gray-600 dark:text-gray-400'>Trạng thái đơn hàng</span>
                             <span
                                 className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                    orderData.state === 'processing'
+                                    isDeleted
                                         ? 'bg-blue-100 text-blue-700'
                                         : orderData.state === 'delivery'
                                         ? 'bg-yellow-100 text-yellow-700'
@@ -216,7 +221,7 @@ export default function OrderDetail({ orderData, onBack }) {
                                         : 'bg-red-100 text-red-700'
                                 }`}
                             >
-                                {orderData.state === 'processing'
+                                {isDeleted
                                     ? 'Đang chờ xử lý'
                                     : orderData.state === 'delivery'
                                     ? 'Đang giao hàng'
@@ -390,7 +395,7 @@ export default function OrderDetail({ orderData, onBack }) {
                                         : 'text-red-600'
                                 }`}
                             >
-                                {orderData.totalPrice.toLocaleString()}đ
+                                {orderData.totalPrice.toLocaleString()}
                             </span>
                         </div>
                     </div>
@@ -398,7 +403,7 @@ export default function OrderDetail({ orderData, onBack }) {
             </div>
 
             {/* Button cancel order */}
-            {orderData.state === 'processing' && (
+            {isDeleted && (
                 <div className='flex justify-center'>
                     <Button
                         color='failure'
@@ -425,7 +430,7 @@ export default function OrderDetail({ orderData, onBack }) {
 
             {/* Modal cancel order */}
             <Modal show={openModal} size='md' onClose={() => setOpenModal(false)} popup>
-                <Modal.Header className='border-b' />
+                <Modal.Header />
                 <Modal.Body>
                     <div className='text-center p-4'>
                         <HiOutlineExclamationCircle className='mx-auto mb-6 h-16 w-16 text-yellow-400' />
@@ -435,7 +440,7 @@ export default function OrderDetail({ orderData, onBack }) {
                         <p className='mb-6 text-gray-500 dark:text-gray-400'>Bạn có chắc chắn muốn hủy đơn hàng này?</p>
                         <div className='mb-6'>
                             <textarea
-                                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500'
+                                className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:!ring-0 focus:border-gray-400'
                                 rows={3}
                                 placeholder='Vui lòng nhập lý do hủy đơn hàng...'
                                 value={message}

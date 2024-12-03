@@ -240,7 +240,7 @@ export default function DashboardProduct() {
                         lọc
                     </span>
                 ) : (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-xl text-center w-full sm:w-auto'>
                         Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản phẩm
                     </span>
                 )}
@@ -290,11 +290,7 @@ export default function DashboardProduct() {
             </div>
 
             {products?.length > 0 ? (
-                <div
-                    className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 
-            lg:grid-cols-3 lg:gap-x-3 xl:grid-cols-3 xl:gap-x-2
-            my-5 gap-y-8 justify-items-center'
-                >
+                <div className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 xl:grid-cols-4 xl:gap-x-2 my-5 gap-y-8 justify-items-center'>
                     {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
