@@ -23,6 +23,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getCartUser } from './services/redux/slices/cartSlice';
+import { CompareDetail } from './pages/Products/components/exportCom_Product';
 
 export default function App() {
     // state
@@ -68,6 +69,7 @@ export default function App() {
                     <Route path='/product-detail/:id' element={<ProductDetail_Page />} />
                     <Route path='/cart' element={<DashboardCart_Page />} />
                     <Route path='/services' element={<DashService_Page />} />
+                    <Route path='/compare-products' element={<CompareDetail />} />
 
                     {/* route only for user */}
                     <Route element={<PrivateRoute_Page />}>

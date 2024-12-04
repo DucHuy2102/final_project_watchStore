@@ -19,3 +19,6 @@ export { default as SortOption } from './Product/SortOption';
 export { default as Pagination } from './Product/Pagination';
 export { default as Review } from './Product/Review';
 export { default as ListReview } from './Product/ListReview';
+
+// compare
+export { default as CompareDetail } from './Compare/CompareDetail';

@@ -112,21 +112,25 @@ export default function Order() {
 
     const handleConfirmDelivery = async (orderId) => {
         try {
-            const res = await axios.put(
-                `${import.meta.env.VITE_API_URL}/api/order/${orderId}/confirm`,
-                {},
+            setIsLoading(true);
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/api/order/is-delivered`,
+                {
+                    orderId,
+                },
                 {
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
                     },
                 },
             );
-            if (res.status === 200) {
-                setOrders(orders.map((order) => (order.id === orderId ? { ...order, state: 'delivered' } : order)));
-                setShowConfirmModal(false);
+            if (res?.status === 200) {
+                setShowReviewModal(true);
             }
         } catch (error) {
             console.log(error);
+        } finally {
+            setIsLoading(false);
         }
     };
 

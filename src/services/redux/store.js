@@ -3,23 +3,16 @@ import themeReducer from './slices/themeSlice';
 import userReducer from './slices/userSlice';
 import cartReducer from './slices/cartSlice';
 import checkoutReducer from './slices/checkoutSlice';
+import compareReducer from './slices/compareSlice';
 import storage from 'redux-persist/lib/storage';
-import {
-    persistReducer,
-    persistStore,
-    FLUSH,
-    REHYDRATE,
-    PAUSE,
-    PERSIST,
-    PURGE,
-    REGISTER,
-} from 'redux-persist';
+import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 
 const rootReducer = combineReducers({
     theme: themeReducer,
     user: userReducer,
     cart: cartReducer,
     checkout: checkoutReducer,
+    compare: compareReducer,
 });
 
 const persistConfig = {

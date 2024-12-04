@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import { FilterModal, Pagination, ProductCard } from './components/exportCom_Product';
 import { Breadcrumb_Component } from '../../components/exportComponent';
 import { FaFilter } from 'react-icons/fa';
+import DashCompare from './components/Compare/DashCompare';
 
 const SORT_OPTIONS = [
     { value: 'gia-tang-dan', label: 'Giá tăng dần', icon: '↑' },
@@ -25,7 +26,6 @@ export default function DashboardProduct() {
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [wireMaterial, setWireMaterial] = useState([]);
     const [waterProof, setWaterProof] = useState([]);
-    console.log(searchParams.size);
 
     const getAllProduct = async () => {
         try {
@@ -88,42 +88,42 @@ export default function DashboardProduct() {
             {
                 title: 'Hình dáng mặt đồng hồ',
                 choices: [
-                    { key: 'shape', value: 'Đồng hồ mặt tròn', label: 'Đồng hồ mặt tròn' },
-                    { key: 'shape', value: 'Đồng hồ mặt vuông', label: 'Đồng hồ mặt vuông' },
+                    { key: 'shape', value: 'Mặt tròn', label: 'Mặt tròn' },
+                    { key: 'shape', value: 'Mặt vuông', label: 'Mặt vuông' },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt chữ nhật',
-                        label: 'Đồng hồ mặt chữ nhật',
+                        value: 'Mặt chữ nhật',
+                        label: 'Mặt chữ nhật',
                     },
                     {
                         key: 'shape ',
-                        value: 'Đồng hồ mặt tam giác',
-                        label: 'Đồng hồ mặt tam giác',
+                        value: 'Mặt tam giác',
+                        label: 'Mặt tam giác',
                     },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt bầu dục',
-                        label: 'Đồng hồ mặt bầu dục',
+                        value: 'Mặt bầu dục',
+                        label: 'Mặt bầu dục',
                     },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt Tonneau',
-                        label: 'Đồng hồ mặt Tonneau',
+                        value: 'Mặt Tonneau',
+                        label: 'Mặt Tonneau',
                     },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt Carage',
-                        label: 'Đồng hồ mặt Carage',
+                        value: 'Mặt Carage',
+                        label: 'Mặt Carage',
                     },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt Cushion',
-                        label: 'Đồng hồ mặt Cushion',
+                        value: 'Mặt Cushion',
+                        label: 'Mặt Cushion',
                     },
                     {
                         key: 'shape',
-                        value: 'Đồng hồ mặt bát giác',
-                        label: 'Đồng hồ mặt bát giác',
+                        value: 'Mặt bát giác',
+                        label: 'Mặt bát giác',
                     },
                 ],
             },
@@ -305,6 +305,7 @@ export default function DashboardProduct() {
             )}
 
             {totalPages > 1 && <Pagination totalProduct={totalProducts} />}
+            <DashCompare />
         </div>
     );
 }

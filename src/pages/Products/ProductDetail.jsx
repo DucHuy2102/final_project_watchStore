@@ -46,7 +46,6 @@ export default function ProductDetail() {
     const [moreProduct, setMoreProduct] = useState([]);
     const [isBuyThisProduct, setIsBuyThisProduct] = useState(false);
     const [listReviews, setListReviews] = useState([]);
-    console.log(listReviews);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {

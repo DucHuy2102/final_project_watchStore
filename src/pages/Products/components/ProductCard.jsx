@@ -5,8 +5,10 @@ import { Button, Modal, Spinner } from 'flowbite-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { CiWarning } from 'react-icons/ci';
 import { setProductToCheckout } from '../../../services/redux/slices/checkoutSlice';
-import { Tag } from 'antd';
-import { BsCheck } from 'react-icons/bs';
+import { Tag, Tooltip } from 'antd';
+import { BsCheck, BsArrowLeftRight } from 'react-icons/bs';
+import { toast } from 'react-toastify';
+import { toggleCompareProduct } from '../../../services/redux/slices/compareSlice';
 
 const isLightColor = (hex) => {
     hex = hex.replace('#', '');
@@ -32,6 +34,8 @@ export default function ProductCard({ product }) {
     const [quantity, setQuantity] = useState(1);
     const [loadingEffect, setLoadingEffect] = useState(false);
     const [selectedColor, setSelectedColor] = useState(option?.[0]?.key);
+    const { compareProducts } = useSelector((state) => state.compare);
+    const isInCompare = compareProducts?.some((p) => p.id === product.id);
 
     const priceFormat = useCallback((price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -126,6 +130,15 @@ export default function ProductCard({ product }) {
         setShowModalBuyNow(false);
     }, [dispatch, navigate, option, product, quantity, selectedColor, selectedOption]);
 
+    const handleCompare = (e) => {
+        e.stopPropagation();
+        if (compareProducts?.length >= 2 && !isInCompare) {
+            toast.warning('Chỉ có thể so sánh 2 sản phẩm!');
+            return;
+        }
+        dispatch(toggleCompareProduct(product));
+    };
+
     // loading
     if (loadingEffect) {
         return (
@@ -155,6 +168,17 @@ export default function ProductCard({ product }) {
                 <span className='bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
                     {waterproof}ATM
                 </span>
+            </div>
+
+            <div className='absolute top-2 right-2 z-20'>
+                <button
+                    onClick={handleCompare}
+                    className={`p-2 rounded-full transition-all duration-300 ${
+                        isInCompare ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                >
+                    <BsArrowLeftRight size={20} />
+                </button>
             </div>
 
             {/* Image watches */}
