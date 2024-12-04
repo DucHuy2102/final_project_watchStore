@@ -2,24 +2,39 @@ import axios from 'axios';
 import { useCallback, useEffect } from 'react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Table, Badge, TextInput, Select, Button, Spinner, Modal } from 'flowbite-react';
-import { HiCheck, HiSearch } from 'react-icons/hi';
-import { BsArrowUp, BsArrowDown } from 'react-icons/bs';
+import { Table, Input, Select, Tag, Space } from 'antd';
+import { Button, Modal } from 'flowbite-react';
+import { SearchOutlined, CheckOutlined } from '@ant-design/icons';
 import { OrderDetail } from '../Products/components/exportCom_Product';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Spinner } from 'flowbite-react';
+import { HiOutlineExclamationCircle } from 'react-icons/hi';
+import ReviewModal_OrderCompleted from './components/ReviewModal_OrderCompleted';
 
 export default function Order() {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { access_token: tokenUser } = useSelector((state) => state.user);
-    const [isLoading, setIsLoading] = useState(false);
     const [orders, setOrders] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [orderDetail, setOrderDetail] = useState(null);
+
+    // search & filter
     const [search, setSearch] = useState('');
     const [filterState, setFilterState] = useState('all');
-    const [sortConfig, setSortConfig] = useState({
-        key: 'createdAt',
-        direction: 'desc',
-    });
-    const [orderDetail, setOrderDetail] = useState(null);
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    // confirm modal
     const [confirmingOrder, setConfirmingOrder] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    // cancel modal
+    const [message, setMessage] = useState('');
+    const [cancelingOrder, setCancelingOrder] = useState(null);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+
+    // review modal
+    const [reviewingOrder, setReviewingOrder] = useState(null);
+    const [showReviewModal, setShowReviewModal] = useState(false);
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -31,6 +46,9 @@ export default function Order() {
             try {
                 setIsLoading(true);
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order`, {
+                    params: {
+                        state: filterState === 'all' ? undefined : filterState,
+                    },
                     headers: {
                         Authorization: `Bearer ${tokenUser}`,
                     },
@@ -45,14 +63,18 @@ export default function Order() {
             }
         };
         getAllOrders();
-    }, [tokenUser]);
+    }, [filterState, location.search, tokenUser]);
+
+    const handleSearch = (e) => {
+        setSearch(e.target.value);
+    };
 
     const getStatusColor = useCallback((state) => {
         const colors = {
-            processing: 'warning',
-            delivery: 'info',
-            complete: 'success',
-            cancel: 'failure',
+            processing: 'gold',
+            delivery: 'blue',
+            complete: 'green',
+            cancel: 'red',
         };
         return colors[state] || 'default';
     }, []);
@@ -77,7 +99,6 @@ export default function Order() {
         });
     }, []);
 
-    // loading
     if (isLoading) {
         return (
             <div className='w-full min-h-screen flex justify-center items-center '>
@@ -88,34 +109,6 @@ export default function Order() {
             </div>
         );
     }
-
-    const filteredOrders = orders.filter((order) => {
-        const matchSearch =
-            order.user?.name.toLowerCase().includes(search.toLowerCase()) ||
-            order.user?.phone.includes(search) ||
-            order.id.includes(search);
-        const matchState = filterState === 'all' || order.state === filterState;
-        return matchSearch && matchState;
-    });
-
-    const handleSort = (key) => {
-        setSortConfig({
-            key,
-            direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc',
-        });
-    };
-
-    const sortedOrders = [...filteredOrders].sort((a, b) => {
-        if (sortConfig.key === 'totalPrice') {
-            return sortConfig.direction === 'asc' ? a.totalPrice - b.totalPrice : b.totalPrice - a.totalPrice;
-        }
-        if (sortConfig.key === 'createdAt') {
-            return sortConfig.direction === 'asc'
-                ? new Date(a.createdAt) - new Date(b.createdAt)
-                : new Date(b.createdAt) - new Date(a.createdAt);
-        }
-        return 0;
-    });
 
     const handleConfirmDelivery = async (orderId) => {
         try {
@@ -137,6 +130,115 @@ export default function Order() {
         }
     };
 
+    const handleCancelOrder = async () => {
+        try {
+            setIsLoading(true);
+            const res = await axios.put(
+                `${import.meta.env.VITE_API_URL}/api/order/cancel`,
+                {
+                    id: cancelingOrder.id,
+                    message: message.trim(),
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${tokenUser}`,
+                    },
+                },
+            );
+            if (res?.status === 200) {
+                setShowCancelModal(false);
+                setMessage('');
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleReview = (order) => {
+        setReviewingOrder(order);
+        setShowReviewModal(true);
+    };
+
+    const columns = [
+        {
+            title: 'Mã đơn hàng',
+            dataIndex: 'id',
+            key: 'id',
+            width: '10%',
+            align: 'center',
+        },
+        {
+            title: 'Ngày đặt',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            width: '15%',
+            align: 'center',
+            sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+            render: (date) => formatDate(date),
+        },
+        {
+            title: 'Tổng tiền',
+            dataIndex: 'totalPrice',
+            key: 'totalPrice',
+            width: '15%',
+            align: 'center',
+            sorter: (a, b) => a.totalPrice - b.totalPrice,
+            render: (price) => `${price.toLocaleString()}đ`,
+        },
+        {
+            title: 'Trạng thái đơn hàng',
+            dataIndex: 'state',
+            key: 'state',
+            width: '15%',
+            align: 'center',
+            render: (state) => <Tag color={getStatusColor(state)}>{getStatusText(state)}</Tag>,
+        },
+        {
+            title: 'Thao tác',
+            key: 'action',
+            width: '20%',
+            align: 'center',
+            render: (_, record) => (
+                <Space size={'small'}>
+                    {record.state === 'delivery' && (
+                        <Button
+                            color='blue'
+                            className='!ring-0'
+                            onClick={() => {
+                                setConfirmingOrder(record);
+                                setShowConfirmModal(true);
+                            }}
+                        >
+                            Nhận hàng
+                        </Button>
+                    )}
+                    {record.state === 'complete' && (
+                        <Button color='blue' className='!ring-0' onClick={() => handleReview(record)}>
+                            Đánh giá
+                        </Button>
+                    )}
+                    <Button color='gray' className='!ring-0' onClick={() => setOrderDetail(record)}>
+                        Chi tiết
+                    </Button>
+                    {record.state === 'processing' && (
+                        <Button
+                            color='failure'
+                            className='!ring-0'
+                            onClick={() => {
+                                setCancelingOrder(record);
+                                setShowCancelModal(true);
+                            }}
+                        >
+                            Hủy đơn
+                        </Button>
+                    )}
+                </Space>
+            ),
+        },
+    ];
+
     return (
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             {orderDetail ? (
@@ -144,171 +246,131 @@ export default function Order() {
             ) : (
                 <>
                     <h1 className='text-3xl font-bold text-gray-900 dark:text-white border-b pb-3'>Đơn hàng của tôi</h1>
-                    <div className='p-6'>
-                        <div className='flex flex-col md:flex-row gap-6 items-start md:items-center'>
-                            <div className='w-full md:w-1/2'>
-                                <TextInput
-                                    icon={HiSearch}
+
+                    <div className='py-6'>
+                        <Space direction='vertical' size='middle' className='w-full'>
+                            <Space wrap>
+                                <Input
                                     placeholder='Tìm kiếm theo tên, SĐT hoặc mã đơn hàng...'
+                                    prefix={<SearchOutlined />}
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className='!ring-0 border-gray-300'
+                                    onChange={handleSearch}
+                                    style={{ width: 300 }}
                                 />
-                            </div>
+                                <Select
+                                    value={filterState}
+                                    onChange={(value) => setFilterState(value)}
+                                    style={{ width: 200 }}
+                                    options={[
+                                        { value: 'all', label: 'Tất cả đơn hàng' },
+                                        { value: 'processing', label: 'Đơn đang chờ giao' },
+                                        { value: 'delivery', label: 'Đơn đang giao' },
+                                        { value: 'complete', label: 'Đơn đã giao' },
+                                        { value: 'cancel', label: 'Đơn đã hủy' },
+                                    ]}
+                                />
+                            </Space>
 
-                            <Select
-                                className='w-full md:w-48 !ring-0'
-                                value={filterState}
-                                onChange={(e) => setFilterState(e.target.value)}
-                            >
-                                <option value='all'>Tất cả đơn hàng</option>
-                                <option value='processing'>Đơn đang chờ giao</option>
-                                <option value='delivered'>Đơn hàng đã nhận</option>
-                                <option value='cancel'>Đơn hàng đã hủy</option>
-                            </Select>
-                        </div>
+                            <Table
+                                columns={columns}
+                                dataSource={orders}
+                                rowKey='id'
+                                loading={isLoading}
+                                pagination={{
+                                    pageSize: 10,
+                                    showTotal: (total) => `Tổng ${total} đơn hàng`,
+                                }}
+                                scroll={{ x: 'max-content' }}
+                            />
+                        </Space>
                     </div>
 
-                    <div className='rounded-lg shadow-sm overflow-hidden'>
-                        <Table striped hoverable>
-                            <Table.Head className='bg-gray-50'>
-                                <Table.HeadCell className='font-semibold text-gray-700 dark:text-white'>
-                                    Mã đơn hàng
-                                </Table.HeadCell>
-                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
-                                    <div
-                                        className='flex items-center justify-center gap-1 cursor-pointer hover:text-gray-900 transition-colors'
-                                        onClick={() => handleSort('createdAt')}
-                                    >
-                                        Ngày đặt
-                                        {sortConfig.key === 'createdAt' && (
-                                            <span>
-                                                {sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}
-                                            </span>
-                                        )}
-                                    </div>
-                                </Table.HeadCell>
-                                <Table.HeadCell className='font-semibold text-gray-700 dark:text-white'>
-                                    Thông tin giao hàng
-                                </Table.HeadCell>
-                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
-                                    <div
-                                        className='flex items-center justify-center gap-1 cursor-pointer hover:text-gray-900 transition-colors'
-                                        onClick={() => handleSort('totalPrice')}
-                                    >
-                                        Tổng tiền
-                                        {sortConfig.key === 'totalPrice' && (
-                                            <span>
-                                                {sortConfig.direction === 'asc' ? <BsArrowUp /> : <BsArrowDown />}
-                                            </span>
-                                        )}
-                                    </div>
-                                </Table.HeadCell>
-                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
-                                    Trạng thái
-                                </Table.HeadCell>
-                                <Table.HeadCell align='center' className='font-semibold text-gray-700 dark:text-white'>
-                                    Thao tác
-                                </Table.HeadCell>
-                            </Table.Head>
-                            <Table.Body className='divide-y divide-gray-200'>
-                                {sortedOrders.map((order) => (
-                                    <Table.Row key={order.id} className='hover:bg-gray-50 transition-colors'>
-                                        <Table.Cell className='font-medium text-gray-900 dark:text-white'>
-                                            {order.id}
-                                        </Table.Cell>
-                                        <Table.Cell align='center'>{formatDate(order.createdAt)}</Table.Cell>
-                                        <Table.Cell>
-                                            <div className='max-w-xs text-gray-600 dark:text-white'>
-                                                {order.user?.address?.fullAddress}
-                                            </div>
-                                        </Table.Cell>
-                                        <Table.Cell
-                                            align='center'
-                                            className='font-semibold text-gray-900 dark:text-white'
-                                        >
-                                            {order.totalPrice.toLocaleString()}đ
-                                        </Table.Cell>
-                                        <Table.Cell className='text-center'>
-                                            <Badge
-                                                color={getStatusColor(order.state)}
-                                                className='inline-flex justify-center min-w-[120px] rounded-full py-1.5 text-sm font-medium'
-                                            >
-                                                {getStatusText(order.state)}
-                                            </Badge>
-                                        </Table.Cell>
-                                        <Table.Cell align='center'>
-                                            <div className='flex justify-center gap-2'>
-                                                {order.state === 'delivered' ? (
-                                                    <>
-                                                        <Button
-                                                            className='focus:!ring-0 hover:bg-blue-700 transition-colors'
-                                                            size='sm'
-                                                            color='blue'
-                                                            onClick={() => {
-                                                                setConfirmingOrder(order);
-                                                                setShowConfirmModal(true);
-                                                            }}
-                                                        >
-                                                            <div className='flex justify-center items-center gap-x-2'>
-                                                                <HiCheck className='h-4 w-4' />
-                                                                <span>Nhận hàng</span>
-                                                            </div>
-                                                        </Button>
-                                                        <Button
-                                                            className='focus:!ring-0 hover:bg-gray-700 transition-colors'
-                                                            onClick={() => setOrderDetail(order)}
-                                                            size='sm'
-                                                            color='gray'
-                                                        >
-                                                            Chi tiết
-                                                        </Button>
-                                                    </>
-                                                ) : (
-                                                    <Button
-                                                        className='focus:!ring-0 hover:bg-gray-700 transition-colors'
-                                                        onClick={() => setOrderDetail(order)}
-                                                        size='sm'
-                                                        color='gray'
-                                                    >
-                                                        Chi tiết
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                ))}
-                            </Table.Body>
-                        </Table>
-                    </div>
-
+                    {/* confirm receive order modal */}
                     <Modal
                         show={showConfirmModal}
                         onClose={() => setShowConfirmModal(false)}
-                        size='md'
+                        size='sm'
                         popup
                         className='backdrop-blur-sm'
                     >
-                        <Modal.Header className='border-b' />
+                        <Modal.Header />
                         <Modal.Body>
-                            <div className='text-center p-4'>
-                                <h3 className='mb-6 text-xl font-medium text-gray-900'>
-                                    Xác nhận đã nhận được đơn hàng?
-                                </h3>
-                                <div className='flex justify-center gap-4'>
+                            <div className='text-center'>
+                                <h3 className='mb-6 text-xl font-medium text-gray-900'>Xác nhận đã nhận đơn hàng?</h3>
+                                <div className='flex justify-between gap-4'>
                                     <Button
-                                        className='focus:!ring-0 hover:bg-green-700 transition-colors px-6'
-                                        color='success'
-                                        onClick={() => handleConfirmDelivery(confirmingOrder?.id)}
-                                    >
-                                        Xác nhận
-                                    </Button>
-                                    <Button
-                                        className='focus:!ring-0 hover:bg-gray-700 transition-colors px-6'
+                                        className='focus:!ring-0 px-5'
                                         color='gray'
                                         onClick={() => setShowConfirmModal(false)}
                                     >
                                         Hủy
+                                    </Button>
+                                    <Button
+                                        className='focus:!ring-0 px-5'
+                                        color='blue'
+                                        onClick={() => handleConfirmDelivery(confirmingOrder?.id)}
+                                    >
+                                        Xác nhận
+                                    </Button>
+                                </div>
+                            </div>
+                        </Modal.Body>
+                    </Modal>
+
+                    {/* review order modal */}
+                    <Modal
+                        show={showReviewModal}
+                        size='3xl'
+                        onClose={() => setShowReviewModal(false)}
+                        className='backdrop-blur-md'
+                    >
+                        <Modal.Header>
+                            <h3 className='text-xl font-semibold'>Đánh giá sản phẩm</h3>
+                        </Modal.Header>
+                        <Modal.Body>
+                            <ReviewModal_OrderCompleted
+                                order={reviewingOrder}
+                                onClose={() => setShowReviewModal(false)}
+                            />
+                        </Modal.Body>
+                    </Modal>
+
+                    {/* cancel order modal */}
+                    <Modal show={showCancelModal} size='md' onClose={() => setShowCancelModal(false)} popup>
+                        <Modal.Header />
+                        <Modal.Body>
+                            <div className='text-center p-4'>
+                                <HiOutlineExclamationCircle className='mx-auto mb-6 h-16 w-16 text-yellow-400' />
+                                <h3 className='mb-4 text-xl font-semibold text-gray-900 dark:text-white'>
+                                    Xác nhận hủy đơn hàng
+                                </h3>
+                                <p className='mb-6 text-gray-500 dark:text-gray-400'>
+                                    Bạn có chắc chắn muốn hủy đơn hàng này?
+                                </p>
+                                <div className='mb-6'>
+                                    <textarea
+                                        className='w-full px-4 py-3 border border-gray-300 rounded-lg focus:!ring-0 focus:border-gray-400'
+                                        rows={3}
+                                        placeholder='Vui lòng nhập lý do hủy đơn hàng...'
+                                        value={message}
+                                        onChange={(e) => setMessage(e.target.value)}
+                                    />
+                                </div>
+                                <div className='flex justify-center gap-4'>
+                                    <Button
+                                        color='failure'
+                                        className='focus:!ring-0 hover:bg-red-700 transition-colors px-6'
+                                        onClick={handleCancelOrder}
+                                        isProcessing={isLoading}
+                                    >
+                                        Xác nhận hủy
+                                    </Button>
+                                    <Button
+                                        color='gray'
+                                        className='focus:!ring-0 hover:bg-gray-700 transition-colors px-6'
+                                        onClick={() => setShowCancelModal(false)}
+                                    >
+                                        Đóng
                                     </Button>
                                 </div>
                             </div>

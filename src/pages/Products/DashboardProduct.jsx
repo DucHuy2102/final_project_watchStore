@@ -25,6 +25,7 @@ export default function DashboardProduct() {
     const [selectedFilters, setSelectedFilters] = useState([]);
     const [wireMaterial, setWireMaterial] = useState([]);
     const [waterProof, setWaterProof] = useState([]);
+    console.log(searchParams.size);
 
     const getAllProduct = async () => {
         try {
@@ -226,22 +227,20 @@ export default function DashboardProduct() {
 
     return (
         <div className='min-h-screen p-5 w-full'>
-            <div
-                className='text-white w-full 
-        flex flex-col items-center justify-between gap-y-2 sm:flex-row sm:px-5'
-            >
-                <div className='flex justify-start w-full sm:w-auto'>
+            <div className='text-white w-full flex flex-col items-center justify-between gap-y-2 sm:flex-row sm:px-5'>
+                <div className='w-full sm:w-auto'>
                     <Breadcrumb_Component displayName={'Sản phẩm'} />
                 </div>
 
-                {searchParams.size !== 0 && totalProducts > 0 ? (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-lg text-center w-full sm:w-auto'>
-                        Tìm được <span className='text-teal-500 font-bold'>{totalProducts}</span> sản phẩm khớp với bộ
-                        lọc
+                {selectedFilters.length !== 0 ? (
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-sm lg:text-xl pl-20'>
+                        <span className='text-blue-500 font-bold text-lg lg:text-2xl'>{totalProducts}</span> sản phẩm
+                        khớp với bộ lọc
                     </span>
                 ) : (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-xl text-center w-full sm:w-auto'>
-                        Tất cả <span className='text-blue-500 font-bold'>{totalProducts}</span> sản phẩm
+                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-sm lg:text-xl pl-20'>
+                        Tất cả <span className='text-blue-500 font-bold text-lg lg:text-2xl'>{totalProducts}</span> sản
+                        phẩm
                     </span>
                 )}
 
@@ -250,7 +249,7 @@ export default function DashboardProduct() {
                         placeholder='Sắp xếp theo'
                         options={SORT_OPTIONS}
                         onChange={handleSortChange}
-                        className='w-[180px] h-11'
+                        className='w-[180px] h-11 custom-select'
                         popupClassName='custom-select-dropdown'
                         value={searchParams.get('sortBy')}
                         optionRender={(option) => (
@@ -290,7 +289,7 @@ export default function DashboardProduct() {
             </div>
 
             {products?.length > 0 ? (
-                <div className='grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 xl:grid-cols-4 xl:gap-x-2 my-5 gap-y-8 justify-items-center'>
+                <div className='w-full mx-auto grid grid-cols-1 sm:grid-cols-2 sm:gap-x-5 md:grid-cols-3 md:gap-x-4 2xl:grid-cols-4 2xl:gap-x-2 4xl:grid-cols-5 4xl:gap-x-2 my-5 gap-y-8 justify-items-center'>
                     {products.map((product) => (
                         <ProductCard key={product.id} product={product} />
                     ))}

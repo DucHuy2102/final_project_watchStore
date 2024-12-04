@@ -46,6 +46,7 @@ export default function ProductDetail() {
     const [moreProduct, setMoreProduct] = useState([]);
     const [isBuyThisProduct, setIsBuyThisProduct] = useState(false);
     const [listReviews, setListReviews] = useState([]);
+    console.log(listReviews);
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
@@ -71,9 +72,21 @@ export default function ProductDetail() {
         });
     };
 
-    const handleAddNewReview = useCallback((newReview) => {
-        setListReviews((prevReviews) => [newReview, ...prevReviews]);
-    }, []);
+    const handleAddNewReview = (newReview) => {
+        setListReviews((prevReviews) => [
+            {
+                id: newReview.id,
+                createdAt: newReview.createdAt,
+                delete: false,
+                productId: newReview.productId,
+                rating: newReview.rating,
+                reviewImages: newReview.reviewImages || [],
+                reviewText: newReview.reviewText,
+                user: newReview.user,
+            },
+            ...prevReviews,
+        ]);
+    };
 
     // get product detail
     useEffect(() => {
@@ -885,7 +898,7 @@ export default function ProductDetail() {
                 </div>
 
                 {/* Modal verify user */}
-                <Modal show={showModalBuyNow} size='md' popup>
+                <Modal show={showModalBuyNow} size='md' popup className='backdrop-blur-md'>
                     <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                         <CiWarning size='70px' className='text-yellow-300' />
                         <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>

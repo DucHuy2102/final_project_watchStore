@@ -208,7 +208,13 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Modal Buy Now */}
-            <Modal size='md' popup show={showModalBuyNow} onClose={() => setShowModalBuyNow(false)}>
+            <Modal
+                className='backdrop-blur-md'
+                size='md'
+                popup
+                show={showModalBuyNow}
+                onClose={() => setShowModalBuyNow(false)}
+            >
                 {tokenUser ? (
                     <>
                         <Modal.Header />
@@ -284,7 +290,7 @@ export default function ProductCard({ product }) {
                         </Modal.Body>
                     </>
                 ) : (
-                    <Modal show={showModalBuyNow} size='md' popup>
+                    <Modal className='backdrop-blur-md' show={showModalBuyNow} size='md' popup>
                         <Modal.Body className='mt-7 w-full flex flex-col justify-center items-center gap-y-3'>
                             <CiWarning size='70px' className='text-yellow-300' />
                             <span className='text-lg font-medium text-black'>Bạn cần đăng nhập để mua hàng</span>

@@ -429,7 +429,7 @@ export default function OrderDetail({ orderData, onBack }) {
             )}
 
             {/* Modal cancel order */}
-            <Modal show={openModal} size='md' onClose={() => setOpenModal(false)} popup>
+            <Modal className='backdrop-blur-md' show={openModal} size='md' onClose={() => setOpenModal(false)} popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='text-center p-4'>

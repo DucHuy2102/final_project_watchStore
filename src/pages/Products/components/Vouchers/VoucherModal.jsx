@@ -158,7 +158,7 @@ const VoucherModal_Component = ({
     );
 
     return (
-        <Modal show={isOpen} onClose={onClose} size='md' className='!p-0'>
+        <Modal className='backdrop-blur-md !p-0' show={isOpen} onClose={onClose} size='md'>
             <div className='absolute inset-0 bg-gradient-to-br from-amber-50/90 via-white to-purple-50/90 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900/80 rounded-lg' />
 
             <Modal.Header className='relative border-b border-amber-100/30 dark:border-amber-800/30 pb-3'>

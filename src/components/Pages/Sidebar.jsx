@@ -169,8 +169,8 @@ export default function Sidebar_Component() {
                     </Tooltip>
                 </div>
             </div>
-
-            <Modal show={showModal} onClose={() => setShowModal(false)} size='md' popup>
+            
+            <Modal className='backdrop-blur-md' show={showModal} onClose={() => setShowModal(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
                     <div className='text-center'>

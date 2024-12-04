@@ -199,7 +199,7 @@ export default function Header_Component() {
                                     </div>
                                 </Dropdown.Item>
                                 <Dropdown.Item
-                                    onClick={() => navigate('/dashboard?tab=profile')}
+                                    onClick={() => navigate('/dashboard?tab=order')}
                                     className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
                                 >
                                     <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>

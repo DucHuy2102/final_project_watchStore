@@ -9,7 +9,7 @@ import { MdRateReview } from 'react-icons/md';
 import { Upload, Rate } from 'antd';
 import { FiUpload } from 'react-icons/fi';
 
-export default function Review({ onReviewAdded }) {
+export default function Review({ order, onClose, onReviewAdded }) {
     const [openModal, setOpenModal] = useState(false);
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState('');
@@ -72,8 +72,17 @@ export default function Review({ onReviewAdded }) {
             });
 
             if (res?.status === 200) {
-                console.log(res);
-                onReviewAdded(reviewData);
+                const formattedReview = {
+                    id: res.data.id,
+                    createdAt: res.data.createdAt,
+                    delete: false,
+                    productId: productId,
+                    rating: rating,
+                    reviewImages: successfulUrls,
+                    reviewText: reviewText,
+                    user: res.data.user,
+                };
+                onReviewAdded(formattedReview);
                 toast.success('Đánh giá sản phẩm thành công');
                 resetForm();
                 setOpenModal(false);

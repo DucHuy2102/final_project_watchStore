@@ -8,7 +8,7 @@ import {
     InboxOutlined,
     SendOutlined,
 } from '@ant-design/icons';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { CheckCircleFilled } from '@ant-design/icons';
@@ -26,6 +26,10 @@ export default function DashService() {
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -141,7 +145,7 @@ export default function DashService() {
                 img: validUrls,
             };
 
-            const res = await axios.post('/api/service/create-service', submitData, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/service/create-service`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenUser}`,
                 },

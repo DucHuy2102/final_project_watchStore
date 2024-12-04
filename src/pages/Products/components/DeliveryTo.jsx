@@ -253,7 +253,13 @@ export default function DeliveryTo() {
             </div>
 
             {/* Modal change address */}
-            <Modal show={showModalChangeAddress} onClose={() => setShowModalChangeAddress(false)} size='md' popup>
+            <Modal
+                className='backdrop-blur-md'
+                show={showModalChangeAddress}
+                onClose={() => setShowModalChangeAddress(false)}
+                size='md'
+                popup
+            >
                 <Modal.Header />
                 <Modal.Body>
                     <div className='w-full flex flex-col justify-center items-center gap-y-3'>

@@ -79,7 +79,7 @@ export default function Mini_Navbar() {
 
                 {tokenUser ? (
                     <Dropdown
-                        className='w-[8vw]'
+                        className='w-[10vw]'
                         inline
                         arrowIcon={false}
                         label={

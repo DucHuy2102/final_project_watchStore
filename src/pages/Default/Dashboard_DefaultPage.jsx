@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Dashboard_Page, Order_Page, Profile_Page } from '../exportPage';
 import { Mini_Navbar_Component, Sidebar_Component } from '../../components/exportComponent';
+import ReviewModal_OrderCompleted from '../User/components/ReviewModal_OrderCompleted';
 
 export default function Dashboard_DefaultPage() {
     const location = useLocation();
@@ -26,6 +27,7 @@ export default function Dashboard_DefaultPage() {
                     {tab === 'dashboard' && <Dashboard_Page />}
                     {tab === 'profile' && <Profile_Page />}
                     {tab === 'order' && <Order_Page />}
+                    {tab === 'review' && <ReviewModal_OrderCompleted />}
                 </main>
             </div>
         </div>

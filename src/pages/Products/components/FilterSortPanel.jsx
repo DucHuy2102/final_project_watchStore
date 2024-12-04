@@ -212,7 +212,13 @@ export default function FilterSortPanel() {
             </div>
 
             {/* modal filter option */}
-            <Modal show={showModalFilter} onClose={() => setShowModalFilter(false)} size='md' popup>
+            <Modal
+                className='backdrop-blur-md'
+                show={showModalFilter}
+                onClose={() => setShowModalFilter(false)}
+                size='md'
+                popup
+            >
                 <Modal.Header className='pl-6'>Bộ Lọc Nâng Cao</Modal.Header>
                 <Modal.Body>
                     <div className='mb-4'>

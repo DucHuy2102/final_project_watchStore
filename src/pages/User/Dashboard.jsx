@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import OrderDetail from '../Products/OrderDetail';
 
 // Updated MetricCard component
-function MetricCard({ icon, title, value, trend, trendUp }) {
+function MetricCard({ icon, title, value, trend, trendUp, check }) {
     return (
         <Card className='p-8 shadow-lg border-0 rounded-xl bg-white/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300'>
             <div className='flex flex-col space-y-4'>
@@ -18,7 +18,9 @@ function MetricCard({ icon, title, value, trend, trendUp }) {
                     <div className='bg-gray-50 p-3 rounded-xl shadow-sm'>{icon}</div>
                 </div>
 
-                <p className='text-3xl font-bold text-gray-800'>{value}</p>
+                <p className='text-3xl font-bold text-gray-800'>
+                    {value} {!check && 'đơn'}
+                </p>
 
                 <div className={`flex items-center ${trendUp ? 'text-emerald-500' : 'text-rose-500'}`}>
                     <span className='text-sm font-medium'>{trend} so với tháng trước</span>
@@ -59,7 +61,6 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [selectOrder, setSelectOrder] = useState(null);
     const [satistiedOrders, setSatistiedOrders] = useState([]);
-    console.log(satistiedOrders);
 
     // get satisfied
     useEffect(() => {
@@ -107,13 +108,11 @@ export default function Dashboard() {
                 setIsLoading(false);
             }
         };
-        getAllOrders();
-    }, [tokenUser]);
+        if (orders.length === 0) getAllOrders();
+    }, [orders, tokenUser]);
 
-    const orderProcessing = useMemo(() => orders.filter((order) => order.state === 'processing').length, [orders]);
-    const orderDelivery = useMemo(() => orders.filter((order) => order.state === 'delivery').length, [orders]);
-    const orderComplete = useMemo(() => orders.filter((order) => order.state === 'complete').length, [orders]);
-    const orderCancel = useMemo(() => orders.filter((order) => order.state === 'cancel').length, [orders]);
+    const orderComplete = satistiedOrders?.status?.complete || 0;
+    const orderCancel = satistiedOrders?.status?.cancel || 0;
     const totalAmount = useMemo(() => orders.reduce((acc, order) => acc + order.totalPrice, 0), [orders]);
 
     const orderStats = useMemo(
@@ -125,6 +124,65 @@ export default function Dashboard() {
         ],
         [satistiedOrders],
     );
+
+    const monthStats = useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const lastMonth = currentMonth - 1;
+
+        const ordersThisMonth = orders.filter((o) => {
+            const orderDate = new Date(o.createdAt);
+            return orderDate.getMonth() === currentMonth;
+        });
+
+        const ordersLastMonth = orders.filter((o) => {
+            const orderDate = new Date(o.createdAt);
+            return orderDate.getMonth() === lastMonth;
+        });
+
+        const currentMetric = {
+            totalOrders: ordersThisMonth.length,
+            completedOrders: ordersThisMonth.filter((o) => o.state === 'complete').length,
+            canceledOrders: ordersThisMonth.filter((o) => o.state === 'cancel').length,
+            totalAmount: ordersThisMonth.reduce((acc, o) => acc + o.totalPrice, 0),
+        };
+
+        const lastMetric = {
+            totalOrders: ordersLastMonth.length,
+            completedOrders: ordersLastMonth.filter((o) => o.state === 'complete').length,
+            canceledOrders: ordersLastMonth.filter((o) => o.state === 'cancel').length,
+            totalAmount: ordersLastMonth.reduce((acc, o) => acc + o.totalPrice, 0),
+        };
+
+        return {
+            orders: {
+                trend: (((currentMetric.totalOrders - lastMetric.totalOrders) / lastMetric.totalOrders) * 100).toFixed(
+                    1,
+                ),
+                isUp: currentMetric.totalOrders >= lastMetric.totalOrders,
+            },
+            completed: {
+                trend: (
+                    ((currentMetric.completedOrders - lastMetric.completedOrders) / lastMetric.completedOrders) *
+                    100
+                ).toFixed(1),
+                isUp: currentMetric.completedOrders >= lastMetric.completedOrders,
+            },
+            cancelled: {
+                trend: (
+                    ((currentMetric.canceledOrders - lastMetric.canceledOrders) / lastMetric.canceledOrders) *
+                    100
+                ).toFixed(1),
+                isUp: currentMetric.canceledOrders >= lastMetric.canceledOrders,
+            },
+            amount: {
+                trend: (((currentMetric.totalAmount - lastMetric.totalAmount) / lastMetric.totalAmount) * 100).toFixed(
+                    1,
+                ),
+                isUp: currentMetric.totalAmount >= lastMetric.totalAmount,
+            },
+        };
+    }, [orders]);
 
     const recentOrders = useMemo(() => {
         return orders.slice(0, 5).map((order) => ({
@@ -255,29 +313,33 @@ export default function Dashboard() {
                                 icon={<ShoppingCart className='w-8 h-8 text-blue-500' />}
                                 title='Tổng đơn hàng'
                                 value={orders.length}
-                                trend='+12.5%'
-                                trendUp={true}
+                                trend={`${monthStats.orders.trend}%`}
+                                trendUp={monthStats.orders.isUp}
+                                check={false}
                             />
                             <MetricCard
                                 icon={<Package2 className='w-8 h-8 text-green-500' />}
                                 title='Đơn thành công'
-                                value={orderComplete === 0 ? orderComplete : 'Không có'}
-                                trend='+8.2%'
-                                trendUp={true}
+                                value={orderComplete !== 0 ? orderComplete : 'Không có'}
+                                trend={`${monthStats.completed.trend}%`}
+                                trendUp={monthStats.completed.isUp}
+                                check={false}
                             />
                             <MetricCard
                                 icon={<CreditCard className='w-8 h-8 text-purple-500' />}
                                 title='Tổng chi tiêu'
                                 value={totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                trend='+15.3%'
-                                trendUp={true}
+                                trend={`${monthStats.amount.trend}%`}
+                                trendUp={monthStats.amount.isUp}
+                                check={true}
                             />
                             <MetricCard
                                 icon={<CircleX className='w-8 h-8 text-red-500' />}
                                 title='Đơn hàng đã hủy'
-                                value={orderCancel === 0 ? orderCancel.length : 'Không có'}
-                                trend='0%'
-                                trendUp={false}
+                                value={orderCancel !== 0 ? orderCancel : 'Không có'}
+                                trend={`${monthStats.cancelled.trend}%`}
+                                trendUp={monthStats.cancelled.isUp}
+                                check={false}
                             />
                         </div>
                     </div>

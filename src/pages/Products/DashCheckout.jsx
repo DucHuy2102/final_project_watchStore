@@ -713,10 +713,13 @@ export default function DashCheckout() {
     };
 
     // Pass user's province to VoucherModal
-    const userProvince = useMemo(() => ({
-        label: currentUser?.address?.province?.label || '',
-        value: currentUser?.address?.province?.value || null
-    }), [currentUser?.address?.province]);
+    const userProvince = useMemo(
+        () => ({
+            label: currentUser?.address?.province?.label || '',
+            value: currentUser?.address?.province?.value || null,
+        }),
+        [currentUser?.address?.province],
+    );
 
     if (isLoading) {
         return (
@@ -832,7 +835,7 @@ export default function DashCheckout() {
                                     show={showModalEditAddress}
                                     onClose={() => setShowModalEditAddress(false)}
                                     size='md'
-                                    className='!p-0'
+                                    className='!p-0 backdrop-blur-md'
                                     dismissible={false}
                                     autoFocus={false}
                                 >
