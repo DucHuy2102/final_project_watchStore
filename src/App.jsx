@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ScrollToTop, Header_Component, Footer_Component } from './components/exportComponent';
+import { ScrollToTop, Header_Component, Footer_Component, ChatWidget } from './components/exportComponent';
 import {
     Dashboard_DefaultPage,
     DashboardCart_Page,
@@ -83,6 +83,8 @@ export default function App() {
                 </Routes>
                 <Footer_Component />
             </Router>
+
+            <ChatWidget />
 
             {/* toast */}
             <ToastContainer

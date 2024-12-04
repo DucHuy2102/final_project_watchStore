@@ -9,3 +9,4 @@ export { default as ScrollToTop } from './Utils/ScrollToTop';
 export { default as Carousel_Component } from './Utils/Carousel';
 export { default as Breadcrumb_Component } from './Utils/Breadcrumb';
 export { default as Chip_Filter_Component } from './Utils/Chip_Filter';
+export { default as ChatWidget } from './Pages/ChatWidget';
