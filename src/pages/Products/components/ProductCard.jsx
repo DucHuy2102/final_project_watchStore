@@ -9,6 +9,8 @@ import { Tag, Tooltip } from 'antd';
 import { BsCheck, BsArrowLeftRight } from 'react-icons/bs';
 import { toast } from 'react-toastify';
 import { toggleCompareProduct } from '../../../services/redux/slices/compareSlice';
+import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
+import { toggleLikeProduct } from '../../../services/redux/slices/likeProductSlice';
 
 const isLightColor = (hex) => {
     hex = hex.replace('#', '');
@@ -20,6 +22,7 @@ const isLightColor = (hex) => {
 };
 
 export default function ProductCard({ product }) {
+    console.log(product);
     const { id, productName, img, genderUser, style, waterproof, option } = product;
     const handleRenderGenderUser = useMemo(() => {
         return genderUser === 'Nam' ? 'Nam' : 'Nữ';
@@ -36,6 +39,8 @@ export default function ProductCard({ product }) {
     const [selectedColor, setSelectedColor] = useState(option?.[0]?.key);
     const { compareProducts } = useSelector((state) => state.compare);
     const isInCompare = compareProducts?.some((p) => p.id === product.id);
+    const { likedProducts } = useSelector((state) => state.likeProduct);
+    const isLiked = likedProducts?.some((p) => p.id === product.id);
 
     const priceFormat = useCallback((price) => {
         return new Intl.NumberFormat('vi-VN', {
@@ -139,6 +144,11 @@ export default function ProductCard({ product }) {
         dispatch(toggleCompareProduct(product));
     };
 
+    const handleLike = (e) => {
+        e.stopPropagation();
+        dispatch(toggleLikeProduct(product));
+    };
+
     // loading
     if (loadingEffect) {
         return (
@@ -170,7 +180,15 @@ export default function ProductCard({ product }) {
                 </span>
             </div>
 
-            <div className='absolute top-2 right-2 z-20'>
+            <div className='absolute top-2 right-2 z-20 flex gap-2'>
+                <button
+                    onClick={handleLike}
+                    className={`p-2 rounded-full transition-all duration-300 ${
+                        isLiked ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                >
+                    {isLiked ? <AiFillHeart size={20} /> : <AiOutlineHeart size={20} />}
+                </button>
                 <button
                     onClick={handleCompare}
                     className={`p-2 rounded-full transition-all duration-300 ${

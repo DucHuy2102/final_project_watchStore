@@ -4,6 +4,7 @@ import userReducer from './slices/userSlice';
 import cartReducer from './slices/cartSlice';
 import checkoutReducer from './slices/checkoutSlice';
 import compareReducer from './slices/compareSlice';
+import likeProductReducer from './slices/likeProductSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
     cart: cartReducer,
     checkout: checkoutReducer,
     compare: compareReducer,
+    likeProduct: likeProductReducer,
 });
 
 const persistConfig = {

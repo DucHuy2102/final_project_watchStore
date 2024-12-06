@@ -22,3 +22,6 @@ export { default as ListReview } from './Product/ListReview';
 
 // compare
 export { default as CompareDetail } from './Compare/CompareDetail';
+
+// like product
+export { default as LikeProduct } from './LikeProduct/LikeProduct';

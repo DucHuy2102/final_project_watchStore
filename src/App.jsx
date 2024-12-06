@@ -23,7 +23,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getCartUser } from './services/redux/slices/cartSlice';
-import { CompareDetail } from './pages/Products/components/exportCom_Product';
+import { CompareDetail, LikeProduct } from './pages/Products/components/exportCom_Product';
 
 export default function App() {
     // state
@@ -57,6 +57,7 @@ export default function App() {
             <Router>
                 <ScrollToTop />
                 <Header_Component />
+                <LikeProduct />
                 <Routes>
                     {/* route not auth */}
                     <Route path='/' element={<Home_Page />} />

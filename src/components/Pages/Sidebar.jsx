@@ -9,6 +9,7 @@ import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
 import { SlArrowLeft, SlArrowRight } from 'react-icons/sl';
 import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
+import { clearLikedProducts } from '../../services/redux/slices/likeProductSlice';
 
 const SidebarItem = ({ to, icon: Icon, active, showSidebar, children }) => {
     return (
@@ -54,6 +55,7 @@ export default function Sidebar_Component() {
     const handleSignOutAccount = useCallback(async () => {
         dispatch(user_SignOut());
         dispatch(resetCheckout());
+        dispatch(clearLikedProducts());
     }, [dispatch]);
 
     const toggleSidebar = useCallback(() => {
@@ -169,7 +171,7 @@ export default function Sidebar_Component() {
                     </Tooltip>
                 </div>
             </div>
-            
+
             <Modal className='backdrop-blur-md' show={showModal} onClose={() => setShowModal(false)} size='md' popup>
                 <Modal.Header />
                 <Modal.Body>
