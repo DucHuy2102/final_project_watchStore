@@ -9,7 +9,7 @@ import { FaShippingFast } from 'react-icons/fa';
 import { TbLogout2 } from 'react-icons/tb';
 import { SlArrowLeft, SlArrowRight } from 'react-icons/sl';
 import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
-import { clearLikedProducts } from '../../services/redux/slices/likeProductSlice';
+import { clearLikedProducts } from '../../services/redux/slices/productSlice';
 
 const SidebarItem = ({ to, icon: Icon, active, showSidebar, children }) => {
     return (

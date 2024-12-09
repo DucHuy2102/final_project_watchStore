@@ -1,11 +1,11 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from 'flowbite-react';
-import { clearCompare } from '../../../../services/redux/slices/compareSlice';
 import { BsArrowLeft } from 'react-icons/bs';
 import { motion } from 'framer-motion';
 import { Image } from 'antd';
 import { useEffect, useState } from 'react';
+import { clearCompare } from '../../../../services/redux/slices/productSlice';
 
 const priceFormat = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -22,7 +22,7 @@ export default function CompareDetail() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-    const { compareProducts } = useSelector((state) => state.compare);
+    const { compareProducts } = useSelector((state) => state.product);
     console.log(compareProducts);
 
     useEffect(() => {

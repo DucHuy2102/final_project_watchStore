@@ -13,7 +13,7 @@ import { RiCoupon3Fill } from 'react-icons/ri';
 import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout, resetOrderDetail, setOrderDetail } from '../../services/redux/slices/checkoutSlice';
 import { EmptyCheckout, ProductInfo_CheckoutPage, SelectedVoucher, VoucherModal } from './components/exportCom_Product';
-import { clearLikedProducts } from '../../services/redux/slices/likeProductSlice';
+import { clearLikedProducts } from '../../services/redux/slices/productSlice';
 
 const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 

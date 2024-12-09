@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getCartUser } from './services/redux/slices/cartSlice';
 import { CompareDetail, LikeProduct } from './pages/Products/components/exportCom_Product';
+import { getAllProductToSearch } from './services/redux/slices/productSlice';
 
 export default function App() {
     // state
@@ -51,6 +52,21 @@ export default function App() {
         };
         getProductInCart();
     }, [cartTotalQuantity, dispatch, tokenUser]);
+
+    useEffect(() => {
+        const getAllProduct = async () => {
+            try {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/client/get-full-product`);
+                if (res?.status === 200) {
+                    const { data } = res;
+                    dispatch(getAllProductToSearch(data));
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        };
+        getAllProduct();
+    }, [dispatch]);
 
     return (
         <>

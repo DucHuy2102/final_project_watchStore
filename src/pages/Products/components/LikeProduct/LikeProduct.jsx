@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { AiOutlineClose, AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
-import { toggleLikeProduct, clearLikedProducts } from '../../../../services/redux/slices/likeProductSlice';
+import { toggleLikeProduct, clearLikedProducts } from '../../../../services/redux/slices/productSlice';
 import { useNavigate } from 'react-router-dom';
 import { Button, Modal } from 'flowbite-react';
 import { useState } from 'react';
@@ -9,7 +9,7 @@ import { useState } from 'react';
 export default function LikeProduct() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { likedProducts } = useSelector((state) => state.likeProduct);
+    const { likedProducts } = useSelector((state) => state.product);
     const [showClearModal, setShowClearModal] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
 

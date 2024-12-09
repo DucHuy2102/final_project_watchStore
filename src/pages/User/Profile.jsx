@@ -15,7 +15,7 @@ import { PasswordStrengthMeter } from '../Auth/components/exportCom_Auth';
 import { resetCart } from '../../services/redux/slices/cartSlice';
 import { resetCheckout } from '../../services/redux/slices/checkoutSlice';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
-import { clearLikedProducts } from '../../services/redux/slices/likeProductSlice';
+import { clearLikedProducts } from '../../services/redux/slices/productSlice';
 
 const handleUploadToCloudinary = async (file) => {
     if (!file) return null;

@@ -22,8 +22,10 @@ export default function Header_Component() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [showMobileSearch, setShowMobileSearch] = useState(false);
     const searchRef = useRef(null);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const { allProduct } = useSelector((state) => state.product);
+    const showSuggestionsRef = useRef(null);
 
     // handle sign out account
     const handleSignOutAccount = () => {
@@ -49,19 +51,32 @@ export default function Header_Component() {
         const urlParams = new URLSearchParams(location.search);
         urlParams.set('q', searchTerm);
         const newSearchTerm = urlParams.toString();
+        setShowSuggestions(false);
         navigate(`/products?${newSearchTerm}`);
     };
 
+    const getSearchSuggestions = () => {
+        if (!searchTerm.trim()) return [];
+
+        return allProduct
+            .filter(
+                (product) =>
+                    product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.brand.toLowerCase().includes(searchTerm.toLowerCase()),
+            )
+            .slice(0, 5);
+    };
+
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchRef.current && !searchRef.current.contains(event.target)) {
-                setShowMobileSearch(false);
+        const handleClickOutside = (e) => {
+            if (showSuggestionsRef.current && !showSuggestionsRef.current.contains(e.target)) {
+                setShowSuggestions(false);
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        window.addEventListener('mousedown', handleClickOutside);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            window.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 
@@ -81,7 +96,7 @@ export default function Header_Component() {
             {/* Logo */}
             <Link
                 to='/'
-                className='self-center tracking-wider outline-none whitespace-nowrap text-2xl sm:text-3xl font-bold hover:scale-105 transition-transform duration-300'
+                className='self-center tracking-wider outline-none whitespace-nowrap text-xl sm:text-2xl md:text-3xl font-bold hover:scale-105 transition-transform duration-300'
             >
                 <span
                     className='bg-clip-text text-transparent bg-gradient-to-r animate-gradient-x
@@ -99,134 +114,162 @@ export default function Header_Component() {
                 </span>
             </Link>
 
-            {/* Desktop search */}
-            <form onSubmit={handleSearch}>
-                <TextInput
-                    type='text'
-                    placeholder='Tìm kiếm...'
-                    rightIcon={AiOutlineSearch}
-                    className='hidden lg:inline-block lg:w-96 rounded-full shadow-sm hover:shadow-md transition-shadow duration-300'
-                    value={searchTerm ?? ''}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </form>
-
-            {/* Mobile search */}
-            <div className='md:hidden ml-14'>
-                <Button
-                    className='rounded-full w-10 focus:!ring-0'
-                    onClick={() => {
-                        setShowMobileSearch(!showMobileSearch);
-                    }}
-                >
-                    <AiOutlineSearch size={20} />
-                </Button>
+            {/* search */}
+            <div className='relative'>
+                <div className='hidden lg:block w-full max-w-sm' ref={showSuggestionsRef}>
+                    <form onSubmit={handleSearch}>
+                        <TextInput
+                            type='text'
+                            placeholder='Tìm kiếm...'
+                            rightIcon={AiOutlineSearch}
+                            className='rounded-full shadow-sm hover:shadow-md transition-shadow duration-300'
+                            style={{
+                                border: '0.5px solid #E0E0E0',
+                                outline: 'none',
+                                width: '25vw',
+                            }}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
+                                setShowSuggestions(true);
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                        />
+                    </form>
+                    {showSuggestions && searchTerm && (
+                        <div className='absolute w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50'>
+                            <h2 className='text-lg font-medium text-gray-800 dark:text-gray-200 px-5 py-2 border-b border-gray-100 dark:border-gray-700'>
+                                Kết quả tìm kiếm
+                            </h2>
+                            {getSearchSuggestions().length !== 0 ? (
+                                getSearchSuggestions().map((product) => (
+                                    <div
+                                        key={product.id}
+                                        className='p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer'
+                                        onClick={() => {
+                                            navigate(`/product-detail/${product.id}`);
+                                            setShowSuggestions(false);
+                                            setSearchTerm('');
+                                        }}
+                                    >
+                                        <div className='flex items-center gap-4 group'>
+                                            <div className='w-20 h-20 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300'>
+                                                <img
+                                                    src={product.img[0]}
+                                                    alt={product.productName}
+                                                    className='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500'
+                                                />
+                                            </div>
+                                            <div className='flex-1'>
+                                                <p className='text-sm font-medium text-gray-800 dark:text-gray-200 mb-1 line-clamp-2'>
+                                                    {product.productName}
+                                                </p>
+                                                <p className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+                                                    Thương hiệu: {product.brand}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className='p-4 text-center text-gray-500 dark:text-gray-400'>
+                                    Không tìm thấy sản phẩm phù hợp
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Mobile search */}
-            {showMobileSearch && (
-                <form ref={searchRef} onSubmit={handleSearch} className='w-full mt-2'>
-                    <TextInput
-                        type='text'
-                        placeholder='Tìm kiếm...'
-                        rightIcon={AiOutlineSearch}
-                        className='w-full'
-                        value={searchTerm ?? ''}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </form>
-            )}
-
-            {!showMobileSearch && (
-                <div className='flex gap-x-4 md:order-2'>
-                    <Button
-                        onClick={() => dispatch(toggleTheme())}
-                        color={theme === 'light' ? 'light' : 'dark'}
-                        pill
-                        className='focus:!ring-0 hover:scale-110 active:scale-95 transition-all duration-300 relative overflow-hidden 
+            {/* buttons: theme and user */}
+            <div className='flex gap-x-4 md:order-2'>
+                <Button
+                    onClick={() => dispatch(toggleTheme())}
+                    color={theme === 'light' ? 'light' : 'dark'}
+                    pill
+                    className='focus:!ring-0 hover:scale-110 active:scale-95 transition-all duration-300 relative overflow-hidden 
     hover:shadow-md dark:hover:shadow-blue-500/30 hover:shadow-amber-500/30 
     group bg-gradient-to-br from-amber-100 to-amber-50 dark:from-blue-900 dark:to-blue-950'
-                    >
-                        <div
-                            className='absolute inset-0 bg-gradient-to-br from-amber-200 to-amber-100 dark:from-blue-800 dark:to-blue-900 
+                >
+                    <div
+                        className='absolute inset-0 bg-gradient-to-br from-amber-200 to-amber-100 dark:from-blue-800 dark:to-blue-900 
         opacity-0 group-hover:opacity-100 transition-opacity duration-300'
-                        />
-                        {theme === 'light' ? (
-                            <FaSun
-                                size={16}
-                                className='text-amber-500 mt-[3px] relative z-10 animate-spin-slow 
+                    />
+                    {theme === 'light' ? (
+                        <FaSun
+                            size={16}
+                            className='text-amber-500 mt-[3px] relative z-10 animate-spin-slow 
             group-hover:animate-pulse group-hover:text-amber-600 transition-colors duration-300'
-                            />
-                        ) : (
-                            <FaMoon
-                                size={16}
-                                className='text-blue-500 mt-[3px] relative z-10 animate-bounce-slow 
-            group-hover:animate-pulse group-hover:text-blue-400 transition-colors duration-300'
-                            />
-                        )}
-                    </Button>
-
-                    {tokenUser ? (
-                        <Dropdown
-                            className='mt-[2px]'
-                            inline
-                            arrowIcon={false}
-                            label={
-                                <div className='w-10 h-10 ring-1 ring-gray-200 dark:ring-gray-700 rounded-full hover:ring-amber-500 dark:hover:ring-blue-500 transition-all duration-300 hover:scale-105'>
-                                    <img
-                                        src={avatarUser}
-                                        alt='Avatar_User'
-                                        className='object-cover w-full h-full rounded-full shadow-sm'
-                                    />
-                                </div>
-                            }
-                        >
-                            <Dropdown.Header className='cursor-pointer bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 p-2'>
-                                <Link
-                                    to={'/dashboard?tab=dashboard'}
-                                    className='block text-center text-xs font-semibold tracking-wide text-amber-800 dark:text-blue-400 hover:text-amber-600 dark:hover:text-blue-300 transition-colors duration-300'
-                                >
-                                    {currentUser?.username}
-                                </Link>
-                            </Dropdown.Header>
-                            <div className='p-1 bg-white dark:bg-gray-900'>
-                                <Dropdown.Item
-                                    onClick={() => navigate('/dashboard?tab=profile')}
-                                    className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
-                                >
-                                    <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
-                                        Trang cá nhân
-                                    </div>
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                    onClick={() => navigate('/dashboard?tab=order')}
-                                    className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
-                                >
-                                    <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
-                                        Đơn hàng
-                                    </div>
-                                </Dropdown.Item>
-                                <Dropdown.Divider className='my-1 border-amber-200/50 dark:border-gray-700' />
-                                <Dropdown.Item
-                                    className='flex justify-center items-center hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all duration-300'
-                                    onClick={handleSignOutAccount}
-                                >
-                                    <span className='font-medium py-1.5 px-3 w-full text-xs text-center text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300'>
-                                        Đăng xuất
-                                    </span>
-                                </Dropdown.Item>
-                            </div>
-                        </Dropdown>
+                        />
                     ) : (
-                        <Link to='/login' className='ml-2'>
-                            <Button pill outline className='focus:!ring-0'>
-                                Đăng nhập
-                            </Button>
-                        </Link>
+                        <FaMoon
+                            size={16}
+                            className='text-blue-500 mt-[3px] relative z-10 animate-bounce-slow 
+            group-hover:animate-pulse group-hover:text-blue-400 transition-colors duration-300'
+                        />
                     )}
-                    <Navbar.Toggle />
-                </div>
-            )}
+                </Button>
+
+                {tokenUser ? (
+                    <Dropdown
+                        className='mt-[2px]'
+                        inline
+                        arrowIcon={false}
+                        label={
+                            <div className='w-10 h-10 ring-1 ring-gray-200 dark:ring-gray-700 rounded-full hover:ring-amber-500 dark:hover:ring-blue-500 transition-all duration-300 hover:scale-105'>
+                                <img
+                                    src={avatarUser}
+                                    alt='Avatar_User'
+                                    className='object-cover w-full h-full rounded-full shadow-sm'
+                                />
+                            </div>
+                        }
+                    >
+                        <Dropdown.Header className='cursor-pointer bg-gradient-to-r from-amber-50 to-amber-100 dark:from-gray-800 dark:to-gray-900 p-2'>
+                            <Link
+                                to={'/dashboard?tab=dashboard'}
+                                className='block text-center text-xs font-semibold tracking-wide text-amber-800 dark:text-blue-400 hover:text-amber-600 dark:hover:text-blue-300 transition-colors duration-300'
+                            >
+                                {currentUser?.username}
+                            </Link>
+                        </Dropdown.Header>
+                        <div className='p-1 bg-white dark:bg-gray-900'>
+                            <Dropdown.Item
+                                onClick={() => navigate('/dashboard?tab=profile')}
+                                className='flex justify-center `items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                            >
+                                <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
+                                    Trang cá nhân
+                                </div>
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                                onClick={() => navigate('/dashboard?tab=order')}
+                                className='flex justify-center items-center hover:bg-amber-50 dark:hover:bg-gray-800 rounded-md transition-all duration-300'
+                            >
+                                <div className='font-medium py-1.5 px-3 w-full text-xs text-center text-gray-700 dark:text-gray-300'>
+                                    Đơn hàng
+                                </div>
+                            </Dropdown.Item>
+                            <Dropdown.Divider className='my-1 border-amber-200/50 dark:border-gray-700' />
+                            <Dropdown.Item
+                                className='flex justify-center items-center hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-all duration-300'
+                                onClick={handleSignOutAccount}
+                            >
+                                <span className='font-medium py-1.5 px-3 w-full text-xs text-center text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-300'>
+                                    Đăng xuất
+                                </span>
+                            </Dropdown.Item>
+                        </div>
+                    </Dropdown>
+                ) : (
+                    <Link to='/login' className='ml-2'>
+                        <Button pill outline className='focus:!ring-0'>
+                            Đăng nhập
+                        </Button>
+                    </Link>
+                )}
+                <Navbar.Toggle />
+            </div>
 
             {/* Navbar */}
             <Navbar.Collapse className='md:inline-block'>

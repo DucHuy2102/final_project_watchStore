@@ -93,8 +93,8 @@ export default function FilterModal({ show, onClose, selectedFilters, onRemoveFi
     );
 
     return (
-        <Modal show={show} onClose={onClose} size='6xl'>
-            <div className='p-6 space-y-4'>
+        <Modal show={show} onClose={onClose} size='6xl' popup>
+            <div className='px-6 py-5 space-y-1'>
                 {header}
 
                 {/* body */}

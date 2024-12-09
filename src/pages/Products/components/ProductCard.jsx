@@ -8,9 +8,8 @@ import { setProductToCheckout } from '../../../services/redux/slices/checkoutSli
 import { Tag, Tooltip } from 'antd';
 import { BsCheck, BsArrowLeftRight } from 'react-icons/bs';
 import { toast } from 'react-toastify';
-import { toggleCompareProduct } from '../../../services/redux/slices/compareSlice';
 import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
-import { toggleLikeProduct } from '../../../services/redux/slices/likeProductSlice';
+import { toggleCompareProduct, toggleLikeProduct } from '../../../services/redux/slices/productSlice';
 
 const isLightColor = (hex) => {
     hex = hex.replace('#', '');
@@ -37,9 +36,9 @@ export default function ProductCard({ product }) {
     const [quantity, setQuantity] = useState(1);
     const [loadingEffect, setLoadingEffect] = useState(false);
     const [selectedColor, setSelectedColor] = useState(option?.[0]?.key);
-    const { compareProducts } = useSelector((state) => state.compare);
+    const { compareProducts } = useSelector((state) => state.product);
     const isInCompare = compareProducts?.some((p) => p.id === product.id);
-    const { likedProducts } = useSelector((state) => state.likeProduct);
+    const { likedProducts } = useSelector((state) => state.product);
     const isLiked = likedProducts?.some((p) => p.id === product.id);
 
     const priceFormat = useCallback((price) => {

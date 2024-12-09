@@ -15,6 +15,15 @@ const SORT_OPTIONS = [
     { value: 'z-a', label: 'Từ Z - A', icon: 'Z' },
 ];
 
+const PRICE_RANGES = [
+    { key: 'price', value: '0-1000000', label: 'Dưới 1 triệu' },
+    { key: 'price', value: '1000000-3000000', label: '1 - 3 triệu' },
+    { key: 'price', value: '3000000-5000000', label: '3 - 5 triệu' },
+    { key: 'price', value: '5000000-10000000', label: '5 - 10 triệu' },
+    { key: 'price', value: '10000000-999999999', label: 'Trên 10 triệu' },
+    { key: 'price', value: '20000000-9999999999', label: 'Trên 20 triệu' },
+];
+
 export default function DashboardProduct() {
     // states
     const [searchParams, setSearchParams] = useSearchParams();
@@ -73,9 +82,11 @@ export default function DashboardProduct() {
                 choices: [
                     { key: 'gender', value: 'Nữ', label: 'Đồng hồ nữ' },
                     { key: 'gender', value: 'Nam', label: 'Đồng hồ nam' },
-                    { key: 'gender', value: 'Thiếu nhi', label: 'Đồng hồ thiếu nhi' },
-                    { key: 'gender', value: 'Tất cả', label: 'Tất cả đối tượng' },
                 ],
+            },
+            {
+                title: 'Khoảng giá',
+                choices: PRICE_RANGES,
             },
             {
                 title: 'Chất liệu dây',
@@ -163,10 +174,16 @@ export default function DashboardProduct() {
             const filterGroups = {};
             filters.forEach((filter) => {
                 if (filter?.value.trim()) {
-                    if (!filterGroups[filter.key]) {
-                        filterGroups[filter.key] = new Set();
+                    if (filter.key === 'price') {
+                        const [min, max] = filter.value.split('-');
+                        newSearchParams.set('minPrice', min);
+                        newSearchParams.set('maxPrice', max);
+                    } else {
+                        if (!filterGroups[filter.key]) {
+                            filterGroups[filter.key] = new Set();
+                        }
+                        filterGroups[filter.key].add(filter.value.trim());
                     }
-                    filterGroups[filter.key].add(filter.value.trim());
                 }
             });
 
@@ -178,7 +195,12 @@ export default function DashboardProduct() {
             });
 
             searchParams.forEach((value, key) => {
-                if (key !== 'pageNum' && !FILTER_OPTIONS.some((option) => option.choices[0].key === key)) {
+                if (
+                    key !== 'pageNum' &&
+                    key !== 'minPrice' &&
+                    key !== 'maxPrice' &&
+                    !FILTER_OPTIONS.some((option) => option.choices[0].key === key)
+                ) {
                     newSearchParams.set(key, value);
                 }
             });
@@ -233,14 +255,19 @@ export default function DashboardProduct() {
                 </div>
 
                 {selectedFilters.length !== 0 ? (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-sm lg:text-xl pl-20'>
-                        <span className='text-blue-500 font-bold text-lg lg:text-2xl'>{totalProducts}</span> sản phẩm
-                        khớp với bộ lọc
+                    <span className='text-gray-700 dark:text-gray-100 font-normal text-sm lg:text-xl pl-20 tracking-wide'>
+                        <span className='text-blue-600 font-bold text-lg lg:text-2xl italic'>
+                            {totalProducts.toLocaleString()}
+                        </span>{' '}
+                        sản phẩm phù hợp
                     </span>
                 ) : (
-                    <span className='text-gray-600 dark:text-gray-200 font-semibold text-sm lg:text-xl pl-20'>
-                        Tất cả <span className='text-blue-500 font-bold text-lg lg:text-2xl'>{totalProducts}</span> sản
-                        phẩm
+                    <span className='text-gray-700 dark:text-gray-100 font-normal text-sm lg:text-xl pl-20 tracking-wide'>
+                        Tổng cộng{' '}
+                        <span className='text-blue-600 font-bold text-lg lg:text-2xl italic'>
+                            {totalProducts.toLocaleString()}
+                        </span>{' '}
+                        sản phẩm
                     </span>
                 )}
 

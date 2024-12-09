@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { Button } from 'flowbite-react';
-import { clearCompare } from '../../../../services/redux/slices/compareSlice';
+import { clearCompare } from '../../../../services/redux/slices/productSlice';
 import { BsX, BsArrowRight } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,7 +10,7 @@ export default function DashCompare() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(true);
-    const { compareProducts } = useSelector((state) => state.compare);
+    const { compareProducts } = useSelector((state) => state.product);
 
     if (compareProducts.length === 0) return null;
 
