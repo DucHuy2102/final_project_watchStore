@@ -6,7 +6,7 @@ const policyData = [
     },
     {
         img: 'https://casio-hcm.vn/wp-content/uploads/2024/03/guarantee.png',
-        title: 'bảo hành tận nơi',
+        title: 'bảo hành',
         subtitle: 'toàn quốc',
     },
     {
@@ -16,8 +16,8 @@ const policyData = [
     },
     {
         img: 'https://casio-hcm.vn/wp-content/uploads/2024/03/low-battery.png',
-        title: 'thay pin miễn phí',
-        subtitle: 'trọn đời',
+        title: 'thay pin',
+        subtitle: 'miễn phí',
     },
     {
         img: 'https://casio-hcm.vn/wp-content/uploads/2024/03/discount.png',
@@ -31,7 +31,7 @@ export default function Policy() {
         <div className='my-16 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
             <div className='relative mb-12 text-3xl sm:text-4xl text-center font-bold uppercase'>
                 <span
-                    className='relative z-10 bg-white dark:bg-[rgb(16,32,42)] px-6 inline-block
+                    className='relative z-10 bg-white dark:bg-[rgb(16,32,42)] px-6 py-1 inline-block
             bg-clip-text text-transparent bg-gradient-to-r from-gray-800 to-gray-600 
             dark:from-gray-100 dark:to-gray-300'
                 >
@@ -50,10 +50,6 @@ export default function Policy() {
                     hover:border-gray-200 dark:hover:border-gray-600'
                         >
                             <div className='relative group'>
-                                <div
-                                    className='absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 
-                            rounded-full opacity-0 group-hover:opacity-100 transition duration-500 blur'
-                                ></div>
                                 <img
                                     src={item.img}
                                     className='relative h-16 w-16 object-cover transition-all duration-300 

@@ -30,7 +30,7 @@ export default function TheReviews() {
                         {
                             review: 'Dịch vụ và sản phẩm đều xuất sắc. Giá cả hợp lý và nhân viên tư vấn rất thân thiện. WatcHes thực sự là sự lựa chọn tốt!',
                             name: 'Nguyễn Tấn Công',
-                            location: 'Hồ Chí Minh',
+                            location: 'TP. Hồ Chí Minh',
                         },
                     ].map((item, index) => (
                         <div

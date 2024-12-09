@@ -14,6 +14,47 @@ import { toast } from 'react-toastify';
 import { CheckCircleFilled } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 
+const SHOP_INFO_DATA = [
+    {
+        title: 'Giờ làm việc',
+        data: [
+            { title: 'Thứ 2 - Thứ 6', content: '8:00 - 20:00' },
+            { title: 'Thứ 7 - Chủ nhật', content: '9:00 - 17:00' },
+        ],
+    },
+    {
+        title: 'Liên hệ với chúng tôi',
+        data: [
+            { title: 'Hotline', content: '1900 1234' },
+            { title: 'Email', content: 'support@watches.vn' },
+        ],
+    },
+];
+
+const SHOP_INFO = ({ title, data }) => {
+    return (
+        <div className='space-y-5'>
+            <div>
+                <h4 className='font-medium bg-gradient-to-r from-amber-700 to-amber-600 text-transparent bg-clip-text text-lg'>
+                    {title}
+                </h4>
+                <div className='w-24 h-px bg-gradient-to-r from-amber-500 to-amber-300' />
+            </div>
+            <ul className='space-y-4'>
+                {data?.map((item, index) => (
+                    <li
+                        key={index}
+                        className='cursor-pointer p-4 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'
+                    >
+                        <p className='text-sm text-amber-700 font-bold mb-1'>{item.title}</p>
+                        <p className='text-amber-800 font-medium tracking-wide'>{item.content}</p>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
 export default function DashService() {
     const { access_token: tokenUser } = useSelector((state) => state.user);
     const [formData, setFormData] = useState({
@@ -27,9 +68,9 @@ export default function DashService() {
     const [loading, setLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
-    useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, []);
+    // useEffect(() => {
+    //     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // }, []);
 
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -201,11 +242,25 @@ export default function DashService() {
                     <div className='max-w-6xl mx-auto px-4 lg:px-8'>
                         <div className='bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-md mb-8 max-w-3xl mx-auto'>
                             <p className='text-lg italic text-gray-700 leading-relaxed'>
-                                Trung tâm sửa chữa Watc
-                                <span className='text-yellow-500 font-medium'>H</span>es - Chuyên sửa đồng hồ đeo tay
-                                chính hãng máy Quartz, cơ (automatic),… tất cả các thương hiệu và dịch vụ. Bảng giá rõ
-                                ràng, uy tín, bảo hành lên đến 12 tháng do thợ lâu năm thực hiện với sự bảo đảm bằng
-                                100% máy móc chuyên dụng nhập khẩu Thụy Sỹ.
+                                Cửa hàng đồng hồ{' '}
+                                <span
+                                    className='text-amber-600 font-semibold tracking-wide 
+                                    bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent'
+                                >
+                                    WatcHes
+                                </span>{' '}
+                                - Chuyên cung cấp các dòng đồng hồ phù hợp với nhiều khách hàng, cùng với nhiều sản phẩm
+                                nhập khẩu chính hãng và chế độ bảo hành lên đến{' '}
+                                <span className='font-semibold text-amber-700'>24 tháng</span>. Cửa hàng cam kết mang
+                                lại trải nghiệm mua sắm thoải mái và dịch vụ chăm sóc khách hàng tận tâm, đảm bảo bạn
+                                nhận được sự tư vấn rõ ràng, chu đáo từ những nhân viên chuyên nghiệp. Hãy đến với{' '}
+                                <span
+                                    className='text-amber-600 font-semibold tracking-wide 
+                                    bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent'
+                                >
+                                    WatcHes
+                                </span>{' '}
+                                để tìm chiếc đồng hồ phù hợp, khẳng định phong cách và sự đẳng cấp của bạn!
                             </p>
                         </div>
 
@@ -236,43 +291,9 @@ export default function DashService() {
                                         Thông tin liên hệ
                                     </h3>
                                     <div className='grid grid-cols-2 gap-8'>
-                                        <div className='space-y-5'>
-                                            <h4 className='font-medium text-gray-800 mb-4 text-lg'>Giờ làm việc</h4>
-                                            <ul className='space-y-4'>
-                                                <li className='flex justify-between items-center p-2 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'>
-                                                    <span className='text-gray-800 font-medium'>Thứ 2 - Thứ 6</span>
-                                                    <span className='text-amber-700 font-semibold'>8:00 - 20:00</span>
-                                                </li>
-                                                <li className='flex justify-between items-center p-4 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'>
-                                                    <span className='text-gray-800 font-medium'>Thứ 7</span>
-                                                    <span className='text-amber-700 font-semibold'>8:30 - 17:30</span>
-                                                </li>
-                                                <li className='flex justify-between items-center p-4 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'>
-                                                    <span className='text-gray-800 font-medium'>Chủ nhật</span>
-                                                    <span className='text-amber-700 font-semibold'>9:00 - 16:00</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-
-                                        <div className='space-y-6'>
-                                            <h4 className='font-medium text-gray-800 mb-4 text-lg'>
-                                                Thông tin liên lạc
-                                            </h4>
-                                            <ul className='space-y-4'>
-                                                <li className='cursor-pointer p-4 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'>
-                                                    <p className='text-sm text-gray-500 font-medium mb-1'>Hotline</p>
-                                                    <p className='text-gray-800 font-semibold tracking-wide'>
-                                                        1900 1234
-                                                    </p>
-                                                </li>
-                                                <li className='cursor-pointer p-4 rounded-xl hover:bg-gradient-to-r hover:from-amber-50 hover:to-transparent transition-all duration-300 border border-transparent hover:border-amber-100/50'>
-                                                    <p className='text-sm text-gray-500 font-medium mb-1'>Email</p>
-                                                    <p className='text-gray-800 font-semibold tracking-wide'>
-                                                        support@watches.vn
-                                                    </p>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        {SHOP_INFO_DATA.map((item, index) => (
+                                            <SHOP_INFO key={index} title={item.title} data={item.data} />
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -351,7 +372,7 @@ export default function DashService() {
                                                     onClick={() => handleTypeChange('feedback')}
                                                 >
                                                     <MessageOutlined className='mr-2' />
-                                                    Phản ánh
+                                                    Phản Ánh & Góp Ý
                                                 </Button>
                                                 <Button
                                                     type={formData.type === 'return' ? 'primary' : 'default'}
@@ -364,13 +385,13 @@ export default function DashService() {
                                                     onClick={() => handleTypeChange('return')}
                                                 >
                                                     <SwapOutlined className='mr-2' />
-                                                    Đổi trả hàng
+                                                    Yêu Cầu Tư Vấn
                                                 </Button>
                                             </div>
 
                                             <Input.TextArea
                                                 rows={3}
-                                                placeholder='Lý do phản ánh hoặc đổi trả...'
+                                                placeholder='Mời bạn nhập nội dung để chúng tôi phản hồi chính xác'
                                                 name='message'
                                                 value={formData.message}
                                                 onChange={handleInputChange}

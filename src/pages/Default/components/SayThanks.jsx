@@ -19,7 +19,7 @@ const SayThanks = () => {
                         Những điều nhỏ bé{' '}
                         <span
                             className='font-semibold italic bg-clip-text text-transparent 
-                    bg-gradient-to-r from-gray-700 via-gray-500 to-gray-700 
+                    bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 
                     dark:from-gray-300 dark:to-gray-100'
                         >
                             WatcHes

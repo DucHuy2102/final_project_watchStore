@@ -1,4 +1,4 @@
-import { Button, Label, Spinner, TextInput } from 'flowbite-react';
+import { Button, Label, Modal, Spinner, TextInput } from 'flowbite-react';
 import { useState } from 'react';
 import { CiLogin } from 'react-icons/ci';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -17,6 +17,8 @@ export default function Login() {
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [loadingState, setLoadingState] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+    const [count, setCount] = useState(0);
+    const [modalShow, setModalShow] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { state } = useLocation();
@@ -61,6 +63,11 @@ export default function Login() {
             } else {
                 setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
             }
+            const countFailedAttempts = count + 1;
+            setCount(countFailedAttempts);
+            if (countFailedAttempts >= 3) {
+                setModalShow(true);
+            }
             setFormData({ username: '', password: '' });
             toast.error(errorMessage);
             console.log(error);
@@ -98,11 +105,37 @@ export default function Login() {
             }
         } catch (error) {
             console.log(error);
+            toast.error('Đã xảy ra lỗi, vui lòng thử lại sau!');
         }
     };
 
     return (
         <div className='w-full h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800'>
+            <Modal show={modalShow} onClose={() => setModalShow(false)} popup className='backdrop-blur-md' size='md'>
+                <Modal.Header />
+                <Modal.Body className='p-y-4 space-y-5'>
+                    <div className='text-center'>
+                        <h2 className='text-2xl font-bold text-gray-800 dark:text-white'>Bạn đã nhập sai 3 lần</h2>
+                        <p className='text-sm text-gray-600 dark:text-gray-400'>Bạn có muốn đặt lại mật khẩu không?</p>
+                    </div>
+                    <div className='flex justify-between gap-4'>
+                        <Button color='gray' onClick={() => setModalShow(false)} className='w-32 !ring-0'>
+                            Hủy
+                        </Button>
+                        <Button
+                            color='failure'
+                            onClick={() => {
+                                navigate('/forgot-password');
+                                setModalShow(false);
+                            }}
+                            className='w-32 !ring-0'
+                        >
+                            Xác nhận
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
+
             <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-10 relative'>
                 <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
                     <div className='absolute top-6 left-6'>
