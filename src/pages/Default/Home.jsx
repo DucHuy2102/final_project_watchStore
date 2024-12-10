@@ -14,7 +14,7 @@ export default function Home() {
 
     useEffect(() => {
         const toggleScrollToTop = () => {
-            if (window.scrollY > 500) {
+            if (window.scrollY > 300) {
                 setIsVisible(true);
             } else {
                 setIsVisible(false);
@@ -87,17 +87,12 @@ export default function Home() {
             {isVisible && (
                 <button
                     onClick={scrollToTop}
-                    className='fixed bottom-40 right-7 p-4 bg-white dark:bg-gray-800 
+                    className='fixed bottom-32 right-6 p-4 bg-amber-500 dark:bg-gray-800 
                     rounded-full shadow-lg hover:shadow-2xl transform hover:scale-110 
-                    transition-all duration-300 z-50 group border border-gray-200 
-                    dark:border-gray-700'
+                    transition-all duration-300 z-50 group dark:border border-gray-600'
                     aria-label='Scroll to top'
                 >
-                    <FiArrowUp
-                        className='w-6 h-6 text-gray-600 dark:text-gray-300 
-                        group-hover:text-blue-600 dark:group-hover:text-blue-400 
-                        transition-colors duration-300'
-                    />
+                    <FiArrowUp className='w-6 h-6 text-white' />
                 </button>
             )}
         </div>

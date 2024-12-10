@@ -11,7 +11,7 @@ const Carousel = () => {
             spaceBetween={0}
             modules={[Navigation, Autoplay]}
             autoplay={{ delay: 4000 }}
-            className='sm:h-[90vh] sm:w-full shadow-lg rounded-md'
+            className='sm:h-[90vh] sm:w-full shadow-lg rounded-lg'
         >
             <SwiperSlide>
                 <img src={'../assets/slide_01.jpg'} alt='Image' className={styleImage} />

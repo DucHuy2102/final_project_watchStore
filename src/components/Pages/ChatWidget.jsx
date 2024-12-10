@@ -13,16 +13,16 @@ export default function ChatWidget() {
     const chatOptions = [
         {
             id: 1,
-            title: 'Chat với nhân viên',
+            title: 'Chat trên Zalo',
             icon: <img src={'./assets/zalo.png'} alt='Zalo' className='w-6 h-6' />,
             link: `https://zalo.me/${import.meta.env.VITE_ZALO_ID}`,
         },
-        {
-            id: 2,
-            title: 'Yêu cầu gọi lại',
-            icon: <CgPhone className='text-blue-600 w-5 h-5 group-hover:text-white transition-all duration-200' />,
-            link: 'tel:your-phone-number',
-        },
+        // {
+        //     id: 2,
+        //     title: 'Yêu cầu gọi lại',
+        //     icon: <CgPhone className='text-blue-600 w-5 h-5 group-hover:text-white transition-all duration-200' />,
+        //     link: 'tel:your-phone-number',
+        // },
     ];
 
     useEffect(() => {
@@ -77,7 +77,7 @@ export default function ChatWidget() {
                 {isOpen ? <IoMdClose className='text-2xl' /> : <FaRocketchat className='text-2xl' />}
             </button>
 
-            <Modal show={modalTele} onClose={() => setModalTele(false)} popup size={'md'} className='backdrop-blur-sm'>
+            {/* <Modal show={modalTele} onClose={() => setModalTele(false)} popup size={'md'} className='backdrop-blur-sm'>
                 <Modal.Header />
                 <Modal.Body className='px-6 pb-8'>
                     <div className='flex flex-col items-center gap-6'>
@@ -96,13 +96,17 @@ export default function ChatWidget() {
                                 placeholder='Nhập số điện thoại'
                                 className='py-2.5 text-lg rounded-lg shadow-sm border-gray-300 focus:border-blue-500 focus:ring-blue-500'
                             />
+                            <p className='text-gray-600 text-sm text-center leading-relaxed max-w-md'>
+                                Gọi Hotline tư vấn miễn phí{' '}
+                                <span className='font-bold text-blue-500'>039 484 9668</span>
+                            </p>
                             <Button type='primary' color={'blue'} className='w-full py-2.5'>
                                 Gửi yêu cầu
                             </Button>
                         </div>
                     </div>
                 </Modal.Body>
-            </Modal>
+            </Modal> */}
         </div>
     );
 }

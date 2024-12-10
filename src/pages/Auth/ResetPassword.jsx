@@ -1,15 +1,15 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
-import { Button, Label, Spinner, TextInput } from 'flowbite-react';
+import { Button, Spinner } from 'flowbite-react';
 import { TfiHandPointRight } from 'react-icons/tfi';
-import { IoIosSend } from 'react-icons/io';
+import { IoIosHome, IoIosSend } from 'react-icons/io';
 import { toast } from 'react-toastify';
-import { GoLock } from 'react-icons/go';
+import { FaLock } from 'react-icons/fa';
 import { PasswordStrengthMeter } from './components/exportCom_Auth';
 import axios from 'axios';
+import { Input } from 'antd';
 
 export default function ResetPassword() {
-    // state
     const [password, setPassword] = useState('');
     const [verifyPassword, setVerifyPassword] = useState('');
     const [passwordStrength, setPasswordStrength] = useState(0);
@@ -17,7 +17,6 @@ export default function ResetPassword() {
     const { token } = useParams();
     const navigate = useNavigate();
 
-    // get strength of password
     const getStrength = (pass) => {
         let strength = 0;
         if (pass.length >= 6) strength++;
@@ -27,7 +26,6 @@ export default function ResetPassword() {
         return strength;
     };
 
-    // submit form function
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!password || !verifyPassword) {
@@ -54,87 +52,120 @@ export default function ResetPassword() {
             }
         } catch (error) {
             console.log(error);
+            toast.error('Đã xảy ra lỗi, vui lòng thử lại sau!');
         } finally {
             setLoadingState(false);
         }
     };
 
     return (
-        <div
-            className='w-full px-5 py-5 sm:py-0 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-center
-    bg-gradient-to-br from-gray-100 via-white to-gray-200 dark:from-gray-800 dark:to-gray-900
-    sm:h-auto min-h-[93vh] items-center justify-center'
-        >
-            {/* Image Section */}
-            <div className='sm:w-[50%] w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg'>
-                <img
-                    src={'../assets/reset_password.jpg'}
-                    alt='Product Image'
-                    className='w-full h-80 sm:w-[90vw] sm:h-[90vh] object-cover rounded-lg shadow-lg'
-                />
-            </div>
-            {/* Form Section */}
-            <div className='w-full border border-t-2 dark:border-gray-700 sm:w-[50%] p-8 bg-white dark:bg-gray-800 shadow-md rounded-lg'>
-                <span className='text-xl sm:text-2xl font-semibold text-gray-800 dark:text-white text-center block'>
-                    Đặt lại mật khẩu
-                </span>
-                <form className='flex flex-col gap-6 mt-6' onSubmit={handleSubmit}>
-                    <div>
-                        <Label value='Mật khẩu' className='text-gray-700 dark:text-gray-300' />
-                        <TextInput
-                            icon={GoLock}
-                            type='password'
-                            placeholder='Mật khẩu'
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value);
-                                setPasswordStrength(getStrength(e.target.value));
-                            }}
-                            className='mt-1'
-                            autoFocus
+        <div className='w-full h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800'>
+            <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-10 relative'>
+                <div className='hidden lg:block lg:w-1/2 h-screen'>
+                    <div className='relative h-full w-full'>
+                        <img
+                            src={'../assets/reset_password.jpg'}
+                            alt='Reset Password'
+                            className='w-full h-full object-cover rounded-r-[40px] shadow-2xl transform hover:scale-105 
+                            transition-all duration-700 animate-ken-burns'
                         />
                     </div>
-                    <PasswordStrengthMeter password={password} strength={passwordStrength} />
-                    <div>
-                        <Label value='Xác nhận mật khẩu' className='text-gray-700 dark:text-gray-300' />
-                        <TextInput
-                            icon={GoLock}
-                            type='password'
-                            placeholder='Hãy nhập lại mật khẩu'
-                            value={verifyPassword}
-                            onChange={(e) => setVerifyPassword(e.target.value)}
-                            className='mt-1'
-                        />
-                    </div>
-
-                    <Button
-                        type='submit'
-                        outline
-                        className='w-full focus:!ring-0 bg-gradient-to-r from-gray-300 via-gray-400 to-gray-500
-                                dark:from-slate-700 dark:via-slate-700 dark:to-zinc-700
-                                text-gray-800 dark:text-gray-200 font-medium'
-                    >
-                        {loadingState ? (
-                            <>
-                                <Spinner size='sm' />
-                                <span className='pl-3'>Đang xử lý...</span>
-                            </>
-                        ) : (
-                            <span className='flex justify-center items-center gap-x-2 text-sm'>
-                                <IoIosSend className='transition-transform duration-300 transform group-hover:-translate-x-2' />{' '}
-                                Cập nhật mật khẩu mới
-                            </span>
-                        )}
-                    </Button>
-                </form>
-
-                <div className='flex gap-2 text-sm font-semibold mt-6 text-gray-600 dark:text-gray-400'>
-                    <span>Hủy thao tác?</span>
-                    <div className='flex justify-center items-center gap-x-2 hover:text-blue-600'>
-                        <TfiHandPointRight />
-                        <Link to='/login' className='dark:text-blue-400 hover:underline'>
-                            Trang đăng nhập
+                </div>
+                <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
+                    <div className='absolute top-6 left-6'>
+                        <Link
+                            to={'/'}
+                            className='flex items-center gap-2 px-6 py-2.5 text-gray-700 
+                            bg-transparent hover:bg-gray-100 backdrop-blur-sm
+                            rounded-tl-3xl rounded-br-3xl shadow-lg hover:shadow-xl
+                            transition-all duration-300 group'
+                        >
+                            <IoIosHome className='text-xl group-hover:scale-110 transition-transform duration-300' />
+                            <span className='font-medium'>Trang chủ</span>
                         </Link>
+                    </div>
+
+                    <div className='flex flex-col items-center justify-center w-full md:max-w-2xl lg:max-w-full p-10 mt-10'>
+                        <h2
+                            className='text-3xl font-bold md:text-4xl text-gray-800 dark:text-white
+                            bg-gradient-to-r from-blue-600 to-purple-600 h-12 bg-clip-text text-transparent'
+                        >
+                            Đặt lại mật khẩu
+                        </h2>
+                        <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-8 text-center'>
+                            Hãy chọn mật khẩu mới cho tài khoản của bạn
+                        </p>
+
+                        <form
+                            className='w-full max-w-md space-y-6 bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl'
+                            onSubmit={handleSubmit}
+                        >
+                            <div>
+                                <label htmlFor='password' className='block text-gray-700 dark:text-gray-300 mb-2'>
+                                    Mật khẩu mới
+                                </label>
+                                <Input.Password
+                                    prefix={<FaLock className='text-gray-600 mr-1' />}
+                                    type='password'
+                                    placeholder='Nhập mật khẩu mới'
+                                    value={password}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setPasswordStrength(getStrength(e.target.value));
+                                    }}
+                                    className='!ring-0 !border-gray-300 h-10'
+                                    autoFocus
+                                />
+                            </div>
+                            <PasswordStrengthMeter password={password} strength={passwordStrength} />
+                            <div>
+                                <label htmlFor='verifyPassword' className='block text-gray-700 dark:text-gray-300 mb-2'>
+                                    Xác nhận mật khẩu
+                                </label>
+                                <Input.Password
+                                    prefix={<FaLock className='text-gray-600 mr-1' />}
+                                    type='password'
+                                    placeholder='Xác nhận mật khẩu mới'
+                                    value={verifyPassword}
+                                    onChange={(e) => setVerifyPassword(e.target.value)}
+                                    className='!ring-0 !border-gray-300 h-10'
+                                />
+                            </div>
+
+                            <Button
+                                disabled={loadingState}
+                                type='submit'
+                                color='blue'
+                                className='focus:!ring-0 w-full rounded-xl py-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                            >
+                                {loadingState ? (
+                                    <>
+                                        <Spinner size='sm' />
+                                        <span className='ml-2'>Đang xử lý...</span>
+                                    </>
+                                ) : (
+                                    <span className='flex justify-center items-center gap-x-2'>
+                                        <IoIosSend className='transition-transform duration-300 transform group-hover:-translate-x-2' />
+                                        Cập nhật mật khẩu mới
+                                    </span>
+                                )}
+                            </Button>
+                        </form>
+
+                        <div className='w-full max-w-md mt-6'>
+                            <div className='flex items-center justify-center gap-x-2 mb-4'>
+                                <span className='text-sm text-gray-600 dark:text-gray-400'>
+                                    Bạn không muốn đặt lại mật khẩu?
+                                </span>
+                                <Link
+                                    to='/login'
+                                    className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
+                                    flex items-center font-medium transition-colors duration-300'
+                                >
+                                    <TfiHandPointRight className='mr-1' /> Trang đăng nhập
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

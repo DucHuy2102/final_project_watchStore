@@ -80,17 +80,18 @@ export default function Header_Component() {
         };
     }, []);
 
+    const shouldHideHeader =
+        ['/login', '/register', '/forgot-password', '/verify-email', '/dashboard'].includes(pathname) ||
+        pathname.startsWith('/reset-password');
+
+    if (shouldHideHeader) {
+        return null;
+    }
+
     return (
         <Navbar
             className={`${
-                pathname === '/login' ||
-                pathname === '/register' ||
-                pathname === '/forgot-password' ||
-                pathname === '/verify-email' ||
-                pathname === '/dashboard' ||
-                pathname.startsWith('/admin')
-                    ? 'hidden sm:hidden md:hidden lg:hidden'
-                    : 'block'
+                shouldHideHeader ? 'hidden sm:hidden md:hidden lg:hidden' : 'block'
             } border-b border-gray-200 dark:border-gray-700 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 shadow-sm sticky top-0 z-50`}
         >
             {/* Logo */}

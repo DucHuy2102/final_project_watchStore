@@ -1,4 +1,4 @@
-import { Button, Label, Modal, Spinner, TextInput } from 'flowbite-react';
+import { Button, Modal, Spinner } from 'flowbite-react';
 import { useState } from 'react';
 import { CiLogin } from 'react-icons/ci';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { FcGoogle } from 'react-icons/fc';
 import { IoIosHome } from 'react-icons/io';
 import { FaLock, FaUser } from 'react-icons/fa';
+import { Input } from 'antd';
 
 export default function Login() {
     // state
@@ -58,18 +59,13 @@ export default function Login() {
                 }, 3000);
             }
         } catch (error) {
-            if (error.response.status === 401) {
-                setErrorMessage('Tài khoản hoặc mật khẩu không đúng!');
-            } else {
-                setErrorMessage('Đã xảy ra lỗi, vui lòng thử lại sau!');
-            }
             const countFailedAttempts = count + 1;
             setCount(countFailedAttempts);
             if (countFailedAttempts >= 3) {
                 setModalShow(true);
             }
             setFormData({ username: '', password: '' });
-            toast.error(errorMessage);
+            toast.error('Tài khoản hoặc mật khẩu không đúng!');
             console.log(error);
         } finally {
             setLoadingState(false);
@@ -111,19 +107,24 @@ export default function Login() {
 
     return (
         <div className='w-full h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800'>
+            {/* modal check login 3 times */}
             <Modal show={modalShow} onClose={() => setModalShow(false)} popup className='backdrop-blur-md' size='md'>
                 <Modal.Header />
                 <Modal.Body className='p-y-4 space-y-5'>
                     <div className='text-center'>
-                        <h2 className='text-2xl font-bold text-gray-800 dark:text-white'>Bạn đã nhập sai 3 lần</h2>
-                        <p className='text-sm text-gray-600 dark:text-gray-400'>Bạn có muốn đặt lại mật khẩu không?</p>
+                        <h2 className='text-xl font-bold text-gray-800 dark:text-white'>
+                            Bạn có muốn đặt lại mật khẩu không?
+                        </h2>
+                        <p className='text-sm text-gray-600 dark:text-gray-400'>
+                            Hệ thống chúng tôi ghi nhận bạn đã nhập sai nhiều lần
+                        </p>
                     </div>
                     <div className='flex justify-between gap-4'>
                         <Button color='gray' onClick={() => setModalShow(false)} className='w-32 !ring-0'>
                             Hủy
                         </Button>
                         <Button
-                            color='failure'
+                            color='blue'
                             onClick={() => {
                                 navigate('/forgot-password');
                                 setModalShow(false);
@@ -136,6 +137,7 @@ export default function Login() {
                 </Modal.Body>
             </Modal>
 
+            {/* login form */}
             <div className='w-full h-screen flex flex-col md:flex-row items-center justify-center lg:gap-x-10 relative'>
                 <div className='w-full lg:w-1/2 flex flex-col items-center justify-center'>
                     <div className='absolute top-6 left-6'>
@@ -166,38 +168,37 @@ export default function Login() {
                             onSubmit={handleSubmit}
                         >
                             <div>
-                                <Label htmlFor='username' className='text-gray-700 dark:text-gray-300'>
+                                <label htmlFor='username' className='block text-gray-700 dark:text-gray-300 mb-2'>
                                     Tên người dùng
-                                </Label>
-                                <TextInput
-                                    icon={FaUser}
-                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
+                                </label>
+                                <Input
+                                    prefix={<FaUser className='text-gray-600 mr-1' />}
                                     type='text'
                                     autoFocus
                                     placeholder='Tên người dùng'
                                     id='username'
                                     value={formData.username}
                                     onChange={handleChange}
+                                    className='!ring-0 !border-gray-300 h-10'
                                 />
                             </div>
                             <div>
-                                <Label htmlFor='password' className='text-gray-700 dark:text-gray-300'>
+                                <label htmlFor='password' className='block text-gray-700 dark:text-gray-300 mb-2'>
                                     Mật khẩu
-                                </Label>
-                                <TextInput
-                                    style={{ border: '1px solid #BDBDBD', boxShadow: 'none', outline: 'none' }}
-                                    icon={FaLock}
-                                    type='password'
+                                </label>
+                                <Input.Password
+                                    prefix={<FaLock className='text-gray-600 mr-1' />}
                                     placeholder='Mật khẩu'
                                     id='password'
                                     value={formData.password}
                                     onChange={handleChange}
+                                    className='!ring-0 !border-gray-300 h-10'
                                 />
                             </div>
                             <div className='flex items-center justify-end'>
                                 <Link
                                     to='/forgot-password'
-                                    className='text-sm text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
+                                    className='text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 
                     transition-colors duration-300 flex items-center'
                                 >
                                     <TfiHandPointRight className='mr-1' />
@@ -208,7 +209,7 @@ export default function Login() {
                                 disabled={loadingState}
                                 type='submit'
                                 color='blue'
-                                className='focus:!ring-0 w-full rounded-xl py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                                className='focus:!ring-0 w-full rounded-xl py-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
                             >
                                 {loadingState ? (
                                     <>
