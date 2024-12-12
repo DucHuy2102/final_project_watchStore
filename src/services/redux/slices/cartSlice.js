@@ -48,13 +48,13 @@ export const cartSlice = createSlice({
             }
         },
         changeProductQuantity: (state, action) => {
-            const { type, idCart } = action.payload;
+            const { type, idCart, quantity = 1 } = action.payload;
             const itemIndex = state.cartItem.findIndex((item) => item.idCart === idCart);
             if (itemIndex === -1) return;
             const cartItem = state.cartItem[itemIndex];
             if (type === 'increase') {
-                cartItem.quantity += 1;
-                state.cartTotalQuantity += 1;
+                cartItem.quantity += quantity;
+                state.cartTotalQuantity += quantity;
             } else if (type === 'decrease') {
                 if (cartItem.quantity > 1) {
                     cartItem.quantity -= 1;

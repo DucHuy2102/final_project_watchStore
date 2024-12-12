@@ -280,21 +280,65 @@ export default function DashboardCart() {
     const handleColorChange = async (item, newColor) => {
         try {
             setLoading(true);
-            const res = await axios.put(
-                `${import.meta.env.VITE_API_URL}/api/cart/update-orderLine`,
-                {
-                    itemId: item.idCart,
-                    quantity: item.quantity,
-                    option: newColor,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${tokenUser}`,
-                    },
-                },
+            const checkItemIndex = cartItem.findIndex(
+                (cartItem) =>
+                    cartItem.productItem.id === item.productItem.id &&
+                    cartItem.option === newColor &&
+                    cartItem.idCart !== item.idCart,
             );
-            if (res?.status === 200) {
-                dispatch(changeColorProduct({ idCart: item.idCart, option: newColor }));
+            if (checkItemIndex !== -1) {
+                const exitItem = cartItem[checkItemIndex];
+                const totalQuantity = exitItem.quantity + item.quantity;
+                const stockQuantity = exitItem.productItem?.option?.find((opt) => opt.key === newColor).value?.quantity;
+                const checkQuantity = totalQuantity > stockQuantity ? stockQuantity : totalQuantity;
+                const res = await axios.put(
+                    `${import.meta.env.VITE_API_URL}/api/cart/update-orderLine`,
+                    {
+                        itemId: exitItem.idCart,
+                        quantity: checkQuantity,
+                        option: newColor,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                        },
+                    },
+                );
+                if (res?.status === 200) {
+                    await axios.delete(`${import.meta.env.VITE_API_URL}/api/cart/delete-item`, {
+                        params: {
+                            id: item.idCart,
+                        },
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                        },
+                    });
+                    dispatch(
+                        changeProductQuantity({
+                            type: 'increase',
+                            idCart: exitItem.idCart,
+                            quantity: checkQuantity,
+                        }),
+                    );
+                    dispatch(deleteProductFromCart(item.idCart));
+                }
+            } else {
+                const res = await axios.put(
+                    `${import.meta.env.VITE_API_URL}/api/cart/update-orderLine`,
+                    {
+                        itemId: item.idCart,
+                        quantity: item.quantity,
+                        option: newColor,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${tokenUser}`,
+                        },
+                    },
+                );
+                if (res?.status === 200) {
+                    dispatch(changeColorProduct({ idCart: item.idCart, option: newColor }));
+                }
             }
         } catch (error) {
             console.log(error);
@@ -410,13 +454,16 @@ export default function DashboardCart() {
                                 loading={loading}
                                 columns={columns}
                                 dataSource={productCartItem}
-                                rowKey='idCart'
+                                rowKey={(record) => {
+                                    `${record.option}-${record.idCart}`;
+                                }}
                                 pagination={false}
                                 scroll={{ x: 1000 }}
                             />
                         </div>
 
                         <div className='lg:w-1/4 space-y-4'>
+                            {/* user info */}
                             <Card
                                 className='relative border-none rounded-2xl overflow-hidden
         bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-50 via-white to-gray-50
@@ -483,6 +530,7 @@ export default function DashboardCart() {
                                 </div>
                             </Card>
 
+                            {/* price info */}
                             <Card
                                 className='relative border-none rounded-2xl overflow-hidden
         bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-50 via-white to-gray-50
@@ -515,7 +563,7 @@ export default function DashboardCart() {
                                         <div className='space-y-2 px-2'>
                                             <div className='flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/80 transition-colors'>
                                                 <Text className='text-gray-600 font-medium'>Tạm tính</Text>
-                                                <Text delete className='text-gray-400 font-light'>
+                                                <Text className='text-gray-600 font-semibold'>
                                                     {formatPrice(totalPrice)}
                                                 </Text>
                                             </div>
@@ -523,7 +571,7 @@ export default function DashboardCart() {
                                             <div className='flex justify-between items-center p-2 rounded-lg hover:bg-gray-50/80 transition-colors'>
                                                 <Text className='text-gray-600 font-medium'>Giảm giá</Text>
                                                 <div className='flex items-center justify-center gap-x-1'>
-                                                    <Tag className='border-none bg-emerald-50 text-emerald-600'>
+                                                    <Tag className='border-none font-bold bg-emerald-50 text-emerald-600'>
                                                         -{Math.round((totalDiscountPrice / totalPrice) * 100)}%
                                                     </Tag>
                                                     <Text className='text-emerald-600 font-medium'>
