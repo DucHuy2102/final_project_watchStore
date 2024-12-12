@@ -3,14 +3,12 @@ import { AiOutlineClose, AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import { toggleLikeProduct, clearLikedProducts } from '../../../../services/redux/slices/productSlice';
 import { useNavigate } from 'react-router-dom';
-import { Button, Modal } from 'flowbite-react';
 import { useState } from 'react';
 
 export default function LikeProduct() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { likedProducts } = useSelector((state) => state.product);
-    const [showClearModal, setShowClearModal] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
 
     if (likedProducts.length === 0) return null;
@@ -55,7 +53,9 @@ export default function LikeProduct() {
                             </h3>
                         </div>
                         <button
-                            onClick={() => setShowClearModal(true)}
+                            onClick={() => {
+                                dispatch(clearLikedProducts());
+                            }}
                             className='text-gray-500 hover:text-red-500 transition-colors duration-300'
                             title='Xóa tất cả'
                         >
@@ -114,32 +114,6 @@ export default function LikeProduct() {
                     ))}
                 </div>
             </div>
-
-            <Modal show={showClearModal} onClose={() => setShowClearModal(false)} size='sm'>
-                <Modal.Body className='p-y-4 space-y-5'>
-                    <div className='text-center'>
-                        <AiOutlineHeart className='mx-auto text-4xl text-red-500 mb-4' />
-                        <p className='text-gray-600 dark:text-gray-400'>
-                            Bạn có chắc chắn muốn xóa tất cả sản phẩm yêu thích?
-                        </p>
-                    </div>
-                    <div className='flex justify-between gap-4'>
-                        <Button color='gray' onClick={() => setShowClearModal(false)} className='w-32 !ring-0'>
-                            Hủy
-                        </Button>
-                        <Button
-                            color='failure'
-                            onClick={() => {
-                                dispatch(clearLikedProducts());
-                                setShowClearModal(false);
-                            }}
-                            className='w-32 !ring-0'
-                        >
-                            Xác nhận
-                        </Button>
-                    </div>
-                </Modal.Body>
-            </Modal>
         </>
     );
 }

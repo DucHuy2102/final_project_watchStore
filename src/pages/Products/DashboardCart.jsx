@@ -11,6 +11,7 @@ import {
     Select,
     Tag,
     Modal,
+    Input,
 } from 'antd';
 import {
     DeleteOutlined,
@@ -44,7 +45,6 @@ const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency
 export default function DashboardCart() {
     const { access_token: tokenUser, user } = useSelector((state) => state.user);
     const { cartItem, cartTotalQuantity } = useSelector((state) => state.cart);
-    console.log(cartItem);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -183,7 +183,12 @@ export default function DashboardCart() {
                         icon={<MinusOutlined />}
                         className='border-gray-300 hover:border-blue-500 hover:text-blue-500'
                     />
-                    <InputNumber value={item.quantity} className='w-10 pl-1' controls={false} />
+                    <Input
+                        readOnly
+                        value={item.quantity}
+                        className='text-center font-semibold rounded-lg border-gray-300 h-8 w-14'
+                        controls={false}
+                    />
                     <Button
                         onClick={() => handleChangeQuantity('increase', item.idCart)}
                         icon={<PlusOutlined />}

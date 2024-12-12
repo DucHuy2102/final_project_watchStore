@@ -23,7 +23,6 @@ export default function CompareDetail() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const { compareProducts } = useSelector((state) => state.product);
-    console.log(compareProducts);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -74,12 +73,25 @@ export default function CompareDetail() {
         const differences = [];
 
         // price
-        if (products[0].option[0].value.price !== products[1].option[0].value.price) {
-            const priceDiff = Math.abs(products[0].option[0].value.price - products[1].option[0].value.price);
-            const expensiveProduct =
-                products[0].option[0].value.price > products[1].option[0].value.price ? products[0] : products[1];
-            const cheaperProduct =
-                products[0].option[0].value.price > products[1].option[0].value.price ? products[1] : products[0];
+        const priceDiff = Math.abs(products[0].option[0].value.price - products[1].option[0].value.price);
+        const expensiveProduct =
+            products[0].option[0].value.price > products[1].option[0].value.price ? products[0] : products[1];
+        const cheaperProduct =
+            products[0].option[0].value.price > products[1].option[0].value.price ? products[1] : products[0];
+        if (products[0].option[0].value.price === products[1].option[0].value.price) {
+            differences.push({
+                title: 'Chênh lệch giá',
+                description: `Đồng hồ ${expensiveProduct.productName} và đồng hồ ${cheaperProduct.productName} là hai sản phầm đồng giá`,
+                recommendation:
+                    priceDiff >= 1000000
+                        ? `Sản phẩm tuy đồng giá tiền (${priceFormat(
+                              products[0].option[0].value.price,
+                          )}) nhưng xét về mặt giá trị của chúng lại có nhiều điểm khác nhau, hãy xem xét các tiêu chí khác để lựa chọn sản phẩm phù hợp với bạn nhé!`
+                        : `Sản phẩm có giá trị tương đối phù hợp với tài chính của bạn (chỉ ${priceFormat(
+                              products[0].option[0].value.price,
+                          )}). Nhớ xem xét thêm các tiêu chí khác để lựa chọn sản phẩm phù hợp với nhu cầu của bạn nhé!`,
+            });
+        } else {
             differences.push({
                 title: 'Chênh lệch giá',
                 description: `Đồng hồ ${expensiveProduct.productName} đắt hơn ${priceFormat(
@@ -95,7 +107,13 @@ export default function CompareDetail() {
         }
 
         // style
-        if (products[0].style !== products[1].style) {
+        if (products[0].style === products[1].style) {
+            differences.push({
+                title: 'Phong cách thiết kế',
+                description: `Sản phẩm ${products[0].productName} và sản phẩm ${products[1].productName} đều có cùng một phong cách thiết kế là ${products[0].style}`,
+                recommendation: `Phong cách thiết kế ${products[0].style} là lựa chọn phổ biến, phù hợp với nhiều phong cách và dễ kết hợp trang phục, thích hợp cho các dịp sự kiện và các hoạt động thường ngày.`,
+            });
+        } else {
             differences.push({
                 title: 'Phong cách thiết kế',
                 description: `${products[0].productName} mang phong cách ${products[0].style}, trong khi ${products[1].productName} theo phong cách ${products[1].style}`,
@@ -104,7 +122,29 @@ export default function CompareDetail() {
         }
 
         // wire material
-        if (products[0].wireMaterial !== products[1].wireMaterial) {
+        if (products[0].wireMaterial === products[1].wireMaterial) {
+            differences.push({
+                title: 'Chất liệu dây',
+                description: `Cả hai sản phẩm ${products[0].productName} và ${products[1].productName} có cùng chất liệu dây là ${products[0].wireMaterial}`,
+                recommendation: `${products[0].wireMaterial} là lựa chọn phổ biến cho đồng hồ, đảm bảo cho ${
+                    products[0].wireMaterial === 'Dây cao su'
+                        ? 'sự mềm mại, bền bỉ, phù hợp cho hoạt động thể thao và chống nước,'
+                        : products[0].wireMaterial === 'Dây nhựa'
+                        ? 'sự nhẹ nhàng, thoải mái, phù hợp cho hoạt động sinh hoạt hàng ngày,'
+                        : products[0].wireMaterial === 'Dây da'
+                        ? 'sự thanh lịch, cổ điển, phù hợp cho những dịp sang trọng,'
+                        : products[0].wireMaterial === 'Dây kim loại'
+                        ? 'sự bền bỉ, chống nước tốt, phù hợp với phong cách năng động, lịch lãm,'
+                        : products[0].wireMaterial === 'Dây dù/vải'
+                        ? 'sự đẹp mắt, thoải mái và nhẹ nhàng, phù hợp cho phong cách năng động và các hoạt động thường ngày,'
+                        : products[0].wireMaterial === 'Dây thép không gỉ'
+                        ? 'sự bền bỉ, độ bền cao, chống nước tốt, phù hợp với nhiều hoạt động,'
+                        : products[0].wireMaterial === 'Dây dù/vải'
+                        ? 'sự đẹp mắt, thoải mái và nhẹ nhàng, phù hợp cho phong cách năng động và các hoạt động thường ngày,'
+                        : 'sự sang trọng, đẳng cấp, thể hiện sự tinh tế và quý phái,'
+                } nhưng hãy cân nhắc lựa chọn sản phẩm phù hợp nhu cầu và môi trường sử dụng của bạn`,
+            });
+        } else {
             differences.push({
                 title: 'Chất liệu dây',
                 description: `Dây đồng hồ: ${products[0].productName} (${products[0].wireMaterial}) vs ${products[1].productName} (${products[1].wireMaterial})`,
@@ -126,7 +166,15 @@ export default function CompareDetail() {
         }
 
         // shape
-        if (products[0].shape !== products[1].shape) {
+        if (products[0].shape === products[1].shape) {
+            differences.push({
+                title: 'Hình dạng mặt đồng hồ',
+                description: `Cả hai sản phẩm ${products[0].productName} và ${
+                    products[1].productName
+                } đều có ${products[0].shape.toLowerCase()}`,
+                recommendation: `${products[0].shape} là lựa chọn phổ biến và an toàn, phù hợp với mọi phong cách và dễ kết hợp trang phục. Hình dạng mặt đồng hồ này sẽ rất phù hợp với phong cách của bạn, nhưng hãy nhớ cân nhắc các tiêu chí khác nữa nhé!`,
+            });
+        } else {
             differences.push({
                 title: 'Hình dạng mặt đồng hồ',
                 description: `${products[0].productName} có ${products[0].shape.toLowerCase()}, trong khi ${
@@ -134,22 +182,22 @@ export default function CompareDetail() {
                 } có ${products[1].shape.toLowerCase()}`,
                 recommendation:
                     products[0].shape === 'Mặt vuông'
-                        ? 'Dành cho người yêu thích sự cá tính và phá cách. Tạo ấn tượng khác biệt nhưng vẫn giữ nét sang trọng, thì lựa chọn dành cho bạn là chọn đồng hồ mặt vuông'
+                        ? 'Dành cho người yêu thích sự cá tính và phá cách. Tạo ấn tượng khác biệt nhưng vẫn giữ nét sang trọng, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt vuông'
                         : products[0].shape === 'Mặt tròn'
-                        ? 'Phù hợp với mọi phong cách và dễ kết hợp trang phục. Lựa chọn an toàn cho người thích sự cổ điển, thì lựa chọn dành cho bạn là chọn đồng hồ mặt tròn'
+                        ? 'Phù hợp với mọi phong cách và dễ kết hợp trang phục. Lựa chọn an toàn cho người thích sự cổ điển, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt tròn'
                         : products[0].shape === 'Mặt hình chữ nhật'
-                        ? 'Thiết kế thanh lịch, tinh tế, phù hợp cho người thích vẻ đẹp cổ điển hoặc phong cách lịch lãm, thì lựa chọn dành cho bạn là chọn đồng hồ mặt hình chữ nhật'
+                        ? 'Thiết kế thanh lịch, tinh tế, phù hợp cho người thích vẻ đẹp cổ điển hoặc phong cách lịch lãm, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt hình chữ nhật'
                         : products[0].shape === 'Mặt tam giác'
-                        ? 'Lựa chọn độc đáo và hiếm gặp, dành cho những ai thích thể hiện cá tính mạnh mẽ và khác biệt, thì lựa chọn dành cho bạn là chọn đồng hồ mặt tam giác'
+                        ? 'Lựa chọn độc đáo và hiếm gặp, dành cho những ai thích thể hiện cá tính mạnh mẽ và khác biệt, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt tam giác'
                         : products[0].shape === 'Mặt bầu dục'
-                        ? 'Mang lại sự mềm mại, thanh thoát, phù hợp với người thích sự tinh tế và nhẹ nhàng, thì lựa chọn dành cho bạn là chọn đồng hồ mặt bầu dục'
+                        ? 'Mang lại sự mềm mại, thanh thoát, phù hợp với người thích sự tinh tế và nhẹ nhàng, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt bầu dục'
                         : products[0].shape === 'Mặt Tonneau'
-                        ? 'Thiết kế lạ mắt và sang trọng, thích hợp cho người tìm kiếm phong cách khác biệt nhưng không quá phô trương, thì lựa chọn dành cho bạn là chọn đồng hồ mặt Tonneau'
+                        ? 'Thiết kế lạ mắt và sang trọng, thích hợp cho người tìm kiếm phong cách khác biệt nhưng không quá phô trương, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt Tonneau'
                         : products[0].shape === 'Mặt Carage'
-                        ? 'Hiếm và độc đáo, lựa chọn lý tưởng cho người thích sưu tầm và muốn sở hữu mẫu đồng hồ độc nhất, thì lựa chọn dành cho bạn là chọn đồng hồ mặt Carage'
+                        ? 'Hiếm và độc đáo, lựa chọn lý tưởng cho người thích sưu tầm và muốn sở hữu mẫu đồng hồ độc nhất, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt Carage'
                         : products[0].shape === 'Mặt Cushion'
-                        ? 'Kết hợp hài hòa giữa cổ điển và hiện đại, phù hợp cho người muốn một thiết kế khác lạ nhưng không quá nổi bật, thì lựa chọn dành cho bạn là chọn đồng hồ mặt Cushion'
-                        : 'Phong cách mạnh mẽ, sắc nét, lý tưởng cho người yêu thích sự góc cạnh và muốn thể hiện bản lĩnh, thì lựa chọn dành cho bạn là chọn đồng hồ mặt Cushion',
+                        ? 'Kết hợp hài hòa giữa cổ điển và hiện đại, phù hợp cho người muốn một thiết kế khác lạ nhưng không quá nổi bật, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt Cushion'
+                        : 'Phong cách mạnh mẽ, sắc nét, lý tưởng cho người yêu thích sự góc cạnh và muốn thể hiện bản lĩnh, thì gợi ý tốt nhất dành cho bạn là chọn đồng hồ mặt Cushion',
             });
         }
 
@@ -181,16 +229,22 @@ export default function CompareDetail() {
                 products[0].option[0].value.price > products[1].option[0].value.price ? products[0] : products[1];
             const cheaperProduct =
                 products[0].option[0].value.price > products[1].option[0].value.price ? products[1] : products[0];
+
+            const expensiveFeatures = expensiveProduct?.feature?.split(', ') || [];
+            const cheaperFeatures = cheaperProduct?.feature?.split(', ') || [];
+
             differences.push({
                 title: 'Đánh giá giá trị',
                 description: 'Phân tích chi phí - lợi ích dựa trên tính năng và chất lượng',
                 recommendation: `${cheaperProduct.productName} có giá trị tốt hơn về mặt chi phí. Tuy nhiên, ${
                     expensiveProduct.productName
                 } ${
-                    expensiveProduct.waterproof > cheaperProduct.waterproof ? 'có khả năng chống nước tốt hơn và ' : ''
+                    expensiveProduct?.waterproof > cheaperProduct?.waterproof
+                        ? 'có khả năng chống nước tốt hơn và '
+                        : ''
                 }${
-                    expensiveProduct.feature.length > cheaperProduct.feature.length
-                        ? 'có nhiều tính năng hơn, bao gồm: ' + expensiveProduct.feature.join(', ')
+                    expensiveFeatures.length > cheaperFeatures.length
+                        ? 'có nhiều tính năng hơn, bao gồm: ' + expensiveProduct.feature
                         : 'có thiết kế cao cấp hơn, với chất liệu và hoàn thiện tốt hơn'
                 }. Hãy cân nhắc giữa chi phí và các tính năng bổ sung để đưa ra quyết định phù hợp.`,
             });

@@ -119,23 +119,20 @@ export default function Header_Component() {
             <div className='relative'>
                 <div className='hidden lg:block w-full max-w-sm' ref={showSuggestionsRef}>
                     <form onSubmit={handleSearch}>
-                        <TextInput
-                            type='text'
-                            placeholder='Tìm kiếm...'
-                            rightIcon={AiOutlineSearch}
-                            className='rounded-full shadow-sm hover:shadow-md transition-shadow duration-300'
-                            style={{
-                                border: '0.5px solid #E0E0E0',
-                                outline: 'none',
-                                width: '25vw',
-                            }}
-                            value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setShowSuggestions(true);
-                            }}
-                            onFocus={() => setShowSuggestions(true)}
-                        />
+                        <div className='relative w-[25vw]'>
+                            <input
+                                type='text'
+                                placeholder='Tìm kiếm sản phẩm...'
+                                className='w-full rounded-full p-5 py-2 border-gray-300 dark:bg-gray-900 dark:border-gray-700
+                                 dark:text-white focus:outline-none focus:ring-1 focus:!border-[#0e7490]'
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setShowSuggestions(true);
+                                }}
+                            />
+                            <AiOutlineSearch className='absolute text-lg right-4 top-1/2 transform -translate-y-1/2 text-gray-400' />
+                        </div>
                     </form>
                     {showSuggestions && searchTerm && (
                         <div className='absolute w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50'>

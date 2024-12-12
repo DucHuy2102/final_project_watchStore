@@ -32,6 +32,7 @@ export default function App() {
     const { access_token: tokenUser } = useSelector((state) => state.user);
     const { cartTotalQuantity } = useSelector((state) => state.cart);
 
+    // get cart user and dispatch to redux
     useEffect(() => {
         const getProductInCart = async () => {
             if (tokenUser && cartTotalQuantity === 0) {
@@ -53,6 +54,7 @@ export default function App() {
         getProductInCart();
     }, [cartTotalQuantity, dispatch, tokenUser]);
 
+    // get all products for search suggestions and dispatch data to redux
     useEffect(() => {
         const getAllProduct = async () => {
             try {

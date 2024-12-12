@@ -21,7 +21,6 @@ const isLightColor = (hex) => {
 };
 
 export default function ProductCard({ product }) {
-    console.log(product);
     const { id, productName, img, genderUser, style, waterproof, option } = product;
     const handleRenderGenderUser = useMemo(() => {
         return genderUser === 'Nam' ? 'Nam' : 'Nữ';
@@ -199,11 +198,7 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Image watches */}
-            <div
-                className='w-full p-1 h-[50vh] sm:h-[40vh] md:h-[40vh] 
-                lg:h-[45vh] lg:p-2 xl:h-[53vh] xl:px-5
-                flex items-center justify-center overflow-hidden'
-            >
+            <div className='w-full p-1 h-[40vh] lg:h-[45vh] lg:p-2 flex items-center justify-center overflow-hidden'>
                 <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>
                     {img.map((item, index) => (
                         <SwiperSlide key={index}>

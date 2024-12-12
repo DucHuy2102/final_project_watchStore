@@ -36,6 +36,7 @@ export default function ProductDetail() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { access_token: tokenUser } = useSelector((state) => state.user);
+    const { cartItem } = useSelector((state) => state.cart);
     const { pathname } = useLocation();
     const { id } = useParams();
     const [product, setProduct] = useState({});
@@ -288,7 +289,20 @@ export default function ProductDetail() {
         };
     }, [selectedOptionDetails, product.price, product.discount, formatPrice]);
 
-    // handle select color of product
+    // Add this function to check total quantity
+    const getTotalQuantityInCart = useCallback(
+        (productId, color) => {
+            return cartItem.reduce((total, item) => {
+                if (item.productItem.id === productId && item.option === color) {
+                    return total + item.quantity;
+                }
+                return total;
+            }, 0);
+        },
+        [cartItem],
+    );
+
+    // Modify handleColorSelect
     const handleColorSelect = (color) => {
         setSelectedColor(color);
         const newOption = product?.option?.find((opt) => opt.key === color);
@@ -310,6 +324,7 @@ export default function ProductDetail() {
             toast.error('Vui lòng chọn số lượng sản phẩm');
             return;
         }
+
         try {
             setLoadingEffect(true);
             const res = await axios.post(
@@ -345,7 +360,7 @@ export default function ProductDetail() {
             setQuantityProduct(0);
             setLoadingEffect(false);
         }
-    }, [tokenUser, selectedColor, id, quantityProduct, dispatch, product]);
+    }, [tokenUser, selectedColor, quantityProduct, product, id, dispatch]);
 
     // get more product of the same brand
     useEffect(() => {
@@ -638,13 +653,20 @@ export default function ProductDetail() {
                                         <button
                                             onClick={() => setQuantityProduct(quantityProduct + 1)}
                                             disabled={
-                                                !selectedOption || quantityProduct >= selectedOption.value.quantity
+                                                quantityProduct + getTotalQuantityInCart(product.id, selectedColor) >=
+                                                selectedOption?.value?.quantity
                                             }
                                             className='p-3 text-gray-600 hover:text-blue-600 disabled:opacity-50'
                                         >
                                             <FiPlus className='w-4 h-4' />
                                         </button>
                                     </div>
+                                    {selectedOption && getTotalQuantityInCart(product.id, selectedColor) > 0 && (
+                                        <span className='text-sm font-semibold text-orange-500'>
+                                            (Đã có {getTotalQuantityInCart(product.id, selectedColor)} sản phẩm trong
+                                            giỏ hàng)
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
@@ -927,7 +949,7 @@ export default function ProductDetail() {
                 {isVisible && (
                     <button
                         onClick={scrollToTop}
-                        className='fixed bottom-20 right-8 p-4 bg-white dark:bg-gray-800 
+                        className='fixed bottom-40 right-6 p-4 bg-white dark:bg-gray-800 
                     rounded-full shadow-lg hover:shadow-2xl transform hover:scale-110 
                     transition-all duration-300 z-50 group border border-gray-200 
                     dark:border-gray-700'
