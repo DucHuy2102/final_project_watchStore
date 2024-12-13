@@ -48,8 +48,8 @@ const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProv
         <div className='relative group'>
             <div className='absolute inset-0 bg-gradient-to-r from-amber-50 to-purple-50 dark:from-amber-900/20 dark:to-purple-900/20 rounded-lg blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
-            <div className='relative bg-white dark:bg-gray-800/90 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-4 border border-amber-100/50 dark:border-amber-800/50'>
-                <div className='flex items-center gap-3'>
+            <div className='relative bg-white space-y-2 dark:bg-gray-800/90 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 p-4 border border-amber-100/50 dark:border-amber-800/50'>
+                <div className='flex items-start gap-3'>
                     <div className='w-16 h-16 flex-shrink-0 overflow-hidden rounded-md shadow-sm'>
                         <img
                             src={
@@ -60,16 +60,12 @@ const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProv
                             className='w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-300'
                         />
                     </div>
-
-                    <div className='flex-grow min-w-0'>
-                        <h4 className='text-base font-medium bg-gradient-to-r from-amber-700 to-amber-900 dark:from-amber-400 dark:to-amber-600 bg-clip-text text-transparent truncate'>
+                    <div className='flex-grow min-w-0 space-y-1.5'>
+                        <h4 className='text-base font-medium bg-gradient-to-r from-amber-700 to-amber-900 dark:from-amber-400 dark:to-amber-600 bg-clip-text text-transparent'>
                             {voucher.couponName}
                         </h4>
-                        <p className='text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1'>
-                            {voucher.description}
-                        </p>
-
-                        <div className='flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400'>
+                        <p className='text-xs text-gray-500 dark:text-gray-400 line-clamp-1'>{voucher.description}</p>
+                        <div className='flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400'>
                             <div className='flex items-center gap-1'>
                                 <FiPercent className='w-3.5 h-3.5 text-amber-500' />
                                 <span>{voucher.discount}%</span>
@@ -80,34 +76,32 @@ const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProv
                             </div>
                         </div>
                     </div>
-
-                    <div className='flex-shrink-0 ml-2'>
-                        {isApplicable ? (
-                            <button
-                                onClick={onApplyVoucher}
-                                className='px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700
+                </div>
+                {!isApplicable && (
+                    <div className='w-full text-center py-1.5 pb-2 bg-gray-50 dark:bg-gray-700/50 rounded-md border border-orange-500/50'>
+                        <span className='text-xs font-semibold text-orange-500 dark:text-orange-400'>
+                            {!isValidDate
+                                ? 'Hết hạn'
+                                : !hasRemainingTimes
+                                ? 'Hết lượt'
+                                : !isMinPriceReached
+                                ? `Thiếu ${remainingAmount.toLocaleString('vi-VN')}₫`
+                                : !isValidProvince
+                                ? 'Không áp dụng cho khu vực này'
+                                : 'Khả dụng'}
+                        </span>
+                    </div>
+                )}
+                {isApplicable && (
+                    <button
+                        onClick={onApplyVoucher}
+                        className='w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700
                                 text-white text-xs font-medium rounded-md transition-all duration-300 hover:shadow-md
                                 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1'
-                            >
-                                Áp dụng
-                            </button>
-                        ) : (
-                            <div className='text-center'>
-                                <span className='text-xs font-medium text-orange-500 dark:text-orange-400 whitespace-nowrap'>
-                                    {!isValidDate
-                                        ? 'Hết hạn'
-                                        : !hasRemainingTimes
-                                        ? 'Hết lượt'
-                                        : !isMinPriceReached
-                                        ? `Thiếu ${remainingAmount.toLocaleString('vi-VN')}₫`
-                                        : !isValidProvince
-                                        ? 'Không áp dụng cho khu vực này'
-                                        : 'Khả dụng'}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                    >
+                        Áp dụng
+                    </button>
+                )}
             </div>
         </div>
     );
@@ -180,15 +174,16 @@ const VoucherModal_Component = ({
                     <SelectedVoucher voucher={selectedVoucher} onRemove={() => onApplyVoucher(null)} />
                 ) : (
                     <div className='space-y-4'>
-                        <TextInput
-                            type='text'
-                            placeholder='Tìm kiếm voucher...'
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            icon={FiSearch}
-                            className='!ring-0 focus:!border-amber-500'
-                            sizing='sm'
-                        />
+                        <div className='relative'>
+                            <input
+                                type='text'
+                                placeholder='Tìm kiếm voucher...'
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className='w-full pl-10 pr-4 py-2 text-sm border !border-gray-300 rounded-lg focus:ring-0 focus:outline-none'
+                            />
+                            <FiSearch className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400' />
+                        </div>
 
                         <div className='h-[50vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-amber-500/50 scrollbar-track-amber-100/30 dark:scrollbar-thumb-amber-600/50 dark:scrollbar-track-gray-700/30'>
                             {filteredVouchers.length > 0 ? (

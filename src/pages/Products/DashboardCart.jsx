@@ -288,9 +288,9 @@ export default function DashboardCart() {
             );
             if (checkItemIndex !== -1) {
                 const exitItem = cartItem[checkItemIndex];
-                const totalQuantity = exitItem.quantity + item.quantity;
+                const newTotalQuantity = exitItem.quantity + item.quantity;
                 const stockQuantity = exitItem.productItem?.option?.find((opt) => opt.key === newColor).value?.quantity;
-                const checkQuantity = totalQuantity > stockQuantity ? stockQuantity : totalQuantity;
+                const checkQuantity = newTotalQuantity > stockQuantity ? stockQuantity : newTotalQuantity;
                 const res = await axios.put(
                     `${import.meta.env.VITE_API_URL}/api/cart/update-orderLine`,
                     {
@@ -314,10 +314,11 @@ export default function DashboardCart() {
                         },
                     });
                     dispatch(
-                        changeProductQuantity({
-                            type: 'increase',
-                            idCart: exitItem.idCart,
-                            quantity: checkQuantity,
+                        changeColorProduct({
+                            idCart: item.idCart,
+                            targetId: exitItem.idCart,
+                            option: newColor,
+                            newQuantity: checkQuantity,
                         }),
                     );
                     dispatch(deleteProductFromCart(item.idCart));
@@ -422,7 +423,7 @@ export default function DashboardCart() {
 
     return (
         <>
-            {cartTotalQuantity === 0 ? (
+            {cartItem.length === 0 ? (
                 <EmptyCart />
             ) : (
                 <div className='px-20 mx-auto py-8 min-h-screen'>
@@ -436,7 +437,7 @@ export default function DashboardCart() {
                     <div className='flex justify-between items-center mb-4'>
                         <div className='flex items-center gap-2'>
                             <ShoppingCartOutlined className='text-xl text-amber-600' />
-                            <span className='text-lg font-medium'>{cartTotalQuantity} sản phẩm trong giỏ hàng</span>
+                            <span className='text-lg font-medium'>{cartItem.length} sản phẩm trong giỏ hàng</span>
                         </div>
                         <Button
                             danger
@@ -454,9 +455,7 @@ export default function DashboardCart() {
                                 loading={loading}
                                 columns={columns}
                                 dataSource={productCartItem}
-                                rowKey={(record) => {
-                                    `${record.option}-${record.idCart}`;
-                                }}
+                                rowKey='idCart'
                                 pagination={false}
                                 scroll={{ x: 1000 }}
                             />

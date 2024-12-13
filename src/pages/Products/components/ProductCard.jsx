@@ -169,6 +169,7 @@ export default function ProductCard({ product }) {
             max-w-md min-h-[50vh] mx-auto rounded-lg overflow-hidden 
             transition-transform duration-500 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] transform hover:scale-105'
         >
+            {/* style and waterproof info */}
             <div className='absolute top-2 left-2 z-20 flex gap-2 [&>*]:backdrop-blur-none'>
                 <span className='bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full'>
                     {style}
@@ -178,6 +179,7 @@ export default function ProductCard({ product }) {
                 </span>
             </div>
 
+            {/* button like and compare */}
             <div className='absolute top-2 right-2 z-20 flex gap-2'>
                 <button
                     onClick={handleLike}
@@ -198,14 +200,14 @@ export default function ProductCard({ product }) {
             </div>
 
             {/* Image watches */}
-            <div className='w-full p-1 h-[40vh] lg:h-[45vh] lg:p-2 flex items-center justify-center overflow-hidden'>
+            <div className='w-full p-1 h-[40vh] lg:h-[54vh] lg:p-2 flex items-center justify-center overflow-hidden'>
                 <Swiper className='h-full w-full rounded-lg' loop={true} spaceBetween={0}>
                     {img.map((item, index) => (
                         <SwiperSlide key={index}>
                             <img
                                 src={item}
                                 alt={productName}
-                                className='h-auto w-auto cursor-pointer rounded-lg object-cover 
+                                className='h-full w-full cursor-pointer rounded-lg object-cover 
                                 transition-transform duration-500 ease-in-out transform hover:scale-105'
                             />
                         </SwiperSlide>

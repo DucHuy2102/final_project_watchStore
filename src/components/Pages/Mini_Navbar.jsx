@@ -13,7 +13,7 @@ export default function Mini_Navbar() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { access_token: tokenUser, user: currentUser } = useSelector((state) => state.user);
-    const { cartTotalQuantity } = useSelector((state) => state.cart);
+    const { cartItem } = useSelector((state) => state.cart);
     const avatarUser = currentUser?.avatarImg ?? '../assets/default_Avatar.jpg';
     const { theme } = useSelector((state) => state.theme);
 
@@ -53,7 +53,7 @@ export default function Mini_Navbar() {
                 <NavButton to='/products' icon={MdWatch}>
                     Sản phẩm
                 </NavButton>
-                <NavButton to='/cart' icon={IoIosCart} showBadge={true} badgeCount={cartTotalQuantity}>
+                <NavButton to='/cart' icon={IoIosCart} showBadge={true} badgeCount={cartItem.length}>
                     Giỏ hàng
                 </NavButton>
                 <NavButton to='/services' icon={MdHomeRepairService}>

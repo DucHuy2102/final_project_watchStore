@@ -39,10 +39,16 @@ export const cartSlice = createSlice({
             state.cartTotalQuantity += quantity;
         },
         changeColorProduct: (state, action) => {
-            const { idCart, option } = action.payload;
+            const { idCart, targetId, option, newQuantity } = action.payload;
             const itemIndex = state.cartItem.findIndex((item) => item.idCart === idCart);
-            if (itemIndex === -1) {
-                return;
+            if (itemIndex === -1) return;
+
+            if (targetId) {
+                const targetIndex = state.cartItem.findIndex((item) => item.idCart === targetId);
+                if (targetIndex !== -1) {
+                    state.cartItem[targetIndex].quantity = newQuantity;
+                    state.cartItem.splice(itemIndex, 1);
+                }
             } else {
                 state.cartItem[itemIndex].option = option;
             }

@@ -34,7 +34,9 @@ const PaymentMethod = ({ id, label, imageSrc, selectedPayment, onSelect, classNa
                     <img
                         src={imageSrc}
                         alt={label}
-                        className='relative w-full h-full object-contain rounded-lg p-1.5'
+                        className={`relative w-full h-full object-contain rounded-lg ${
+                            id === 'momo' ? 'p-0.5' : 'p-1.5'
+                        }`}
                     />
                 </div>
                 <div className='flex-1'>
@@ -222,7 +224,6 @@ export default function DashCheckout() {
                 setCountdown((prev) => {
                     if (prev <= 1) {
                         clearInterval(countdownInterval);
-                        navigate('/products');
                         return 0;
                     }
                     return prev - 1;
@@ -231,7 +232,14 @@ export default function DashCheckout() {
 
             return () => clearInterval(countdownInterval);
         }
-    }, [totalQuantity, navigate]);
+    }, [totalQuantity]);
+
+    // redirect to products page if no product
+    useEffect(() => {
+        if (totalQuantity === 0 && countdown === 0) {
+            navigate('/products');
+        }
+    }, [totalQuantity, countdown, navigate]);
 
     // redirect to payment gateway after buy now success
     useEffect(() => {
@@ -1095,17 +1103,24 @@ export default function DashCheckout() {
                                                 </h2>
                                             </div>
 
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                            <div className='flex flex-col gap-5'>
                                                 <PaymentMethod
                                                     id='cash'
-                                                    label='Tiền mặt'
+                                                    label='Thanh toán khi nhận hàng'
                                                     imageSrc='../assets/payCash.png'
                                                     selectedPayment={paymentMethod}
                                                     onSelect={handleChoosePaymentMethod}
                                                 />
                                                 <PaymentMethod
+                                                    id='momo'
+                                                    label='Thanh toán qua Momo'
+                                                    imageSrc='../assets/momoPayment.webp'
+                                                    selectedPayment={paymentMethod}
+                                                    onSelect={handleChoosePaymentMethod}
+                                                />
+                                                <PaymentMethod
                                                     id='vnpay'
-                                                    label='VNPAY'
+                                                    label='Thanh toán qua VNPAY'
                                                     imageSrc='../assets/vnpayPayment.jpg'
                                                     selectedPayment={paymentMethod}
                                                     onSelect={handleChoosePaymentMethod}
