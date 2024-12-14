@@ -441,6 +441,27 @@ export default function ProductDetail() {
         reviewEle.scrollIntoView({ behavior: 'smooth' });
     };
 
+    const getStateDisplay = (state) => {
+        console.log(state);
+        switch (state.toLowerCase()) {
+            case 'selling':
+                return {
+                    text: 'Đang bán',
+                    className: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
+                };
+            case 'pause':
+                return {
+                    text: 'Tạm ngừng bán',
+                    className: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
+                };
+            default:
+                return {
+                    text: 'Hết hàng',
+                    className: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400',
+                };
+        }
+    };
+
     return (
         <div className='min-h-screen bg-gradient-to-b from-[#f8f9fb] to-white dark:from-gray-900 dark:to-gray-800'>
             {/* Breadcrumb */}
@@ -599,6 +620,7 @@ export default function ProductDetail() {
                                 <div className='flex flex-wrap gap-4'>
                                     {availableColors.map((color, index) => {
                                         const option = product.option[index];
+                                        const isDisabled = option.value.state !== 'selling';
                                         return (
                                             <button
                                                 key={index}
@@ -609,6 +631,7 @@ export default function ProductDetail() {
                                                         selectedColor === color &&
                                                         'ring-2 ring-offset-0 ring-blue-500 scale-110'
                                                     }
+                                                    ${isDisabled && 'opacity-50'}
                                                 `}
                                             >
                                                 <span
@@ -631,9 +654,19 @@ export default function ProductDetail() {
                                     })}
                                 </div>
                                 {selectedOption && (
-                                    <p className='text-sm text-gray-600'>
-                                        Màu đã chọn: <span className='font-medium'>{selectedOption.value.color}</span>
-                                    </p>
+                                    <div className='flex items-center gap-2'>
+                                        <p className='text-sm text-gray-600'>
+                                            Màu đã chọn:{' '}
+                                            <span className='font-medium'>{selectedOption.value.color}</span>
+                                        </p>
+                                        <span
+                                            className={`text-xs font-medium px-5 py-1 rounded-full
+                                                ${getStateDisplay(selectedOption.value.state).className}
+                                                `}
+                                        >
+                                            {getStateDisplay(selectedOption.value.state).text}
+                                        </span>
+                                    </div>
                                 )}
                             </div>
 
@@ -644,7 +677,7 @@ export default function ProductDetail() {
                                     <div className='flex items-center border border-gray-200 rounded-lg bg-white'>
                                         <button
                                             onClick={() => setQuantityProduct(Math.max(0, quantityProduct - 1))}
-                                            disabled={quantityProduct === 0}
+                                            disabled={quantityProduct === 0 || selectedOption.value.state !== 'selling'}
                                             className='p-3 text-gray-600 hover:text-blue-600 disabled:opacity-50'
                                         >
                                             <FiMinus className='w-4 h-4' />
@@ -654,7 +687,8 @@ export default function ProductDetail() {
                                             onClick={() => setQuantityProduct(quantityProduct + 1)}
                                             disabled={
                                                 quantityProduct + getTotalQuantityInCart(product.id, selectedColor) >=
-                                                selectedOption?.value?.quantity
+                                                    selectedOption?.value?.quantity ||
+                                                selectedOption?.value?.state !== 'selling'
                                             }
                                             className='p-3 text-gray-600 hover:text-blue-600 disabled:opacity-50'
                                         >
@@ -673,7 +707,9 @@ export default function ProductDetail() {
                             {/* Action buttons */}
                             <div className='grid grid-cols-2 gap-6'>
                                 <Button
-                                    disabled={loadingEffect}
+                                    disabled={
+                                        loadingEffect || !selectedOption || selectedOption.value.state !== 'selling'
+                                    }
                                     onClick={handleAddProductToCart}
                                     className='w-full font-semibold text-base py-3 !ring-0
         transition-all duration-300 transform hover:scale-105'
@@ -688,7 +724,9 @@ export default function ProductDetail() {
                                     )}
                                 </Button>
                                 <Button
-                                    disabled={loadingEffect}
+                                    disabled={
+                                        loadingEffect || !selectedOption || selectedOption.value.state !== 'selling'
+                                    }
                                     onClick={handleVerifyUser}
                                     className='w-full font-semibold text-base py-3 !ring-0
         bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 

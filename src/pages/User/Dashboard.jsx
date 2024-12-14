@@ -61,6 +61,7 @@ export default function Dashboard() {
     const [isLoading, setIsLoading] = useState(false);
     const [selectOrder, setSelectOrder] = useState(null);
     const [satistiedOrders, setSatistiedOrders] = useState([]);
+    console.log(satistiedOrders);
 
     // get satisfied
     useEffect(() => {
@@ -307,7 +308,7 @@ export default function Dashboard() {
                             </div>
                         </Card>
 
-                        {/* Cards */}
+                        {/* Metric Cards */}
                         <div className='col-span-2 grid grid-cols-2 gap-8'>
                             <MetricCard
                                 icon={<ShoppingCart className='w-8 h-8 text-blue-500' />}
@@ -588,7 +589,7 @@ export default function Dashboard() {
                                             <td className='px-6 py-5 text-center'>{order.totalPrice}</td>
                                             <td className='px-6 py-5 text-center'>
                                                 <span
-                                                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                    className={`w-32 py-1 inline-flex items-center justify-center text-xs leading-5 font-semibold rounded-full
                                             ${
                                                 order.state === 'processing'
                                                     ? 'bg-yellow-100 text-yellow-800'
