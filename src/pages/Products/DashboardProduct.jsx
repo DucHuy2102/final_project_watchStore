@@ -5,10 +5,11 @@ import { Button, Select } from 'antd';
 import { useSearchParams } from 'react-router-dom';
 import { FilterModal, Pagination, ProductCard } from './components/exportCom_Product';
 import { Breadcrumb_Component } from '../../components/exportComponent';
-import { FaFilter } from 'react-icons/fa';
+import { FaFilter, FaEye } from 'react-icons/fa';
 import DashCompare from './components/Compare/DashCompare';
 
 const SORT_OPTIONS = [
+    { value: 'topView', label: 'Xem nhiều', icon: <FaEye /> },
     { value: 'gia-tang-dan', label: 'Giá tăng dần', icon: '↑' },
     { value: 'gia-giam-dan', label: 'Giá giảm dần', icon: '↓' },
     { value: 'a-z', label: 'Từ A - Z', icon: 'A' },
@@ -53,6 +54,7 @@ export default function DashboardProduct() {
             );
             if (res.status === 200) {
                 const { data } = res;
+                console.log(data);
                 setProducts(data.productResponses);
                 setTotalPages(data.totalPages);
                 setTotalProducts(data.totalProducts);

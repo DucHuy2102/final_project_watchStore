@@ -45,6 +45,7 @@ const formatPrice = (price) => new Intl.NumberFormat('vi-VN', { style: 'currency
 export default function DashboardCart() {
     const { access_token: tokenUser, user } = useSelector((state) => state.user);
     const { cartItem, cartTotalQuantity } = useSelector((state) => state.cart);
+    console.log('-->', cartItem);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -120,16 +121,20 @@ export default function DashboardCart() {
                         dropdownStyle={{ padding: '8px' }}
                         suffixIcon={null}
                     >
-                        {item.productItem.option.map((opt) => (
-                            <Select.Option key={opt.key} value={opt.key}>
-                                <div
-                                    className='w-6 h-6 rounded-full mx-auto border cursor-pointer transition-all duration-200 hover:scale-110'
-                                    style={{
-                                        backgroundColor: opt.key,
-                                    }}
-                                />
-                            </Select.Option>
-                        ))}
+                        {item.productItem.option.map((opt) => {
+                            if (opt.value.state === 'selling') {
+                                return (
+                                    <Select.Option key={opt.key} value={opt.key}>
+                                        <div
+                                            className='w-6 h-6 rounded-full mx-auto border cursor-pointer transition-all duration-200 hover:scale-110'
+                                            style={{
+                                                backgroundColor: opt.key,
+                                            }}
+                                        />
+                                    </Select.Option>
+                                );
+                            }
+                        })}
                     </Select>
                     <Badge
                         className='color-name-badge'

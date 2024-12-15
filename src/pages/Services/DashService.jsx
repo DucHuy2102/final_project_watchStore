@@ -186,7 +186,7 @@ export default function DashService() {
                 img: validUrls,
             };
 
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/service/create-service`, submitData, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/service/create-service`, submitData, {
                 headers: {
                     Authorization: `Bearer ${tokenUser}`,
                 },
