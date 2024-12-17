@@ -17,7 +17,6 @@ export default function Login() {
     // state
     const [formData, setFormData] = useState({ username: '', password: '' });
     const [loadingState, setLoadingState] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
     const [count, setCount] = useState(0);
     const [modalShow, setModalShow] = useState(false);
     const dispatch = useDispatch();

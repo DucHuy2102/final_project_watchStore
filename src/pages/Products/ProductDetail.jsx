@@ -442,7 +442,6 @@ export default function ProductDetail() {
     };
 
     const getStateDisplay = (state) => {
-        console.log(state);
         switch (state.toLowerCase()) {
             case 'selling':
                 return {
