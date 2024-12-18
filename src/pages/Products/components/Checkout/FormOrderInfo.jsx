@@ -204,6 +204,15 @@ const OrderDetails = () => {
                                         <span>Phí vận chuyển</span>
                                         <span className='font-medium'>{formatPrice(orderData.shippingPrice)}</span>
                                     </div>
+                                    {orderData.coupon?.id && (
+                                        <div className='flex justify-between text-blue-500'>
+                                            <span>Áp dụng mã giảm giá</span>
+                                            <span className='font-medium'>
+                                                -{' '}
+                                                {formatPrice((orderData.coupon.discount / 100) * orderData.itemsPrice)}
+                                            </span>
+                                        </div>
+                                    )}
                                     <div className='border-t border-gray-200 mt-4 pt-4'>
                                         <div className='flex justify-between items-center'>
                                             <span className='text-xl font-bold text-gray-900'>Tổng cộng</span>
