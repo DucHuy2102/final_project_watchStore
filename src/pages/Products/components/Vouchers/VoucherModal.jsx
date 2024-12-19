@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Modal, TextInput } from 'flowbite-react';
+import { Modal } from 'flowbite-react';
 import { FiSearch, FiGift, FiClock, FiPercent } from 'react-icons/fi';
 import SelectedVoucher from './SelectedVoucher';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -18,7 +18,7 @@ const VoucherCard = React.memo(({ voucher, onApplyVoucher, totalAmount, userProv
         const createdDate = new Date(voucher.createdDate);
         const expiryDate = new Date(voucher.expiryDate);
 
-        const isValidProvince = !voucher.province || voucher.province.value === userProvince.value;
+        const isValidProvince = voucher.province.value === 0 || voucher.province.value === userProvince.value;
 
         return {
             isValidDate: now >= createdDate && now <= expiryDate,
