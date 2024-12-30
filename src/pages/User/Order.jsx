@@ -4,16 +4,15 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Table, Input, Select, Tag, Space } from 'antd';
 import { Button, Modal } from 'flowbite-react';
-import { SearchOutlined, CheckOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import { OrderDetail } from '../Products/components/exportCom_Product';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Spinner } from 'flowbite-react';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 import ReviewModal_OrderCompleted from './components/ReviewModal_OrderCompleted';
 
 export default function Order() {
     const location = useLocation();
-    const navigate = useNavigate();
     const { access_token: tokenUser } = useSelector((state) => state.user);
     const [orders, setOrders] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -40,29 +39,31 @@ export default function Order() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, []);
 
+    const getAllOrders = async () => {
+        try {
+            setIsLoading(true);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order`, {
+                params: {
+                    state: filterState === 'all' ? undefined : filterState,
+                },
+                headers: {
+                    Authorization: `Bearer ${tokenUser}`,
+                },
+            });
+            if (res.status === 200) {
+                setOrders(res.data);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     // get all orders from api
     useEffect(() => {
-        const getAllOrders = async () => {
-            try {
-                setIsLoading(true);
-                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/order`, {
-                    params: {
-                        state: filterState === 'all' ? undefined : filterState,
-                    },
-                    headers: {
-                        Authorization: `Bearer ${tokenUser}`,
-                    },
-                });
-                if (res.status === 200) {
-                    setOrders(res.data);
-                }
-            } catch (error) {
-                console.log(error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
         getAllOrders();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterState, location.search, tokenUser]);
 
     const handleSearch = (e) => {
@@ -125,7 +126,7 @@ export default function Order() {
                 },
             );
             if (res?.status === 200) {
-                setShowReviewModal(true);
+                getAllOrders();
             }
         } catch (error) {
             console.log(error);
@@ -197,7 +198,11 @@ export default function Order() {
             key: 'state',
             width: '15%',
             align: 'center',
-            render: (state) => <Tag color={getStatusColor(state)}>{getStatusText(state)}</Tag>,
+            render: (state) => (
+                <Tag className='w-32 text-center' color={getStatusColor(state)}>
+                    {getStatusText(state)}
+                </Tag>
+            ),
         },
         {
             title: 'Thao tác',
@@ -209,7 +214,7 @@ export default function Order() {
                     {record.state === 'delivery' && (
                         <Button
                             color='blue'
-                            className='!ring-0'
+                            className='!ring-0 w-24'
                             onClick={() => {
                                 setConfirmingOrder(record);
                                 setShowConfirmModal(true);
@@ -219,17 +224,20 @@ export default function Order() {
                         </Button>
                     )}
                     {record.state === 'complete' && (
-                        <Button color='blue' className='!ring-0' onClick={() => handleReview(record)}>
+                        <Button color='blue' className='!ring-0 w-24' onClick={() => handleReview(record)}>
                             Đánh giá
                         </Button>
                     )}
-                    <Button color='gray' className='!ring-0' onClick={() => setOrderDetail(record)}>
+                    <Button
+                        className='!ring-0 w-24 bg-green-500 hover:!bg-green-600'
+                        onClick={() => setOrderDetail(record)}
+                    >
                         Chi tiết
                     </Button>
                     {record.state === 'processing' && (
                         <Button
                             color='failure'
-                            className='!ring-0'
+                            className='!ring-0 w-24'
                             onClick={() => {
                                 setCancelingOrder(record);
                                 setShowCancelModal(true);
